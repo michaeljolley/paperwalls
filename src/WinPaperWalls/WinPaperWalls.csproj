@@ -23,6 +23,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WindowsAppSDKDeployOnBuild>true</WindowsAppSDKDeployOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
