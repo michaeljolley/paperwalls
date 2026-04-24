@@ -135,7 +135,7 @@ jobs:
           endpoint: https://eus.codesigning.azure.net/
           signing-account-name: bbb-signing
           certificate-profile-name: BaldBeardedBuilder
-          files-folder: ${{ github.workspace }}\WeatherExtension
+          files-folder: ${{ github.workspace }}\src\WinPaperWalls
           files-folder-filter: msix
           files-folder-recurse: true
           file-digest: SHA256
