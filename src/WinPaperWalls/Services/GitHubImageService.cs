@@ -9,7 +9,7 @@ internal sealed class GitHubImageService : IGitHubImageService
 {
 	private const string ApiBaseUrl = "https://api.github.com/repos/burkeholland/paper/contents/wallpapers";
 	private const string UserAgent = "WinPaperWalls/1.0";
-	private static readonly TimeSpan CacheExpiry = TimeSpan.FromHours(1);
+	private static readonly TimeSpan CacheExpiry = TimeSpan.FromHours(24);
 
 	private readonly HttpClient _httpClient;
 	private readonly ISettingsService _settingsService;
