@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WinPaperWalls (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "WinPaperWalls (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
