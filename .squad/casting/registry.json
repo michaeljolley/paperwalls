@@ -1,0 +1,32 @@
+{
+  "agents": {
+    "doc": {
+      "persistent_name": "Doc",
+      "universe": "Back to the Future",
+      "created_at": "2026-04-24T03:02:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "marty": {
+      "persistent_name": "Marty",
+      "universe": "Back to the Future",
+      "created_at": "2026-04-24T03:02:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "biff": {
+      "persistent_name": "Biff",
+      "universe": "Back to the Future",
+      "created_at": "2026-04-24T03:02:00Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "jennifer": {
+      "persistent_name": "Jennifer",
+      "universe": "Back to the Future",
+      "created_at": "2026-04-24T03:02:00Z",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}
