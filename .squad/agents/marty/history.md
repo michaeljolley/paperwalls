@@ -43,3 +43,54 @@
 - Consider: Unit tests once test project architecture is resolved (see decisions.md)
 - Consider: Toast notifications for wallpaper change feedback
 
+### 2026-04-24 - Phase 4: WinUI 3 Settings Window
+
+**What was built:**
+- Complete settings window UI replacing placeholder
+- Rotation interval selector with 7 preset options (30min to weekly) using ComboBox
+- Topic selector with dynamic GitHub API loading using ItemsRepeater
+- Select All/Deselect All buttons for topic management
+- Wallpaper style selector (Fill/Fit/Stretch/Tile/Center/Span)
+- Cache management section with live size display and clear functionality
+- Start with Windows toggle using ToggleSwitch
+- Save button with success notification using InfoBar
+- Loading states with ProgressRing for async GitHub fetch
+- Error handling with InfoBar for GitHub API failures
+
+**Technical implementation:**
+- Uses System.Net.Http.Json for ReadFromJsonAsync extension method
+- TopicItem class implements INotifyPropertyChanged for two-way binding
+- Fetches all topics directly from GitHub API (bypasses service's exclusion filter)
+- Maps ComboBox selections via Tag properties for clean value extraction
+- Settings loaded on first window activation (not in constructor)
+- ICacheService.GetCacheSizeBytes() used for cache display
+- All settings properly map to/from AppSettings model
+- Window hides to tray instead of closing (preserves state)
+
+**UI/UX decisions:**
+- ScrollViewer with max-width 600px for clean desktop experience
+- Sections separated by SubtitleTextBlockStyle headers
+- InfoBars for success/error feedback (auto-hide after 3 seconds for success)
+- Topics displayed in scrollable bordered container (max 200px height)
+- NumberBox for cache size (100-2000 MB range with spinner)
+- ContentDialog for cache clear confirmation and errors
+
+**Integration with existing services:**
+- ISettingsService for load/save operations
+- IGitHubImageService interface defined but needed direct HTTP call for unfiltered topics
+- ICacheService for GetCacheSizeBytes() and ClearCacheAsync()
+- All services retrieved via App.Services.GetRequiredService<T>()
+- Settings changes trigger ISettingsService.SettingsChanged event
+
+**Data binding approach:**
+- ObservableCollection<TopicItem> for dynamic topic list
+- ItemsRepeater with DataTemplate for CheckBox items
+- Two-way binding on TopicItem.IsSelected property
+- Tag-based value extraction from ComboBox selections
+
+**Next Steps:**
+- Scheduler service needs to listen for SettingsChanged event
+- Consider implementing StartupManager for "Start with Windows" functionality
+- May need toast notifications when settings are saved
+- Future: Add wallpaper preview in settings window
+
