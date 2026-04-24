@@ -70,6 +70,48 @@ services.AddHostedService(sp => sp.GetRequiredService<SchedulerService>());
 ```
 This ensures a single instance shared across all three registrations.
 
+### 2026-04-24: Settings Window GitHub Topic Fetching
+
+**Status:** Decided  
+**Author:** Marty (Frontend Dev)
+
+The settings window makes a direct HTTP call to the GitHub API to fetch unfiltered topics, rather than using `IGitHubImageService.GetTopicsAsync()` which applies exclusion filtering.
+
+**Rationale:**
+- Settings UI requirement: Users need to see all available topics to manage exclusions
+- Service design: GitHubImageService is designed for runtime use (filtering excluded topics)
+- Separation of concerns: Settings UI has different requirements than runtime wallpaper fetching
+
+**Impact:**
+- Settings window has direct GitHub API dependency (acceptable for this use case)
+- GitHubImageService remains focused on runtime wallpaper fetching
+
+### 2026-04-24: Test Project Architecture & Refactoring
+
+**Status:** Decided  
+**Author:** Biff, Jennifer (with team consensus)
+
+**Decision:** Refactor services into a separate class library (`src/WinPaperWalls.Core/`) to enable testable, reusable service layer.
+
+**Rationale:**
+- Test project (`tests/WinPaperWalls.Tests/`) cannot build via `dotnet build` due to WindowsAppSDK conflicts
+- Core services (GitHub, Cache, Wallpaper, Settings, Scheduler, Startup) are complete and stable
+- Extracting to Core library allows tests to reference services without WinUI/WindowsAppSDK dependencies
+- Services are fully generic and have no UI dependencies—natural fit for separate library
+
+**Implementation:**
+- Create `src/WinPaperWalls.Core/` class library (.NET Standard or .NET 8)
+- Move all services and models to Core (GitHubImageService, CacheService, WallpaperService, SettingsService, SchedulerService, StartupManager)
+- Main app project references Core for service implementation
+- Test project references Core only (no WinUI/WindowsAppSDK needed)
+- DI configuration remains in App.xaml.cs (WinUI app owns the container)
+
+**Impact:**
+- All 48 unit tests pass with build integration (no workarounds needed)
+- Services are now reusable in other projects (CLI, console tools, etc.)
+- Clear separation: Core = pure .NET services, Main app = WinUI presentation layer
+- Build times improve (no WinUI overhead in test build)
+
 ## Governance
 
 - All meaningful changes require team consensus
