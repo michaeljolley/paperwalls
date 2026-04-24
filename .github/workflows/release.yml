@@ -112,31 +112,39 @@ jobs:
       
       - name: Publish x64 MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-x64
-          /p:PublishProfile=win-x64
+          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          /p:Platform=x64
+          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
+          /p:AppxPackageDir=${{ github.workspace }}\AppPackages\x64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-arm64
-          /p:PublishProfile=win-arm64
+          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          /p:Platform=ARM64
+          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
+          /p:AppxPackageDir=${{ github.workspace }}\AppPackages\ARM64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Stage sideload MSIX packages
         shell: pwsh
         run: |
           New-Item -Path "sideload-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          # Collect the main arch MSIX packages (not scale-* resource packages)
+          $msixFiles = Get-ChildItem -Path "AppPackages" -Filter "*.msix" -Recurse |
+            Where-Object { $_.Name -match '_(x64|arm64)\.msix$' }
 
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No MSIX packages found after publish!"
+            Write-Host "AppPackages contents:"
+            Get-ChildItem -Path "AppPackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
+            Write-Error "No app MSIX packages found in AppPackages!"
             exit 1
           }
 
           foreach ($file in $msixFiles) {
-            Write-Host "Staging $($file.FullName)"
+            Write-Host "Staging $($file.FullName) ($([math]::Round($file.Length / 1MB, 2)) MB)"
             Copy-Item $file.FullName -Destination "sideload-packages/$($file.Name)"
           }
 
@@ -203,17 +211,15 @@ jobs:
           }
 
       # --- Build Store-specific packages with the MS Store publisher identity ---
-      - name: Clean sideload MSIX packages
+      - name: Clean build artifacts before Store build
         shell: pwsh
         run: |
-          Write-Host "Removing sideload MSIX packages before Store build..."
+          Write-Host "Removing sideload artifacts before Store build..."
           if (Test-Path "sideload-packages") {
             Remove-Item -Path "sideload-packages" -Recurse -Force
           }
-          Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
-            Remove-Item -Force
-          if (Test-Path "src/WinPaperWalls/AppPackages") {
-            Remove-Item -Path "src/WinPaperWalls/AppPackages" -Recurse -Force
+          if (Test-Path "AppPackages") {
+            Remove-Item -Path "AppPackages" -Recurse -Force
           }
 
       - name: Patch manifest with Store publisher identity
@@ -230,26 +236,33 @@ jobs:
 
       - name: Publish x64 Store MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-x64
-          /p:PublishProfile=win-x64
+          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          /p:Platform=x64
+          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
+          /p:AppxPackageDir=${{ github.workspace }}\StorePackages\x64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 Store MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-arm64
-          /p:PublishProfile=win-arm64
+          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          /p:Platform=ARM64
+          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
+          /p:AppxPackageDir=${{ github.workspace }}\StorePackages\ARM64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Collect Store MSIX packages
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "StorePackages" -Filter "*.msix" -Recurse |
+            Where-Object { $_.Name -match '_(x64|arm64)\.msix$' }
 
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No Store MSIX packages found after publish!"
+            Write-Host "StorePackages contents:"
+            Get-ChildItem -Path "StorePackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
+            Write-Error "No Store MSIX packages found!"
             exit 1
           }
 
