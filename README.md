@@ -2,7 +2,7 @@
   <img src="src/WinPaperWalls/Assets/logo.png" alt="WinPaperWalls" width="128" />
 </p>
 
-# WinPaperWalls
+# PaperWalls
 
 A Windows desktop application that automatically rotates your desktop wallpaper with beautiful 4K images from the [burkeholland/paper](https://github.com/burkeholland/paper) GitHub repository.
 
