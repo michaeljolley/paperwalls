@@ -36,6 +36,37 @@ Build as a single WinUI 3 desktop app with BackgroundService (not a true Windows
 
 Use WinUI 3 for all UI (settings window, tray integration via H.NotifyIcon.WinUI). Not WPF or WinForms.
 
+### 2026-04-24: Background Scheduler Pattern — PeriodicTimer
+
+**Status:** Decided  
+**Author:** Biff
+
+Use `System.Threading.PeriodicTimer` (introduced in .NET 6) for all periodic background tasks instead of older patterns like `System.Timers.Timer` or `Task.Delay` loops.
+
+**Rationale:**
+- Modern .NET pattern recommended by Microsoft for periodic background work
+- Async-first design works naturally with async/await
+- Built-in CancellationToken support for clean shutdown
+- Memory efficient (no per-tick allocations like Task.Delay loops)
+- Simpler thread safety compared to System.Timers.Timer callbacks
+
+**Implementation pattern:**
+```csharp
+_timer = new PeriodicTimer(TimeSpan.FromMinutes(interval));
+while (await _timer.WaitForNextTickAsync(cancellationToken))
+{
+    // Do work, exceptions caught and logged
+}
+```
+
+**DI pattern for IHostedService + custom interface:**
+```csharp
+services.AddSingleton<SchedulerService>();
+services.AddSingleton<ISchedulerService>(sp => sp.GetRequiredService<SchedulerService>());
+services.AddHostedService(sp => sp.GetRequiredService<SchedulerService>());
+```
+This ensures a single instance shared across all three registrations.
+
 ## Governance
 
 - All meaningful changes require team consensus
