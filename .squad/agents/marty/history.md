@@ -164,3 +164,29 @@
 - Test project WindowsAppSDK version updated to match main project
 - Build warning: NETSDK1198 about missing publish profile (pre-existing, not from this change)
 
+### 2026-04-25 - Real-Time Wallpaper Style Preview in Settings
+
+**What was built:**
+- Live wallpaper style preview: changing the Style ComboBox immediately applies the selected style to the current desktop wallpaper
+- Revert on close: if user closes Settings without clicking Save, the wallpaper style reverts to the previously saved value
+- Settings reload on each window open: `Activated` handler re-subscribes in `OnWindowClosed` so settings refresh every time the window is shown
+
+**Technical implementation:**
+- Added `DesktopWallpaper.GetCurrentWallpaperPath()` — reads current wallpaper path from `HKCU\Control Panel\Desktop` registry key
+- Added `GetCurrentWallpaperPath()` to `IDesktopWallpaperService` interface and `DesktopWallpaperService` implementation
+- `_settingsLoaded` flag prevents `SelectionChanged` handler from firing during initial `LoadSettingsAsync()` population
+- `_savedStyle` field tracks the last-saved style for revert logic
+- `Task.Run()` wraps `SetWallpaper` calls to avoid UI thread deadlock from `SystemParametersInfo` with `SPIF_SENDCHANGE`
+- `OnWindowClosed` resets `_settingsLoaded = false` and re-subscribes `Activated += OnWindowActivated` for fresh reload on next open
+
+**Key learnings:**
+- `SystemParametersInfo` with `SPIF_SENDCHANGE` broadcasts `WM_SETTINGCHANGE` to all top-level windows, which can deadlock the WinUI 3 UI thread — always use `Task.Run()`
+- WinUI 3 `ComboBox.SelectionChanged` fires during programmatic `SelectedIndex` changes, so a guard flag is essential to distinguish user interaction from code-driven selection
+- The `Activated` event pattern (unsubscribe on first fire, re-subscribe on close) works well for "reload settings each time window appears" without duplicate handler accumulation
+
+**Files modified:**
+- `src/WinPaperWalls/Interop/DesktopWallpaper.cs` — added `GetCurrentWallpaperPath()`
+- `src/WinPaperWalls/Services/IDesktopWallpaperService.cs` — added method to interface
+- `src/WinPaperWalls/Services/DesktopWallpaperService.cs` — implemented new method
+- `src/WinPaperWalls/MainWindow.xaml.cs` — live preview, revert, and settings reload logic
+

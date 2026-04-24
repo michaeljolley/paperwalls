@@ -67,4 +67,10 @@ public static class DesktopWallpaper
         // Apply the wallpaper
         SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, filePath, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
     }
+
+    public static string? GetCurrentWallpaperPath()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop");
+        return key?.GetValue("Wallpaper") as string;
+    }
 }

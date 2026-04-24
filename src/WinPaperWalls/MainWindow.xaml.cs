@@ -16,6 +16,8 @@ public sealed partial class MainWindow : Window
     private readonly ICacheService _cacheService;
     private List<string> _allTopics = new();
     private ObservableCollection<TopicItem> _topicItems = new();
+    private string _savedStyle = "Fill";
+    private bool _settingsLoaded = false;
 
     public MainWindow()
     {
@@ -28,6 +30,9 @@ public sealed partial class MainWindow : Window
         
         // Hide window when closed instead of destroying it
         Closed += OnWindowClosed;
+        
+        // Live preview: apply wallpaper style immediately on selection change
+        StyleComboBox.SelectionChanged += StyleComboBox_SelectionChanged;
         
         // Load settings when window is activated
         Activated += OnWindowActivated;
@@ -45,6 +50,7 @@ public sealed partial class MainWindow : Window
 
     private async Task LoadSettingsAsync()
     {
+        _settingsLoaded = false;
         var settings = _settingsService.LoadSettings();
 
         // Set rotation interval
@@ -52,6 +58,7 @@ public sealed partial class MainWindow : Window
 
         // Set wallpaper style
         SetSelectedStyle(settings.WallpaperStyle);
+        _savedStyle = settings.WallpaperStyle;
 
         // Set cache max size
         CacheMaxNumberBox.Value = settings.CacheMaxMB;
@@ -65,6 +72,8 @@ public sealed partial class MainWindow : Window
 
         // Load topics from GitHub
         await LoadTopicsAsync(settings.ExcludedTopics);
+
+        _settingsLoaded = true;
     }
 
     private void SetSelectedInterval(int minutes)
@@ -204,6 +213,23 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private async void StyleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_settingsLoaded) return;
+
+        var newStyle = GetSelectedStyle();
+        var desktopService = App.Services.GetRequiredService<IDesktopWallpaperService>();
+        var currentWallpaper = desktopService.GetCurrentWallpaperPath();
+
+        if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper))
+        {
+            if (Enum.TryParse<WallpaperStyle>(newStyle, out var styleEnum))
+            {
+                await Task.Run(() => desktopService.SetWallpaper(currentWallpaper, styleEnum));
+            }
+        }
+    }
+
     private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -218,6 +244,7 @@ public sealed partial class MainWindow : Window
             };
 
             _settingsService.SaveSettings(settings);
+            _savedStyle = settings.WallpaperStyle;
 
             // Apply startup setting
             var startupManager = App.Services.GetRequiredService<StartupManager>();
@@ -282,7 +309,25 @@ public sealed partial class MainWindow : Window
     {
         // Prevent the window from actually closing - just hide it
         args.Handled = true;
-        
+
+        // Revert wallpaper style if user didn't save
+        var currentStyle = GetSelectedStyle();
+        if (currentStyle != _savedStyle)
+        {
+            var desktopService = App.Services.GetRequiredService<IDesktopWallpaperService>();
+            var currentWallpaper = desktopService.GetCurrentWallpaperPath();
+            if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper) &&
+                Enum.TryParse<WallpaperStyle>(_savedStyle, out var styleEnum))
+            {
+                Task.Run(() => desktopService.SetWallpaper(currentWallpaper, styleEnum));
+            }
+            SetSelectedStyle(_savedStyle);
+        }
+
+        // Reset so settings reload on next open
+        _settingsLoaded = false;
+        Activated += OnWindowActivated;
+
         // Hide the window (minimize to tray)
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         PInvoke.User32.ShowWindow(hwnd, PInvoke.User32.WindowShowStyle.SW_HIDE);

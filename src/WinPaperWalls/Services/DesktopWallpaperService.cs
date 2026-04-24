@@ -8,4 +8,9 @@ public class DesktopWallpaperService : IDesktopWallpaperService
     {
         DesktopWallpaper.SetWallpaper(filePath, style);
     }
+
+    public string? GetCurrentWallpaperPath()
+    {
+        return DesktopWallpaper.GetCurrentWallpaperPath();
+    }
 }
