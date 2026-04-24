@@ -70,13 +70,14 @@
                 </controls:SettingsCard>
 
                 <!-- Topics -->
-                <controls:SettingsCard
-                    Header="Wallpaper topics"
-                    Description="Search and add wallpaper collections"
+                <controls:SettingsExpander
+                    Header="Excluded topics"
+                    Description="Topics excluded from wallpaper rotation"
+                    IsExpanded="True"
                     AutomationProperties.AutomationId="SettingsCardTopics">
-                    <controls:SettingsCard.HeaderIcon>
+                    <controls:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE8B9;" />
-                    </controls:SettingsCard.HeaderIcon>
+                    </controls:SettingsExpander.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <ProgressRing IsActive="{x:Bind ViewModel.IsTopicsLoading, Mode=OneWay}"
                                       Visibility="{x:Bind BoolToVisibility(ViewModel.IsTopicsLoading), Mode=OneWay}"
@@ -86,83 +87,88 @@
                                    VerticalAlignment="Center"
                                    Style="{StaticResource CaptionTextBlockStyle}" />
                     </StackPanel>
-                </controls:SettingsCard>
 
-                <!-- Topic error -->
-                <InfoBar Severity="Error"
-                         IsOpen="{x:Bind ViewModel.TopicsError, Mode=OneWay}"
-                         IsClosable="False"
-                         Title="Failed to load topics"
-                         Message="Could not connect to GitHub."
-                         Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsError), Mode=OneWay}"
-                         Margin="0,4,0,0" />
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard HorizontalContentAlignment="Stretch"
+                                               ContentAlignment="Vertical">
+                            <StackPanel Spacing="8">
+                                <!-- Topic error -->
+                                <InfoBar Severity="Error"
+                                         IsOpen="{x:Bind ViewModel.TopicsError, Mode=OneWay}"
+                                         IsClosable="False"
+                                         Title="Failed to load topics"
+                                         Message="Could not connect to GitHub."
+                                         Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsError), Mode=OneWay}" />
 
-                <!-- Topic search and pills -->
-                <StackPanel Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsLoaded), Mode=OneWay}"
-                            Spacing="8"
-                            Margin="0,4,0,0">
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <AutoSuggestBox x:Name="TopicSearchBox"
-                                        Grid.Column="0"
-                                        PlaceholderText="Search topics to add..."
-                                        QueryIcon="Find"
-                                        ItemsSource="{x:Bind ViewModel.TopicSuggestions, Mode=OneWay}"
-                                        TextChanged="TopicSearchBox_TextChanged"
-                                        SuggestionChosen="TopicSearchBox_SuggestionChosen"
-                                        AutomationProperties.AutomationId="TopicSearchBox"
-                                        AutomationProperties.Name="Search wallpaper topics" />
-                        <Button Grid.Column="1"
-                                Content="Select all"
-                                Command="{x:Bind ViewModel.SelectAllTopicsCommand}"
-                                Style="{ThemeResource AccentButtonStyle}"
-                                AutomationProperties.AutomationId="SelectAllTopicsButton" />
-                        <Button Grid.Column="2"
-                                Content="Deselect all"
-                                Command="{x:Bind ViewModel.DeselectAllTopicsCommand}"
-                                AutomationProperties.AutomationId="DeselectAllTopicsButton" />
-                    </Grid>
+                                <!-- Topic search and pills -->
+                                <StackPanel Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsLoaded), Mode=OneWay}"
+                                            Spacing="8">
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <AutoSuggestBox x:Name="TopicSearchBox"
+                                                        Grid.Column="0"
+                                                        PlaceholderText="Search topics to exclude..."
+                                                        QueryIcon="Find"
+                                                        ItemsSource="{x:Bind ViewModel.TopicSuggestions, Mode=OneWay}"
+                                                        TextChanged="TopicSearchBox_TextChanged"
+                                                        SuggestionChosen="TopicSearchBox_SuggestionChosen"
+                                                        AutomationProperties.AutomationId="TopicSearchBox"
+                                                        AutomationProperties.Name="Search wallpaper topics" />
+                                        <Button Grid.Column="1"
+                                                Content="Include all"
+                                                Command="{x:Bind ViewModel.SelectAllTopicsCommand}"
+                                                Style="{ThemeResource AccentButtonStyle}"
+                                                AutomationProperties.AutomationId="SelectAllTopicsButton" />
+                                        <Button Grid.Column="2"
+                                                Content="Exclude all"
+                                                Command="{x:Bind ViewModel.DeselectAllTopicsCommand}"
+                                                AutomationProperties.AutomationId="DeselectAllTopicsButton" />
+                                    </Grid>
 
-                    <!-- Selected topic pills -->
-                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.SelectedTopics, Mode=OneWay}"
-                                   AutomationProperties.AutomationId="SelectedTopicsList"
-                                   AutomationProperties.Name="Selected wallpaper topics">
-                        <ItemsRepeater.Layout>
-                            <UniformGridLayout MinItemWidth="120" MinItemHeight="32"
-                                               MinRowSpacing="4" MinColumnSpacing="4"
-                                               ItemsStretch="Fill" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="vm:TopicItemViewModel">
-                                <Border CornerRadius="16"
-                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        Padding="12,0,4,0"
-                                        Height="32">
-                                    <StackPanel Orientation="Horizontal" Spacing="4">
-                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}"
-                                                   VerticalAlignment="Center"
-                                                   Style="{StaticResource CaptionTextBlockStyle}" />
-                                        <Button Command="{x:Bind RemoveCommand}"
-                                                Padding="4"
-                                                Width="24" Height="24"
-                                                VerticalAlignment="Center"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                AutomationProperties.Name="Remove topic">
-                                            <FontIcon Glyph="&#xE711;" FontSize="10" />
-                                        </Button>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
-                </StackPanel>
+                                    <!-- Excluded topic pills -->
+                                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.SelectedTopics, Mode=OneWay}"
+                                                   AutomationProperties.AutomationId="SelectedTopicsList"
+                                                   AutomationProperties.Name="Selected wallpaper topics">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout MinItemWidth="120" MinItemHeight="32"
+                                                               MinRowSpacing="4" MinColumnSpacing="4"
+                                                               ItemsStretch="Fill" />
+                                        </ItemsRepeater.Layout>
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:TopicItemViewModel">
+                                                <Border CornerRadius="16"
+                                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                                        BorderThickness="1"
+                                                        Padding="12,0,4,0"
+                                                        Height="32">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}"
+                                                                   VerticalAlignment="Center"
+                                                                   Style="{StaticResource CaptionTextBlockStyle}" />
+                                                        <Button Command="{x:Bind RemoveCommand}"
+                                                                Padding="4"
+                                                                Width="24" Height="24"
+                                                                VerticalAlignment="Center"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                AutomationProperties.Name="Remove topic">
+                                                            <FontIcon Glyph="&#xE711;" FontSize="10" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </StackPanel>
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
 
                 <!-- Start with Windows -->
                 <controls:SettingsCard

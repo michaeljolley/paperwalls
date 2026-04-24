@@ -294,3 +294,49 @@
 - Build: 0 errors
 - Cleaner, more modern settings UX
 - Better discoverability for topic selection (searchable vs. static list)
+
+### 2026-04-24 - Settings UI Refinements: Exclusion Model & Expander Layout
+
+**What was built:**
+- Widened settings window from 750px to 900px for better breathing room
+- Flipped topic selection from "include" model to "exclude" model
+- Moved topic UI into a SettingsExpander for better visual hierarchy
+
+**Technical changes:**
+
+*Window sizing:*
+- Changed window size from 750×1000 to 900×1000 in MainWindow.xaml.cs line 25
+
+*Exclusion model logic (SettingsViewModel.cs):*
+- `RefreshSelectedTopics()`: Now populates from `TopicItems.Where(t => !t.IsSelected)` (excluded topics shown as pills)
+- `FilterTopics()`: Now filters `t.IsSelected` topics (included topics can be searched to exclude)
+- `AddTopic()`: Now sets `IsSelected = false` to exclude a topic
+- `RemoveCommand`: Now sets `IsSelected = true` to re-include the topic
+- `SelectAllTopics`: Includes all topics (removes all exclusions)
+- `DeselectAllTopics`: Excludes all topics (shows all as pills)
+
+*XAML structure (MainWindow.xaml):*
+- Wrapped topic UI in a `SettingsExpander` with `IsExpanded="True"`
+- Header: "Excluded topics", Description: "Topics excluded from wallpaper rotation"
+- Loading indicator moved to expander header content area
+- Single nested `SettingsCard` with `ContentAlignment="Vertical"` and `HorizontalContentAlignment="Stretch"` for full-width content
+- InfoBar, search grid, and pills all contained in one vertical StackPanel inside the card
+- AutoSuggestBox placeholder: "Search topics to exclude..."
+- Button labels: "Include all" and "Exclude all"
+
+**Key learning:**
+- `ContentAlignment="Vertical"` on inner SettingsCard prevents right-aligned content (default behavior when SettingsCard is in SettingsExpander.Items)
+- `HorizontalContentAlignment="Stretch"` ensures full-width content utilization
+- SettingsExpander provides better visual grouping and collapsible UI for complex settings sections
+
+**Files modified:**
+- `src/WinPaperWalls/MainWindow.xaml.cs` — window width 750 → 900
+- `src/WinPaperWalls/ViewModels/SettingsViewModel.cs` — flipped all topic selection logic to exclusion model
+- `src/WinPaperWalls/MainWindow.xaml` — restructured to SettingsExpander, updated labels/placeholders
+
+**Impact:**
+- All 48 tests pass
+- Build: 0 errors
+- Clearer mental model: "exclude topics you don't want" instead of "include topics you want"
+- Better visual hierarchy with expandable topic section
+- More horizontal space for content with 900px width

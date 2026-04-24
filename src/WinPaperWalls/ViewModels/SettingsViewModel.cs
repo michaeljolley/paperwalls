@@ -130,7 +130,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 						var t = TopicItems.FirstOrDefault(x => x.Name == topic);
 						if (t != null)
 						{
-							t.IsSelected = false;
+							t.IsSelected = true;
 							RefreshSelectedTopics();
 						}
 					})
@@ -218,7 +218,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 		if (string.IsNullOrWhiteSpace(query)) return;
 
 		var matches = TopicItems
-			.Where(t => !t.IsSelected && t.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+			.Where(t => t.IsSelected && t.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
 			.Select(t => t.Name);
 
 		foreach (var name in matches)
@@ -228,9 +228,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 	public void AddTopic(string name)
 	{
 		var topic = TopicItems.FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-		if (topic != null && !topic.IsSelected)
+		if (topic != null && topic.IsSelected)
 		{
-			topic.IsSelected = true;
+			topic.IsSelected = false;
 			RefreshSelectedTopics();
 		}
 	}
@@ -238,7 +238,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 	private void RefreshSelectedTopics()
 	{
 		SelectedTopics.Clear();
-		foreach (var item in TopicItems.Where(t => t.IsSelected))
+		foreach (var item in TopicItems.Where(t => !t.IsSelected))
 			SelectedTopics.Add(item);
 	}
 
