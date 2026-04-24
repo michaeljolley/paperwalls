@@ -5,3 +5,25 @@
 .squad/sessions/
 # Squad: SubSquad activation file (local to this machine)
 .squad-workstream
+
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# WinUI/MSIX
+AppPackages/
+BundleArtifacts/
+*.msix
+*.appx
+
+# User-specific files
+*.rsuser
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options
+.vscode/
+.idea/

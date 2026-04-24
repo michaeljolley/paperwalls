@@ -63,4 +63,26 @@ public partial class App : Application
         
         // Do NOT show MainWindow on startup - it opens when user clicks Settings
     }
+
+    public new async void Exit()
+    {
+        // Dispose tray icon
+        _trayIcon = null;
+
+        // Stop the host gracefully
+        if (_host != null)
+        {
+            await _host.StopAsync(TimeSpan.FromSeconds(5));
+            _host.Dispose();
+            _host = null;
+        }
+
+        // Release mutex
+        _instanceMutex?.ReleaseMutex();
+        _instanceMutex?.Dispose();
+        _instanceMutex = null;
+
+        // Call base Exit to actually exit the application
+        base.Exit();
+    }
 }

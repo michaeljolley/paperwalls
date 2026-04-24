@@ -56,8 +56,9 @@ public sealed partial class MainWindow : Window
         // Set cache max size
         CacheMaxNumberBox.Value = settings.CacheMaxMB;
 
-        // Set startup toggle
-        StartWithWindowsToggle.IsOn = settings.StartWithWindows;
+        // Set startup toggle from actual registry state
+        var startupManager = App.Services.GetRequiredService<StartupManager>();
+        StartWithWindowsToggle.IsOn = startupManager.IsStartWithWindows();
 
         // Update cache size display
         UpdateCacheSizeDisplay();
@@ -140,6 +141,7 @@ public sealed partial class MainWindow : Window
     {
         // We need all topics, not filtered by exclusions
         // The GitHubImageService filters by settings, so we need to fetch directly
+        // NOTE: This creates a new HttpClient for each call - acceptable for settings UI (infrequent use)
         using var httpClient = new System.Net.Http.HttpClient();
         httpClient.DefaultRequestHeaders.Add("User-Agent", "WinPaperWalls/1.0");
         
@@ -202,7 +204,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -216,6 +218,10 @@ public sealed partial class MainWindow : Window
             };
 
             _settingsService.SaveSettings(settings);
+
+            // Apply startup setting
+            var startupManager = App.Services.GetRequiredService<StartupManager>();
+            startupManager.SetStartWithWindows(settings.StartWithWindows);
             
             // Show success message
             SaveSuccessBar.IsOpen = true;
@@ -239,7 +245,7 @@ public sealed partial class MainWindow : Window
                 CloseButtonText = "OK",
                 XamlRoot = this.Content.XamlRoot
             };
-            _ = dialog.ShowAsync();
+            await dialog.ShowAsync();
         }
     }
 

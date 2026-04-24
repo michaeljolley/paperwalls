@@ -1,3 +1,5 @@
+using System.Text;
+using FluentAssertions;
 using WinPaperWalls.Models;
 using WinPaperWalls.Services;
 
@@ -35,12 +37,12 @@ public class SettingsServiceTests : IDisposable
         var settings = _service.LoadSettings();
 
         // Assert
-        Assert.NotNull(settings);
-        Assert.Equal(1440, settings.IntervalMinutes);
-        Assert.Equal("Fill", settings.WallpaperStyle);
-        Assert.Equal(500, settings.CacheMaxMB);
-        Assert.True(settings.StartWithWindows);
-        Assert.Empty(settings.ExcludedTopics);
+        settings.Should().NotBeNull();
+        settings.IntervalMinutes.Should().Be(1440);
+        settings.WallpaperStyle.Should().Be("Fill");
+        settings.CacheMaxMB.Should().Be(500);
+        settings.StartWithWindows.Should().BeTrue();
+        settings.ExcludedTopics.Should().BeEmpty();
     }
 
     [Fact]
@@ -61,13 +63,13 @@ public class SettingsServiceTests : IDisposable
         var loaded = _service.LoadSettings();
 
         // Assert
-        Assert.Equal(60, loaded.IntervalMinutes);
-        Assert.Equal("Fit", loaded.WallpaperStyle);
-        Assert.Equal(1000, loaded.CacheMaxMB);
-        Assert.False(loaded.StartWithWindows);
-        Assert.Equal(2, loaded.ExcludedTopics.Count);
-        Assert.Contains("Nature", loaded.ExcludedTopics);
-        Assert.Contains("Space", loaded.ExcludedTopics);
+        loaded.IntervalMinutes.Should().Be(60);
+        loaded.WallpaperStyle.Should().Be("Fit");
+        loaded.CacheMaxMB.Should().Be(1000);
+        loaded.StartWithWindows.Should().BeFalse();
+        loaded.ExcludedTopics.Should().HaveCount(2);
+        loaded.ExcludedTopics.Should().Contain("Nature");
+        loaded.ExcludedTopics.Should().Contain("Space");
     }
 
     [Fact]
@@ -82,6 +84,64 @@ public class SettingsServiceTests : IDisposable
         _service.SaveSettings(settings);
 
         // Assert
-        Assert.True(eventFired);
+        eventFired.Should().BeTrue();
+    }
+
+    [Fact]
+    public void LoadSettings_WithCorruptedJson_ReturnsDefaultSettings()
+    {
+        // Arrange - create a corrupted JSON file
+        var settingsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "WinPaperWalls",
+            "settings.json");
+        
+        Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
+        File.WriteAllText(settingsPath, "{ invalid json !!!");
+
+        // Act
+        var settings = _service.LoadSettings();
+
+        // Assert
+        settings.Should().NotBeNull();
+        settings.IntervalMinutes.Should().Be(1440); // Default value
+    }
+
+    [Fact]
+    public void LoadSettings_ConcurrentReads_DoNotThrow()
+    {
+        // Arrange
+        var tasks = new List<Task>();
+
+        // Act
+        for (int i = 0; i < 10; i++)
+        {
+            tasks.Add(Task.Run(() =>
+            {
+                var settings = _service.LoadSettings();
+                settings.Should().NotBeNull();
+            }));
+        }
+
+        // Assert
+        var act = () => Task.WaitAll(tasks.ToArray());
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void SaveSettings_MultipleTimes_EventFiresEachTime()
+    {
+        // Arrange
+        var eventCount = 0;
+        _service.SettingsChanged += (sender, args) => eventCount++;
+        var settings = new AppSettings();
+
+        // Act
+        _service.SaveSettings(settings);
+        _service.SaveSettings(settings);
+        _service.SaveSettings(settings);
+
+        // Assert
+        eventCount.Should().Be(3);
     }
 }

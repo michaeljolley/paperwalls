@@ -24,7 +24,7 @@ public class StartupManager
             if (key == null)
             {
                 _logger.LogError("Failed to open registry key for startup configuration");
-                return;
+                throw new InvalidOperationException("Cannot access Windows startup registry key");
             }
 
             if (enabled)
@@ -42,6 +42,7 @@ public class StartupManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to configure Windows startup");
+            throw;
         }
     }
 

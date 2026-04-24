@@ -40,12 +40,15 @@ public sealed partial class TrayIconView : UserControl
 
     private void Exit_Click(object sender, RoutedEventArgs e)
     {
-        Application.Current.Exit();
+        var app = (App)Application.Current;
+        app.Exit();
     }
 
     private class ShowSettingsCommandImpl : ICommand
     {
+#pragma warning disable CS0067 // Event is never used but required by ICommand interface
         public event EventHandler? CanExecuteChanged;
+#pragma warning restore CS0067
 
         public bool CanExecute(object? parameter) => true;
 
