@@ -253,3 +253,44 @@
 - Fix topic ListView scrolling with Height=300
 - Build: 0 errors | Tests: 48 pass
 - Committed and pushed
+
+### 2026-04-24 - Topic Selector Pill/Tag UI Redesign
+
+**What was built:**
+- Replaced checkbox-based topic list with modern AutoSuggestBox + removable pill/tag UI
+- AutoSuggestBox for real-time topic search and filtering
+- Selected topics displayed as pill badges with X button for removal
+- ItemsRepeater with UniformGridLayout for flexible pill layout
+
+**Technical implementation:**
+- Added `SelectedTopics` and `TopicSuggestions` ObservableCollections to SettingsViewModel
+- `FilterTopics()` method: searches topic list, updates suggestions as user types
+- `AddTopic()` method: adds topic to selected list, clears input, refreshes suggestions
+- `RefreshSelectedTopics()` method: reloads selected topics from settings
+- `RemoveCommand` on `TopicItemViewModel` with parameter binding for pill removal
+- Pill styling: TextBlock in HyperlinkButton with accent hover effect
+- Suggestions dropdown populated by filtered results
+
+**User experience improvements:**
+- Type-to-search for faster topic selection (no scrolling needed)
+- Visual feedback with pill badges and hover states
+- One-click removal via X button on each pill
+- Keyboard support: Enter to add, Backspace to remove (if input empty)
+
+**Files modified:**
+- `src/WinPaperWalls/MainWindow.xaml` — added AutoSuggestBox, pill ItemsRepeater
+- `src/WinPaperWalls/MainWindow.xaml.cs` — AutoSuggestBox event handlers
+- `src/WinPaperWalls/ViewModels/SettingsViewModel.cs` — new collections, filter/add/refresh methods
+
+**Design decisions:**
+- AutoSuggestBox placed above pills for natural top-to-bottom scanning
+- UniformGridLayout for pills enables flexible wrapping (responsive to window width)
+- Pill styling matches Fluent Design accent colors
+- No external pill UI library — implemented with HyperlinkButton + TextBlock
+- Backward compatible: saved selected topics still load correctly
+
+**Impact:**
+- All 48 tests pass
+- Build: 0 errors
+- Cleaner, more modern settings UX
+- Better discoverability for topic selection (searchable vs. static list)
