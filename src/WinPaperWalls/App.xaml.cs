@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Serilog;
 using WinPaperWalls.Services;
 using WinUIEx;
 
@@ -32,7 +33,21 @@ public partial class App : Application
 		}
 
 		// Build the host with DI container
+		var logPath = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			"WinPaperWalls", "logs", "winpaperwalls-.log");
+
 		_host = Host.CreateDefaultBuilder()
+			.UseSerilog((context, configuration) =>
+			{
+				configuration
+					.WriteTo.File(
+						logPath,
+						rollingInterval: Serilog.RollingInterval.Day,
+						retainedFileCountLimit: 14,
+						fileSizeLimitBytes: 10 * 1024 * 1024,
+						outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+			})
 			.ConfigureServices((context, services) =>
 			{
 				// Register HTTP client factory
@@ -46,6 +61,7 @@ public partial class App : Application
 				services.AddSingleton<IDesktopWallpaperService, DesktopWallpaperService>();
 				services.AddSingleton<IWallpaperService, WallpaperService>();
 				services.AddSingleton<StartupManager>();
+				services.AddSingleton<ILogBundleService, LogBundleService>();
 
 				// Register scheduler as both ISchedulerService and IHostedService
 				services.AddSingleton<SchedulerService>();
@@ -97,6 +113,33 @@ public partial class App : Application
 				mainWindow.Activate();
 			};
 			flyout.Items.Add(settingsItem);
+
+			var reportBugItem = new MenuFlyoutItem { Text = "Report bug" };
+			reportBugItem.Click += async (_, _) =>
+			{
+				try
+				{
+					var logBundleService = Services.GetRequiredService<ILogBundleService>();
+					var zipPath = await Task.Run(() => logBundleService.CreateBugReportAsync());
+
+					var mainWindow = Services.GetRequiredService<MainWindow>();
+					mainWindow.Activate();
+
+					var dialog = new ContentDialog
+					{
+						Title = "Bug Report Created",
+						Content = "Bug report .zip has been created on your Desktop.",
+						CloseButtonText = "OK",
+						XamlRoot = mainWindow.Content.XamlRoot
+					};
+					await dialog.ShowAsync();
+				}
+				catch
+				{
+					// Silently handle errors for now
+				}
+			};
+			flyout.Items.Add(reportBugItem);
 
 			flyout.Items.Add(new MenuFlyoutSeparator());
 
