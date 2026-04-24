@@ -10,6 +10,7 @@ public partial class App : Application
 {
     private static Mutex? _instanceMutex;
     private IHost? _host;
+    private TrayIconView? _trayIcon;
 
     public App()
     {
@@ -33,10 +34,17 @@ public partial class App : Application
         _host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                // Register HTTP client factory
+                services.AddHttpClient("GitHub");
+                services.AddHttpClient();
+
                 // Register services
                 services.AddSingleton<ISettingsService, SettingsService>();
+                services.AddSingleton<IGitHubImageService, GitHubImageService>();
+                services.AddSingleton<ICacheService, CacheService>();
+                services.AddSingleton<IWallpaperService, WallpaperService>();
                 
-                // Register window
+                // Register window (created on-demand but kept as singleton)
                 services.AddSingleton<MainWindow>();
             })
             .Build();
@@ -44,8 +52,9 @@ public partial class App : Application
         // Start the host
         _host.Start();
 
-        // Create and activate main window
-        var mainWindow = Services.GetRequiredService<MainWindow>();
-        mainWindow.Activate();
+        // Create and show tray icon (app starts minimized to tray)
+        _trayIcon = new TrayIconView();
+        
+        // Do NOT show MainWindow on startup - it opens when user clicks Settings
     }
 }

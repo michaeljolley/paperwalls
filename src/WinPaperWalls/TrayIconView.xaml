@@ -1,0 +1,22 @@
+<UserControl
+    x:Class="WinPaperWalls.TrayIconView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tb="using:H.NotifyIcon">
+    
+    <tb:TaskbarIcon 
+        x:Name="TrayIcon"
+        ToolTipText="WinPaperWalls"
+        IconSource="ms-appx:///Assets/tray-icon.ico"
+        LeftClickCommand="{x:Bind ShowSettingsCommand}"
+        DoubleClickCommand="{x:Bind ShowSettingsCommand}">
+        <tb:TaskbarIcon.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Next Wallpaper" Click="NextWallpaper_Click"/>
+                <MenuFlyoutItem Text="Settings..." Click="Settings_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Exit" Click="Exit_Click"/>
+            </MenuFlyout>
+        </tb:TaskbarIcon.ContextFlyout>
+    </tb:TaskbarIcon>
+</UserControl>

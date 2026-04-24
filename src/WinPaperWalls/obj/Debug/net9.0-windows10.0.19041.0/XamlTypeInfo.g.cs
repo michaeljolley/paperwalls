@@ -226,29 +226,69 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
         
         private void InitTypeTables()
         {
-            _typeNameTable = new string[10];
+            _typeNameTable = new string[30];
             _typeNameTable[0] = "Microsoft.UI.Xaml.Controls.XamlControlsResources";
             _typeNameTable[1] = "Microsoft.UI.Xaml.ResourceDictionary";
             _typeNameTable[2] = "Object";
             _typeNameTable[3] = "Boolean";
             _typeNameTable[4] = "WinPaperWalls.MainWindow";
             _typeNameTable[5] = "Microsoft.UI.Xaml.Window";
-            _typeNameTable[6] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
-            _typeNameTable[7] = "Microsoft.UI.Xaml.DependencyObject";
-            _typeNameTable[8] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
-            _typeNameTable[9] = "Int32";
+            _typeNameTable[6] = "H.NotifyIcon.TaskbarIcon";
+            _typeNameTable[7] = "Microsoft.UI.Xaml.FrameworkElement";
+            _typeNameTable[8] = "String";
+            _typeNameTable[9] = "Microsoft.UI.Xaml.Media.ImageSource";
+            _typeNameTable[10] = "System.Windows.Input.ICommand";
+            _typeNameTable[11] = "H.NotifyIcon.Core.TrayIcon";
+            _typeNameTable[12] = "H.NotifyIcon.Core.PopupActivationMode";
+            _typeNameTable[13] = "System.Enum";
+            _typeNameTable[14] = "System.ValueType";
+            _typeNameTable[15] = "H.NotifyIcon.ContextMenuMode";
+            _typeNameTable[16] = "Microsoft.UI.Xaml.UIElement";
+            _typeNameTable[17] = "Microsoft.UI.Xaml.Controls.Primitives.Popup";
+            _typeNameTable[18] = "Microsoft.UI.Xaml.Controls.Primitives.PlacementMode";
+            _typeNameTable[19] = "Microsoft.UI.Xaml.Thickness";
+            _typeNameTable[20] = "Guid";
+            _typeNameTable[21] = "System.Drawing.Icon";
+            _typeNameTable[22] = "System.MarshalByRefObject";
+            _typeNameTable[23] = "Microsoft.UI.Xaml.Controls.ToolTip";
+            _typeNameTable[24] = "Microsoft.UI.Xaml.DependencyObject";
+            _typeNameTable[25] = "WinPaperWalls.TrayIconView";
+            _typeNameTable[26] = "Microsoft.UI.Xaml.Controls.UserControl";
+            _typeNameTable[27] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[28] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
+            _typeNameTable[29] = "Int32";
 
-            _typeTable = new global::System.Type[10];
+            _typeTable = new global::System.Type[30];
             _typeTable[0] = typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources);
             _typeTable[1] = typeof(global::Microsoft.UI.Xaml.ResourceDictionary);
             _typeTable[2] = typeof(global::System.Object);
             _typeTable[3] = typeof(global::System.Boolean);
             _typeTable[4] = typeof(global::WinPaperWalls.MainWindow);
             _typeTable[5] = typeof(global::Microsoft.UI.Xaml.Window);
-            _typeTable[6] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
-            _typeTable[7] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
-            _typeTable[8] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
-            _typeTable[9] = typeof(global::System.Int32);
+            _typeTable[6] = typeof(global::H.NotifyIcon.TaskbarIcon);
+            _typeTable[7] = typeof(global::Microsoft.UI.Xaml.FrameworkElement);
+            _typeTable[8] = typeof(global::System.String);
+            _typeTable[9] = typeof(global::Microsoft.UI.Xaml.Media.ImageSource);
+            _typeTable[10] = typeof(global::System.Windows.Input.ICommand);
+            _typeTable[11] = typeof(global::H.NotifyIcon.Core.TrayIcon);
+            _typeTable[12] = typeof(global::H.NotifyIcon.Core.PopupActivationMode);
+            _typeTable[13] = typeof(global::System.Enum);
+            _typeTable[14] = typeof(global::System.ValueType);
+            _typeTable[15] = typeof(global::H.NotifyIcon.ContextMenuMode);
+            _typeTable[16] = typeof(global::Microsoft.UI.Xaml.UIElement);
+            _typeTable[17] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.Popup);
+            _typeTable[18] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.PlacementMode);
+            _typeTable[19] = typeof(global::Microsoft.UI.Xaml.Thickness);
+            _typeTable[20] = typeof(global::System.Guid);
+            _typeTable[21] = typeof(global::System.Drawing.Icon);
+            _typeTable[22] = typeof(global::System.MarshalByRefObject);
+            _typeTable[23] = typeof(global::Microsoft.UI.Xaml.Controls.ToolTip);
+            _typeTable[24] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
+            _typeTable[25] = typeof(global::WinPaperWalls.TrayIconView);
+            _typeTable[26] = typeof(global::Microsoft.UI.Xaml.Controls.UserControl);
+            _typeTable[27] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[28] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
+            _typeTable[29] = typeof(global::System.Int32);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -285,11 +325,26 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
 
         private object Activate_0_XamlControlsResources() { return new global::Microsoft.UI.Xaml.Controls.XamlControlsResources(); }
         private object Activate_4_MainWindow() { return new global::WinPaperWalls.MainWindow(); }
-        private object Activate_6_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
+        private object Activate_6_TaskbarIcon() { return new global::H.NotifyIcon.TaskbarIcon(); }
+        private object Activate_11_TrayIcon() { return new global::H.NotifyIcon.Core.TrayIcon(); }
+        private object Activate_25_TrayIconView() { return new global::WinPaperWalls.TrayIconView(); }
+        private object Activate_27_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
         private void StaticInitializer_0_XamlControlsResources() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources).TypeHandle);
         private void StaticInitializer_4_MainWindow() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::WinPaperWalls.MainWindow).TypeHandle);
-        private void StaticInitializer_6_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
-        private void StaticInitializer_8_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
+        private void StaticInitializer_6_TaskbarIcon() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::H.NotifyIcon.TaskbarIcon).TypeHandle);
+        private void StaticInitializer_10_ICommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Windows.Input.ICommand).TypeHandle);
+        private void StaticInitializer_11_TrayIcon() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::H.NotifyIcon.Core.TrayIcon).TypeHandle);
+        private void StaticInitializer_12_PopupActivationMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::H.NotifyIcon.Core.PopupActivationMode).TypeHandle);
+        private void StaticInitializer_13_Enum() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Enum).TypeHandle);
+        private void StaticInitializer_14_ValueType() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.ValueType).TypeHandle);
+        private void StaticInitializer_15_ContextMenuMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::H.NotifyIcon.ContextMenuMode).TypeHandle);
+        private void StaticInitializer_19_Thickness() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Thickness).TypeHandle);
+        private void StaticInitializer_20_Guid() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Guid).TypeHandle);
+        private void StaticInitializer_21_Icon() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Drawing.Icon).TypeHandle);
+        private void StaticInitializer_22_MarshalByRefObject() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.MarshalByRefObject).TypeHandle);
+        private void StaticInitializer_25_TrayIconView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::WinPaperWalls.TrayIconView).TypeHandle);
+        private void StaticInitializer_27_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
+        private void StaticInitializer_28_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
         private void MapAdd_0_XamlControlsResources(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.Object, global::System.Object>)instance;
@@ -297,7 +352,7 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
             var newItem = (global::System.Object)item;
             collection.Add(newKey, newItem);
         }
-        private void VectorAdd_8_IList(object instance, object item)
+        private void VectorAdd_28_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::Microsoft.UI.Xaml.Controls.TreeViewNode>)instance;
             var newItem = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)item;
@@ -347,10 +402,166 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
                 xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 6:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
+            case 6:   //  H.NotifyIcon.TaskbarIcon
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.FrameworkElement"));
+                userType.Activator = Activate_6_TaskbarIcon;
+                userType.StaticInitializer = StaticInitializer_6_TaskbarIcon;
+                userType.AddMemberName("ToolTipText");
+                userType.AddMemberName("IconSource");
+                userType.AddMemberName("LeftClickCommand");
+                userType.AddMemberName("DoubleClickCommand");
+                userType.AddMemberName("TrayIcon");
+                userType.AddMemberName("IsCreated");
+                userType.AddMemberName("IsDisposed");
+                userType.AddMemberName("SupportsCustomToolTips");
+                userType.AddMemberName("NoLeftClickDelay");
+                userType.AddMemberName("DoubleClickCommandParameter");
+                userType.AddMemberName("LeftClickCommandParameter");
+                userType.AddMemberName("RightClickCommand");
+                userType.AddMemberName("RightClickCommandParameter");
+                userType.AddMemberName("MiddleClickCommand");
+                userType.AddMemberName("MiddleClickCommandParameter");
+                userType.AddMemberName("MenuActivation");
+                userType.AddMemberName("ContextMenuMode");
+                userType.AddMemberName("PopupActivation");
+                userType.AddMemberName("TrayPopup");
+                userType.AddMemberName("TrayPopupResolved");
+                userType.AddMemberName("PopupPlacement");
+                userType.AddMemberName("PopupOffset");
+                userType.AddMemberName("Id");
+                userType.AddMemberName("CustomName");
+                userType.AddMemberName("Icon");
+                userType.AddMemberName("TrayToolTip");
+                userType.AddMemberName("TrayToolTipResolved");
+                userType.AddMemberName("ParentTaskbarIcon");
+                xamlType = userType;
+                break;
+
+            case 7:   //  Microsoft.UI.Xaml.FrameworkElement
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 8:   //  String
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 9:   //  Microsoft.UI.Xaml.Media.ImageSource
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 10:   //  System.Windows.Input.ICommand
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, null);
+                userType.StaticInitializer = StaticInitializer_10_ICommand;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 11:   //  H.NotifyIcon.Core.TrayIcon
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.StaticInitializer = StaticInitializer_11_TrayIcon;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 12:   //  H.NotifyIcon.Core.PopupActivationMode
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
+                userType.StaticInitializer = StaticInitializer_12_PopupActivationMode;
+                userType.AddEnumValue("LeftClick", global::H.NotifyIcon.Core.PopupActivationMode.LeftClick);
+                userType.AddEnumValue("RightClick", global::H.NotifyIcon.Core.PopupActivationMode.RightClick);
+                userType.AddEnumValue("DoubleClick", global::H.NotifyIcon.Core.PopupActivationMode.DoubleClick);
+                userType.AddEnumValue("LeftOrRightClick", global::H.NotifyIcon.Core.PopupActivationMode.LeftOrRightClick);
+                userType.AddEnumValue("LeftOrDoubleClick", global::H.NotifyIcon.Core.PopupActivationMode.LeftOrDoubleClick);
+                userType.AddEnumValue("MiddleClick", global::H.NotifyIcon.Core.PopupActivationMode.MiddleClick);
+                userType.AddEnumValue("All", global::H.NotifyIcon.Core.PopupActivationMode.All);
+                userType.AddEnumValue("None", global::H.NotifyIcon.Core.PopupActivationMode.None);
+                xamlType = userType;
+                break;
+
+            case 13:   //  System.Enum
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
+                userType.StaticInitializer = StaticInitializer_13_Enum;
+                xamlType = userType;
+                break;
+
+            case 14:   //  System.ValueType
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.StaticInitializer = StaticInitializer_14_ValueType;
+                xamlType = userType;
+                break;
+
+            case 15:   //  H.NotifyIcon.ContextMenuMode
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
+                userType.StaticInitializer = StaticInitializer_15_ContextMenuMode;
+                userType.AddEnumValue("PopupMenu", global::H.NotifyIcon.ContextMenuMode.PopupMenu);
+                userType.AddEnumValue("SecondWindow", global::H.NotifyIcon.ContextMenuMode.SecondWindow);
+                userType.AddEnumValue("ActiveWindow", global::H.NotifyIcon.ContextMenuMode.ActiveWindow);
+                xamlType = userType;
+                break;
+
+            case 16:   //  Microsoft.UI.Xaml.UIElement
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 17:   //  Microsoft.UI.Xaml.Controls.Primitives.Popup
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 18:   //  Microsoft.UI.Xaml.Controls.Primitives.PlacementMode
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 19:   //  Microsoft.UI.Xaml.Thickness
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
+                userType.StaticInitializer = StaticInitializer_19_Thickness;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 20:   //  Guid
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
+                userType.StaticInitializer = StaticInitializer_20_Guid;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 21:   //  System.Drawing.Icon
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.MarshalByRefObject"));
+                userType.StaticInitializer = StaticInitializer_21_Icon;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 22:   //  System.MarshalByRefObject
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.StaticInitializer = StaticInitializer_22_MarshalByRefObject;
+                xamlType = userType;
+                break;
+
+            case 23:   //  Microsoft.UI.Xaml.Controls.ToolTip
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 24:   //  Microsoft.UI.Xaml.DependencyObject
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 25:   //  WinPaperWalls.TrayIconView
+                userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_25_TrayIconView;
+                userType.StaticInitializer = StaticInitializer_25_TrayIconView;
+                userType.AddMemberName("ShowSettingsCommand");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 26:   //  Microsoft.UI.Xaml.Controls.UserControl
+                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 27:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
                 userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.Activator = Activate_6_TreeViewNode;
-                userType.StaticInitializer = StaticInitializer_6_TreeViewNode;
+                userType.Activator = Activate_27_TreeViewNode;
+                userType.StaticInitializer = StaticInitializer_27_TreeViewNode;
                 userType.AddMemberName("Children");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("Depth");
@@ -362,19 +573,15 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 7:   //  Microsoft.UI.Xaml.DependencyObject
-                xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
-                break;
-
-            case 8:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
+            case 28:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
                 userType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_8_IList;
-                userType.CollectionAdd = VectorAdd_8_IList;
+                userType.StaticInitializer = StaticInitializer_28_IList;
+                userType.CollectionAdd = VectorAdd_28_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 9:   //  Int32
+            case 29:   //  Int32
                 xamlType = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
             }
@@ -446,52 +653,305 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
             var that = (global::Microsoft.UI.Xaml.Controls.XamlControlsResources)instance;
             that.UseCompactResources = (global::System.Boolean)Value;
         }
-        private object get_1_TreeViewNode_Children(object instance)
+        private object get_1_TaskbarIcon_ToolTipText(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.ToolTipText;
+        }
+        private void set_1_TaskbarIcon_ToolTipText(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.ToolTipText = (global::System.String)Value;
+        }
+        private object get_2_TaskbarIcon_IconSource(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.IconSource;
+        }
+        private void set_2_TaskbarIcon_IconSource(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.IconSource = (global::Microsoft.UI.Xaml.Media.ImageSource)Value;
+        }
+        private object get_3_TaskbarIcon_LeftClickCommand(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.LeftClickCommand;
+        }
+        private void set_3_TaskbarIcon_LeftClickCommand(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.LeftClickCommand = (global::System.Windows.Input.ICommand)Value;
+        }
+        private object get_4_TaskbarIcon_DoubleClickCommand(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.DoubleClickCommand;
+        }
+        private void set_4_TaskbarIcon_DoubleClickCommand(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.DoubleClickCommand = (global::System.Windows.Input.ICommand)Value;
+        }
+        private object get_5_TaskbarIcon_TrayIcon(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.TrayIcon;
+        }
+        private object get_6_TaskbarIcon_IsCreated(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.IsCreated;
+        }
+        private object get_7_TaskbarIcon_IsDisposed(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.IsDisposed;
+        }
+        private object get_8_TaskbarIcon_SupportsCustomToolTips(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.SupportsCustomToolTips;
+        }
+        private object get_9_TaskbarIcon_NoLeftClickDelay(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.NoLeftClickDelay;
+        }
+        private void set_9_TaskbarIcon_NoLeftClickDelay(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.NoLeftClickDelay = (global::System.Boolean)Value;
+        }
+        private object get_10_TaskbarIcon_DoubleClickCommandParameter(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.DoubleClickCommandParameter;
+        }
+        private void set_10_TaskbarIcon_DoubleClickCommandParameter(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.DoubleClickCommandParameter = (global::System.Object)Value;
+        }
+        private object get_11_TaskbarIcon_LeftClickCommandParameter(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.LeftClickCommandParameter;
+        }
+        private void set_11_TaskbarIcon_LeftClickCommandParameter(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.LeftClickCommandParameter = (global::System.Object)Value;
+        }
+        private object get_12_TaskbarIcon_RightClickCommand(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.RightClickCommand;
+        }
+        private void set_12_TaskbarIcon_RightClickCommand(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.RightClickCommand = (global::System.Windows.Input.ICommand)Value;
+        }
+        private object get_13_TaskbarIcon_RightClickCommandParameter(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.RightClickCommandParameter;
+        }
+        private void set_13_TaskbarIcon_RightClickCommandParameter(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.RightClickCommandParameter = (global::System.Object)Value;
+        }
+        private object get_14_TaskbarIcon_MiddleClickCommand(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.MiddleClickCommand;
+        }
+        private void set_14_TaskbarIcon_MiddleClickCommand(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.MiddleClickCommand = (global::System.Windows.Input.ICommand)Value;
+        }
+        private object get_15_TaskbarIcon_MiddleClickCommandParameter(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.MiddleClickCommandParameter;
+        }
+        private void set_15_TaskbarIcon_MiddleClickCommandParameter(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.MiddleClickCommandParameter = (global::System.Object)Value;
+        }
+        private object get_16_TaskbarIcon_MenuActivation(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.MenuActivation;
+        }
+        private void set_16_TaskbarIcon_MenuActivation(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.MenuActivation = (global::H.NotifyIcon.Core.PopupActivationMode)Value;
+        }
+        private object get_17_TaskbarIcon_ContextMenuMode(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.ContextMenuMode;
+        }
+        private void set_17_TaskbarIcon_ContextMenuMode(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.ContextMenuMode = (global::H.NotifyIcon.ContextMenuMode)Value;
+        }
+        private object get_18_TaskbarIcon_PopupActivation(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.PopupActivation;
+        }
+        private void set_18_TaskbarIcon_PopupActivation(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.PopupActivation = (global::H.NotifyIcon.Core.PopupActivationMode)Value;
+        }
+        private object get_19_TaskbarIcon_TrayPopup(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.TrayPopup;
+        }
+        private void set_19_TaskbarIcon_TrayPopup(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.TrayPopup = (global::Microsoft.UI.Xaml.UIElement)Value;
+        }
+        private object get_20_TaskbarIcon_TrayPopupResolved(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.TrayPopupResolved;
+        }
+        private object get_21_TaskbarIcon_PopupPlacement(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.PopupPlacement;
+        }
+        private void set_21_TaskbarIcon_PopupPlacement(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.PopupPlacement = (global::Microsoft.UI.Xaml.Controls.Primitives.PlacementMode)Value;
+        }
+        private object get_22_TaskbarIcon_PopupOffset(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.PopupOffset;
+        }
+        private void set_22_TaskbarIcon_PopupOffset(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.PopupOffset = (global::Microsoft.UI.Xaml.Thickness)Value;
+        }
+        private object get_23_TaskbarIcon_Id(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.Id;
+        }
+        private void set_23_TaskbarIcon_Id(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.Id = (global::System.Guid)Value;
+        }
+        private object get_24_TaskbarIcon_CustomName(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.CustomName;
+        }
+        private void set_24_TaskbarIcon_CustomName(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.CustomName = (global::System.String)Value;
+        }
+        private object get_25_TaskbarIcon_Icon(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.Icon;
+        }
+        private void set_25_TaskbarIcon_Icon(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.Icon = (global::System.Drawing.Icon)Value;
+        }
+        private object get_26_TaskbarIcon_TrayToolTip(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.TrayToolTip;
+        }
+        private void set_26_TaskbarIcon_TrayToolTip(object instance, object Value)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            that.TrayToolTip = (global::Microsoft.UI.Xaml.UIElement)Value;
+        }
+        private object get_27_TaskbarIcon_TrayToolTipResolved(object instance)
+        {
+            var that = (global::H.NotifyIcon.TaskbarIcon)instance;
+            return that.TrayToolTipResolved;
+        }
+        private object get_28_TaskbarIcon_ParentTaskbarIcon(object instance)
+        {
+            return global::H.NotifyIcon.TaskbarIcon.GetParentTaskbarIcon((global::Microsoft.UI.Xaml.DependencyObject)instance);
+        }
+        private void set_28_TaskbarIcon_ParentTaskbarIcon(object instance, object Value)
+        {
+            global::H.NotifyIcon.TaskbarIcon.SetParentTaskbarIcon((global::Microsoft.UI.Xaml.DependencyObject)instance, (global::H.NotifyIcon.TaskbarIcon)Value);
+        }
+        private object get_29_TrayIconView_ShowSettingsCommand(object instance)
+        {
+            var that = (global::WinPaperWalls.TrayIconView)instance;
+            return that.ShowSettingsCommand;
+        }
+        private object get_30_TreeViewNode_Children(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Children;
         }
-        private object get_2_TreeViewNode_Content(object instance)
+        private object get_31_TreeViewNode_Content(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Content;
         }
-        private void set_2_TreeViewNode_Content(object instance, object Value)
+        private void set_31_TreeViewNode_Content(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.Content = (global::System.Object)Value;
         }
-        private object get_3_TreeViewNode_Depth(object instance)
+        private object get_32_TreeViewNode_Depth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Depth;
         }
-        private object get_4_TreeViewNode_HasChildren(object instance)
+        private object get_33_TreeViewNode_HasChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasChildren;
         }
-        private object get_5_TreeViewNode_HasUnrealizedChildren(object instance)
+        private object get_34_TreeViewNode_HasUnrealizedChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasUnrealizedChildren;
         }
-        private void set_5_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
+        private void set_34_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.HasUnrealizedChildren = (global::System.Boolean)Value;
         }
-        private object get_6_TreeViewNode_IsExpanded(object instance)
+        private object get_35_TreeViewNode_IsExpanded(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.IsExpanded;
         }
-        private void set_6_TreeViewNode_IsExpanded(object instance, object Value)
+        private void set_35_TreeViewNode_IsExpanded(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.IsExpanded = (global::System.Boolean)Value;
         }
-        private object get_7_TreeViewNode_Parent(object instance)
+        private object get_36_TreeViewNode_Parent(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Parent;
@@ -511,50 +971,250 @@ namespace WinPaperWalls.WinPaperWalls_XamlTypeInfo
                 xamlMember.Getter = get_0_XamlControlsResources_UseCompactResources;
                 xamlMember.Setter = set_0_XamlControlsResources_UseCompactResources;
                 break;
+            case "H.NotifyIcon.TaskbarIcon.ToolTipText":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "ToolTipText", "String");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_1_TaskbarIcon_ToolTipText;
+                xamlMember.Setter = set_1_TaskbarIcon_ToolTipText;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.IconSource":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "IconSource", "Microsoft.UI.Xaml.Media.ImageSource");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_2_TaskbarIcon_IconSource;
+                xamlMember.Setter = set_2_TaskbarIcon_IconSource;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.LeftClickCommand":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "LeftClickCommand", "System.Windows.Input.ICommand");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_3_TaskbarIcon_LeftClickCommand;
+                xamlMember.Setter = set_3_TaskbarIcon_LeftClickCommand;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.DoubleClickCommand":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "DoubleClickCommand", "System.Windows.Input.ICommand");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_4_TaskbarIcon_DoubleClickCommand;
+                xamlMember.Setter = set_4_TaskbarIcon_DoubleClickCommand;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.TrayIcon":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "TrayIcon", "H.NotifyIcon.Core.TrayIcon");
+                xamlMember.Getter = get_5_TaskbarIcon_TrayIcon;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.IsCreated":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "IsCreated", "Boolean");
+                xamlMember.Getter = get_6_TaskbarIcon_IsCreated;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.IsDisposed":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "IsDisposed", "Boolean");
+                xamlMember.Getter = get_7_TaskbarIcon_IsDisposed;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.SupportsCustomToolTips":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "SupportsCustomToolTips", "Boolean");
+                xamlMember.Getter = get_8_TaskbarIcon_SupportsCustomToolTips;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.NoLeftClickDelay":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "NoLeftClickDelay", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_9_TaskbarIcon_NoLeftClickDelay;
+                xamlMember.Setter = set_9_TaskbarIcon_NoLeftClickDelay;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.DoubleClickCommandParameter":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "DoubleClickCommandParameter", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_10_TaskbarIcon_DoubleClickCommandParameter;
+                xamlMember.Setter = set_10_TaskbarIcon_DoubleClickCommandParameter;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.LeftClickCommandParameter":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "LeftClickCommandParameter", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_11_TaskbarIcon_LeftClickCommandParameter;
+                xamlMember.Setter = set_11_TaskbarIcon_LeftClickCommandParameter;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.RightClickCommand":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "RightClickCommand", "System.Windows.Input.ICommand");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_12_TaskbarIcon_RightClickCommand;
+                xamlMember.Setter = set_12_TaskbarIcon_RightClickCommand;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.RightClickCommandParameter":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "RightClickCommandParameter", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_13_TaskbarIcon_RightClickCommandParameter;
+                xamlMember.Setter = set_13_TaskbarIcon_RightClickCommandParameter;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.MiddleClickCommand":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "MiddleClickCommand", "System.Windows.Input.ICommand");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_14_TaskbarIcon_MiddleClickCommand;
+                xamlMember.Setter = set_14_TaskbarIcon_MiddleClickCommand;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.MiddleClickCommandParameter":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "MiddleClickCommandParameter", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_15_TaskbarIcon_MiddleClickCommandParameter;
+                xamlMember.Setter = set_15_TaskbarIcon_MiddleClickCommandParameter;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.MenuActivation":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "MenuActivation", "H.NotifyIcon.Core.PopupActivationMode");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_16_TaskbarIcon_MenuActivation;
+                xamlMember.Setter = set_16_TaskbarIcon_MenuActivation;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.ContextMenuMode":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "ContextMenuMode", "H.NotifyIcon.ContextMenuMode");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_17_TaskbarIcon_ContextMenuMode;
+                xamlMember.Setter = set_17_TaskbarIcon_ContextMenuMode;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.PopupActivation":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "PopupActivation", "H.NotifyIcon.Core.PopupActivationMode");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_18_TaskbarIcon_PopupActivation;
+                xamlMember.Setter = set_18_TaskbarIcon_PopupActivation;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.TrayPopup":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "TrayPopup", "Microsoft.UI.Xaml.UIElement");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_19_TaskbarIcon_TrayPopup;
+                xamlMember.Setter = set_19_TaskbarIcon_TrayPopup;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.TrayPopupResolved":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "TrayPopupResolved", "Microsoft.UI.Xaml.Controls.Primitives.Popup");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_20_TaskbarIcon_TrayPopupResolved;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.PopupPlacement":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "PopupPlacement", "Microsoft.UI.Xaml.Controls.Primitives.PlacementMode");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_21_TaskbarIcon_PopupPlacement;
+                xamlMember.Setter = set_21_TaskbarIcon_PopupPlacement;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.PopupOffset":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "PopupOffset", "Microsoft.UI.Xaml.Thickness");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_22_TaskbarIcon_PopupOffset;
+                xamlMember.Setter = set_22_TaskbarIcon_PopupOffset;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.Id":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Id", "Guid");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_23_TaskbarIcon_Id;
+                xamlMember.Setter = set_23_TaskbarIcon_Id;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.CustomName":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "CustomName", "String");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_24_TaskbarIcon_CustomName;
+                xamlMember.Setter = set_24_TaskbarIcon_CustomName;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.Icon":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Icon", "System.Drawing.Icon");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_25_TaskbarIcon_Icon;
+                xamlMember.Setter = set_25_TaskbarIcon_Icon;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.TrayToolTip":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "TrayToolTip", "Microsoft.UI.Xaml.UIElement");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_26_TaskbarIcon_TrayToolTip;
+                xamlMember.Setter = set_26_TaskbarIcon_TrayToolTip;
+                break;
+            case "H.NotifyIcon.TaskbarIcon.TrayToolTipResolved":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "TrayToolTipResolved", "Microsoft.UI.Xaml.Controls.ToolTip");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_27_TaskbarIcon_TrayToolTipResolved;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "H.NotifyIcon.TaskbarIcon.ParentTaskbarIcon":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("H.NotifyIcon.TaskbarIcon");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "ParentTaskbarIcon", "H.NotifyIcon.TaskbarIcon");
+                xamlMember.SetTargetTypeName("Microsoft.UI.Xaml.DependencyObject");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.SetIsAttachable();
+                xamlMember.Getter = get_28_TaskbarIcon_ParentTaskbarIcon;
+                xamlMember.Setter = set_28_TaskbarIcon_ParentTaskbarIcon;
+                break;
+            case "WinPaperWalls.TrayIconView.ShowSettingsCommand":
+                userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("WinPaperWalls.TrayIconView");
+                xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "ShowSettingsCommand", "System.Windows.Input.ICommand");
+                xamlMember.Getter = get_29_TrayIconView_ShowSettingsCommand;
+                xamlMember.SetIsReadOnly();
+                break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Children":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Children", "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>");
-                xamlMember.Getter = get_1_TreeViewNode_Children;
+                xamlMember.Getter = get_30_TreeViewNode_Children;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Content":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Content", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_2_TreeViewNode_Content;
-                xamlMember.Setter = set_2_TreeViewNode_Content;
+                xamlMember.Getter = get_31_TreeViewNode_Content;
+                xamlMember.Setter = set_31_TreeViewNode_Content;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Depth":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Depth", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_3_TreeViewNode_Depth;
+                xamlMember.Getter = get_32_TreeViewNode_Depth;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasChildren":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "HasChildren", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_4_TreeViewNode_HasChildren;
+                xamlMember.Getter = get_33_TreeViewNode_HasChildren;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasUnrealizedChildren":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "HasUnrealizedChildren", "Boolean");
-                xamlMember.Getter = get_5_TreeViewNode_HasUnrealizedChildren;
-                xamlMember.Setter = set_5_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Getter = get_34_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Setter = set_34_TreeViewNode_HasUnrealizedChildren;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.IsExpanded":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "IsExpanded", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_6_TreeViewNode_IsExpanded;
-                xamlMember.Setter = set_6_TreeViewNode_IsExpanded;
+                xamlMember.Getter = get_35_TreeViewNode_IsExpanded;
+                xamlMember.Setter = set_35_TreeViewNode_IsExpanded;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Parent":
                 userType = (global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::WinPaperWalls.WinPaperWalls_XamlTypeInfo.XamlMember(this, "Parent", "Microsoft.UI.Xaml.Controls.TreeViewNode");
-                xamlMember.Getter = get_7_TreeViewNode_Parent;
+                xamlMember.Getter = get_36_TreeViewNode_Parent;
                 xamlMember.SetIsReadOnly();
                 break;
             }
