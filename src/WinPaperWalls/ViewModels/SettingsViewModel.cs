@@ -103,9 +103,11 @@ public sealed partial class SettingsViewModel : ObservableObject
 		StartWithWindows = _startupManager.IsStartWithWindows();
 		UpdateCacheSizeDisplay();
 
-		await LoadTopicsAsync(settings.ExcludedTopics);
-
+		// Mark settings as loaded before topic fetch so style preview and revert
+		// work immediately — the GitHub API call should not block interaction.
 		SettingsLoaded = true;
+
+		await LoadTopicsAsync(settings.ExcludedTopics);
 	}
 
 	private async Task LoadTopicsAsync(List<string> excludedTopics)
