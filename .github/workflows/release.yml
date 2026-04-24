@@ -132,14 +132,12 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "sideload-packages" -ItemType Directory -Force
-          # Collect the main arch MSIX packages (not scale-* resource packages)
-          $msixFiles = Get-ChildItem -Path "AppPackages" -Filter "*.msix" -Recurse |
-            Where-Object { $_.Name -match '_(x64|arm64)\.msix$' }
+          $msixFiles = Get-ChildItem -Path "AppPackages" -Filter "*.msixbundle" -Recurse
 
           if ($msixFiles.Count -eq 0) {
             Write-Host "AppPackages contents:"
             Get-ChildItem -Path "AppPackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-            Write-Error "No app MSIX packages found in AppPackages!"
+            Write-Error "No MSIX bundles found in AppPackages!"
             exit 1
           }
 
@@ -148,7 +146,7 @@ jobs:
             Copy-Item $file.FullName -Destination "sideload-packages/$($file.Name)"
           }
 
-          Write-Host "Staged $($msixFiles.Count) MSIX package(s)."
+          Write-Host "Staged $($msixFiles.Count) MSIX bundle(s)."
 
       - name: Azure login
         uses: azure/login@v3
@@ -162,7 +160,7 @@ jobs:
           signing-account-name: bbb-signing
           certificate-profile-name: BaldBeardedBuilder
           files-folder: ${{ github.workspace }}\sideload-packages
-          files-folder-filter: msix
+          files-folder-filter: msixbundle
           files-folder-recurse: false
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -171,10 +169,10 @@ jobs:
       - name: Verify MSIX signatures
         shell: pwsh
         run: |
-          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msix"
+          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msixbundle"
 
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No MSIX packages found in sideload-packages!"
+            Write-Error "No MSIX bundles found in sideload-packages!"
             exit 1
           }
 
@@ -189,13 +187,13 @@ jobs:
             }
           }
 
-          Write-Host "All MSIX packages are signed and verified."
+          Write-Host "All MSIX bundles are signed and verified."
       
       - name: Upload MSIX artifacts
         uses: actions/upload-artifact@v7
         with:
           name: msix-packages
-          path: sideload-packages/*.msix
+          path: sideload-packages/*.msixbundle
           retention-days: 7
 
       - name: Upload MSIX packages to GitHub Release
@@ -203,7 +201,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msix"
+          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msixbundle"
           
           foreach ($file in $msixFiles) {
             Write-Host "Uploading $($file.Name) to release..."
@@ -256,13 +254,12 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "StorePackages" -Filter "*.msix" -Recurse |
-            Where-Object { $_.Name -match '_(x64|arm64)\.msix$' }
+          $msixFiles = Get-ChildItem -Path "StorePackages" -Filter "*.msixbundle" -Recurse
 
           if ($msixFiles.Count -eq 0) {
             Write-Host "StorePackages contents:"
             Get-ChildItem -Path "StorePackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-            Write-Error "No Store MSIX packages found!"
+            Write-Error "No Store MSIX bundles found!"
             exit 1
           }
 
@@ -275,7 +272,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: msix-store-packages
-          path: store-packages/*.msix
+          path: store-packages/*.msixbundle
           retention-days: 7
 
   store-submit:
