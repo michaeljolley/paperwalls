@@ -1,4 +1,3 @@
-using System.Text;
 using FluentAssertions;
 using WinPaperWalls.Models;
 using WinPaperWalls.Services;

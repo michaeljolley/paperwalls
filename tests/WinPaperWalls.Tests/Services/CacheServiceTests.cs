@@ -1,6 +1,5 @@
 using System.Net;
 using FluentAssertions;
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using WinPaperWalls.Services;

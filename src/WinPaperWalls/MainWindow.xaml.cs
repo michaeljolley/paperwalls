@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using WinPaperWalls.Interop;
 using WinPaperWalls.Services;
 
@@ -12,10 +12,8 @@ namespace WinPaperWalls;
 public sealed partial class MainWindow : Window
 {
 	private readonly ISettingsService _settingsService;
-	private readonly IGitHubImageService _gitHubImageService;
 	private readonly ICacheService _cacheService;
-	private List<string> _allTopics = new();
-	private ObservableCollection<TopicItem> _topicItems = new();
+	private readonly ObservableCollection<TopicItem> _topicItems = new();
 	private string _savedStyle = "Fill";
 	private bool _settingsLoaded = false;
 
@@ -25,7 +23,6 @@ public sealed partial class MainWindow : Window
 
 		// Get services from DI
 		_settingsService = App.Services.GetRequiredService<ISettingsService>();
-		_gitHubImageService = App.Services.GetRequiredService<IGitHubImageService>();
 		_cacheService = App.Services.GetRequiredService<ICacheService>();
 
 		// Hide window when closed instead of destroying it
@@ -115,11 +112,11 @@ public sealed partial class MainWindow : Window
 		{
 			// Get all topics (need to bypass exclusion filter for settings UI)
 			// So we'll call the GitHub API directly through a workaround
-			_allTopics = await GetAllTopicsFromGitHubAsync();
+			var allTopics = await GetAllTopicsFromGitHubAsync();
 
 			// Create topic items with selection state
 			_topicItems.Clear();
-			foreach (var topic in _allTopics)
+			foreach (var topic in allTopics)
 			{
 				_topicItems.Add(new TopicItem
 				{

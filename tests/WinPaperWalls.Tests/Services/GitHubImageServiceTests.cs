@@ -1,8 +1,6 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using WinPaperWalls.Models;
