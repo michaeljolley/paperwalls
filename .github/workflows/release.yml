@@ -68,7 +68,7 @@ jobs:
         run: dotnet test tests/WinPaperWalls.Tests/WinPaperWalls.Tests.csproj -c Release -r win-x64 --no-build
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-output
           path: |
