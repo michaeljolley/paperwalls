@@ -237,3 +237,48 @@ Marty (Phase 4) built the complete settings window UI with all configuration opt
 - `dotnet build` succeeds
 - All scheduler and startup manager services compile and integrate cleanly
 - Settings window properly triggers scheduler restart on interval change
+
+### 2026-04-23: Testability Improvements for Unit Tests
+
+**Problem Context:**
+Jennifer's comprehensive unit tests (40+ test cases) uncovered three testability issues preventing 11 tests from passing:
+
+**Issue 1: CacheService Directory Not Injectable**
+- Problem: _cacheDirectory hardcoded to %LOCALAPPDATA%\WinPaperWalls\cache
+- Tests writing to temp directory but EvictOldestAsync/ClearCacheAsync operated on wrong location
+- Fix: Added optional cacheDirectory parameter to constructor
+  - Production code: 
+ull defaults to %LOCALAPPDATA% path
+  - Test code: passes temp directory for isolation
+- Interface (ICacheService) unchanged - no API breaking changes
+
+**Issue 2: Static DesktopWallpaper.SetWallpaper Not Mockable**
+- Problem: Direct static call prevented mocking in tests
+- Tests failed with FileNotFoundException on mock paths like C:\test\image1.jpg
+- Fix: Created abstraction layer for testability
+  - New interface: IDesktopWallpaperService
+  - New wrapper: DesktopWallpaperService (calls static method)
+  - WallpaperService now injects IDesktopWallpaperService instead of calling static directly
+  - Registered IDesktopWallpaperService in DI container (App.xaml.cs)
+- Tests can now mock the interface without file system dependencies
+
+**Issue 3: SchedulerService Doesn't Handle 0-Minute Interval**
+- Problem: Test setting IntervalMinutes = 0 creates TimeSpan.Zero for PeriodicTimer
+- Causes undefined behavior in timer loop
+- Fix: Enforce minimum 1-minute interval in two places:
+  - StartAsync(): ar intervalMinutes = Math.Max(1, settings.IntervalMinutes);
+  - OnSettingsChanged(): Same guard on settings reload
+- Prevents edge case while maintaining realistic production behavior
+
+**Design Patterns Applied:**
+- **Dependency Injection for External Dependencies** - Wrap static/non-mockable APIs (file system, OS calls) behind interfaces
+- **Optional Parameters for Test Hooks** - Production code uses sensible defaults, tests override with controlled values
+- **Input Validation** - Guard against edge cases (zero interval) that break invariants
+
+**Testability Principle:**
+Any code that touches external state (file system, registry, OS APIs) should be injectable. This allows tests to verify logic without side effects.
+
+**Build Status:**
+- Main project (src/WinPaperWalls/WinPaperWalls.csproj): ✅ Builds successfully
+- Test project: Expected errors (Jennifer will update test mocks to match new signatures)
+- Zero breaking changes to public APIs or production behavior
