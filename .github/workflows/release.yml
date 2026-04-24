@@ -128,21 +128,19 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "sideload-packages" -ItemType Directory -Force
-          # Copy only app MSIX files, excluding SDK runtime packages (Main.msix, Singleton.msix) in obj/
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
-            Where-Object { $_.FullName -notmatch '\\obj\\' }
-          
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No app MSIX packages found! (SDK runtime packages in obj/ were excluded)"
+            Write-Error "No MSIX packages found after publish!"
             exit 1
           }
-          
+
           foreach ($file in $msixFiles) {
             Write-Host "Staging $($file.FullName)"
             Copy-Item $file.FullName -Destination "sideload-packages/$($file.Name)"
           }
-          
-          Write-Host "Staged $($msixFiles.Count) app MSIX package(s)."
+
+          Write-Host "Staged $($msixFiles.Count) MSIX package(s)."
 
       - name: Azure login
         uses: azure/login@v3
@@ -209,13 +207,10 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Removing sideload MSIX packages before Store build..."
-          # Clean the staged sideload packages
           if (Test-Path "sideload-packages") {
             Remove-Item -Path "sideload-packages" -Recurse -Force
           }
-          # Clean any MSIX files from src (excluding obj/ SDK runtime packages)
           Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
-            Where-Object { $_.FullName -notmatch '\\obj\\' } |
             Remove-Item -Force
           if (Test-Path "src/WinPaperWalls/AppPackages") {
             Remove-Item -Path "src/WinPaperWalls/AppPackages" -Recurse -Force
@@ -251,15 +246,13 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          # Copy only app MSIX files, excluding SDK runtime packages in obj/
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
-            Where-Object { $_.FullName -notmatch '\\obj\\' }
-          
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No Store MSIX packages found! (SDK runtime packages in obj/ were excluded)"
+            Write-Error "No Store MSIX packages found after publish!"
             exit 1
           }
-          
+
           foreach ($file in $msixFiles) {
             Write-Host "Copying $($file.Name) to store-packages/"
             Copy-Item $file.FullName -Destination "store-packages/$($file.Name)"
