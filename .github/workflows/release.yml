@@ -124,6 +124,26 @@ jobs:
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
+      - name: Stage sideload MSIX packages
+        shell: pwsh
+        run: |
+          New-Item -Path "sideload-packages" -ItemType Directory -Force
+          # Copy only app MSIX files, excluding SDK runtime packages (Main.msix, Singleton.msix) in obj/
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
+            Where-Object { $_.FullName -notmatch '\\obj\\' }
+          
+          if ($msixFiles.Count -eq 0) {
+            Write-Error "No app MSIX packages found! (SDK runtime packages in obj/ were excluded)"
+            exit 1
+          }
+          
+          foreach ($file in $msixFiles) {
+            Write-Host "Staging $($file.FullName)"
+            Copy-Item $file.FullName -Destination "sideload-packages/$($file.Name)"
+          }
+          
+          Write-Host "Staged $($msixFiles.Count) app MSIX package(s)."
+
       - name: Azure login
         uses: azure/login@v3
         with:
@@ -135,9 +155,9 @@ jobs:
           endpoint: https://eus.codesigning.azure.net/
           signing-account-name: bbb-signing
           certificate-profile-name: BaldBeardedBuilder
-          files-folder: ${{ github.workspace }}\src\WinPaperWalls
+          files-folder: ${{ github.workspace }}\sideload-packages
           files-folder-filter: msix
-          files-folder-recurse: true
+          files-folder-recurse: false
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
@@ -145,10 +165,10 @@ jobs:
       - name: Verify MSIX signatures
         shell: pwsh
         run: |
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msix"
 
           if ($msixFiles.Count -eq 0) {
-            Write-Error "No MSIX packages found!"
+            Write-Error "No MSIX packages found in sideload-packages!"
             exit 1
           }
 
@@ -165,37 +185,11 @@ jobs:
 
           Write-Host "All MSIX packages are signed and verified."
       
-      - name: Find and upload MSIX packages
-        shell: pwsh
-        run: |
-          Write-Host "Searching for MSIX packages..."
-          
-          # Show what was produced
-          if (Test-Path "src/WinPaperWalls/AppPackages") {
-            Write-Host "AppPackages directory contents:"
-            Get-ChildItem -Path "src/WinPaperWalls/AppPackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-          } else {
-            Write-Host "src/WinPaperWalls/AppPackages directory does not exist"
-            Write-Host "Searching entire WinPaperWalls directory for .msix files..."
-            Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-          }
-          
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
-          
-          foreach ($file in $msixFiles) {
-            Write-Host "Found MSIX: $($file.FullName)"
-          }
-          
-          if ($msixFiles.Count -eq 0) {
-            Write-Error "No MSIX packages found!"
-            exit 1
-          }
-      
       - name: Upload MSIX artifacts
         uses: actions/upload-artifact@v7
         with:
           name: msix-packages
-          path: src/WinPaperWalls/**/*.msix
+          path: sideload-packages/*.msix
           retention-days: 7
 
       - name: Upload MSIX packages to GitHub Release
@@ -203,7 +197,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msix"
           
           foreach ($file in $msixFiles) {
             Write-Host "Uploading $($file.Name) to release..."
@@ -215,7 +209,14 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Removing sideload MSIX packages before Store build..."
-          Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse | Remove-Item -Force
+          # Clean the staged sideload packages
+          if (Test-Path "sideload-packages") {
+            Remove-Item -Path "sideload-packages" -Recurse -Force
+          }
+          # Clean any MSIX files from src (excluding obj/ SDK runtime packages)
+          Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
+            Where-Object { $_.FullName -notmatch '\\obj\\' } |
+            Remove-Item -Force
           if (Test-Path "src/WinPaperWalls/AppPackages") {
             Remove-Item -Path "src/WinPaperWalls/AppPackages" -Recurse -Force
           }
@@ -250,7 +251,15 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          # Copy only app MSIX files, excluding SDK runtime packages in obj/
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse |
+            Where-Object { $_.FullName -notmatch '\\obj\\' }
+          
+          if ($msixFiles.Count -eq 0) {
+            Write-Error "No Store MSIX packages found! (SDK runtime packages in obj/ were excluded)"
+            exit 1
+          }
+          
           foreach ($file in $msixFiles) {
             Write-Host "Copying $($file.Name) to store-packages/"
             Copy-Item $file.FullName -Destination "store-packages/$($file.Name)"
