@@ -230,3 +230,17 @@
 - `src/WinPaperWalls/MainWindow.xaml` — full layout restructure
 - `src/WinPaperWalls/MainWindow.xaml.cs` — added ExtendsContentIntoTitleBar and SetTitleBar() in constructor
 
+### 2025-01-10 - Settings Layout & Scroll Fixes
+
+**What changed:**
+- Moved "Start with Windows" toggle to be the last setting in the Backgrounds section (after Topics expander), per Michael's request
+- Bumped settings window size 25% from 600×800 to 750×1000 for more breathing room
+- Fixed topic list scrolling: changed ListView from `MaxHeight="300"` to `Height="300"` — a fixed height gives the ListView a definite viewport so its built-in ScrollViewer activates properly inside the SettingsCard container
+
+**Key learning:**
+- Inside a `SettingsCard` (which uses Auto-sizing), `MaxHeight` on a ListView doesn't create a proper scrollable region because the parent doesn't constrain it enough. Using a fixed `Height` forces the ListView to define its own viewport, enabling its built-in virtualized scrolling.
+
+**Files modified:**
+- `src/WinPaperWalls/MainWindow.xaml` — reordered Start with Windows, fixed ListView Height
+- `src/WinPaperWalls/MainWindow.xaml.cs` — updated window Resize dimensions
+
