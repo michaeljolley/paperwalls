@@ -282,3 +282,34 @@ Any code that touches external state (file system, registry, OS APIs) should be 
 - Main project (src/WinPaperWalls/WinPaperWalls.csproj): ✅ Builds successfully
 - Test project: Expected errors (Jennifer will update test mocks to match new signatures)
 - Zero breaking changes to public APIs or production behavior
+
+### 2026-07-14: Code Cleanup - Unused Usings and Dead Code
+
+**PR #9:** Removed unused using statements, sorted imports, removed dead fields.
+
+**Changes:**
+- Removed unused `using System.Text` from SettingsServiceTests.cs
+- Removed unused `using Microsoft.Extensions.Http` from GitHubImageServiceTests.cs and CacheServiceTests.cs
+- Removed unused `using System.Net.Http.Json` from GitHubImageServiceTests.cs
+- Sorted using statements in MainWindow.xaml.cs (System.* first convention)
+- Removed unused `_gitHubImageService` field from MainWindow (GitHub API calls use raw HttpClient in GetAllTopicsFromGitHubAsync)
+- Removed unused `_allTopics` field from MainWindow (replaced with local variable)
+- Made `_topicItems` field readonly
+
+**Key Finding:** MainWindow injects IGitHubImageService but doesn't use it - the settings UI bypasses the service to get unfiltered topics directly from GitHub API. This is by design (see decisions.md).
+
+### 2026-04-24: Code Cleanup Complete
+
+**Agent:** Biff (Code Cleanup Phase)  
+**Timestamp:** 2026-04-24T16:27:08Z  
+**Status:** ✅ Complete
+
+**PR #9 Summary:**
+- Removed 4 unused `using` statements from test files
+- Sorted and organized imports in MainWindow.xaml.cs
+- Removed 2 dead fields: `_gitHubImageService`, `_allTopics`
+- Build: ✅ Clean
+- Tests: ✅ 48 tests pass
+- No behavioral changes to application
+
+**Impact:** Code is now more maintainable with cleaner imports and no dead code references.
