@@ -282,3 +282,26 @@ Any code that touches external state (file system, registry, OS APIs) should be 
 - Main project (src/WinPaperWalls/WinPaperWalls.csproj): ✅ Builds successfully
 - Test project: Expected errors (Jennifer will update test mocks to match new signatures)
 - Zero breaking changes to public APIs or production behavior
+
+### 2026-07-25: Native AOT Compilation Enabled
+
+**Changes Made:**
+- Added `PublishAot=true` and `AllowUnsafeBlocks=true` to WinPaperWalls.csproj
+- Converted all `[DllImport]` to `[LibraryImport]` in User32.cs and DesktopWallpaper.cs (AOT-compatible compile-time marshalling)
+- Created `AppJsonContext` source-generated `JsonSerializerContext` in `Serialization/AppJsonContext.cs`
+- Extracted shared `GitHubContentItem` model to `Models/GitHubContentItem.cs` (was duplicated as private classes)
+- Updated SettingsService, GitHubImageService, MainWindow to use source-generated JSON serialization
+- Fixed IL3000 AOT warning: replaced `Assembly.Location` with `Environment.ProcessPath` in StartupManager
+- Added AOT publish verification step to CI workflow (runs on push to main only, not PRs)
+
+**Key Files:**
+- `src/WinPaperWalls/Serialization/AppJsonContext.cs` — source-gen JSON context for all serialized types
+- `src/WinPaperWalls/Models/GitHubContentItem.cs` — shared GitHub API response DTO
+
+**AOT Behavior:**
+- `dotnet build` still works normally (AOT analysis only, no AOT compilation)
+- `dotnet publish` triggers full AOT compilation (self-contained native binary)
+- Tests unaffected — test project doesn't need AOT
+- All 48 tests pass after changes
+
+**Build Command:** `dotnet build src/WinPaperWalls/WinPaperWalls.csproj -r win-x64` — 0 errors, 0 AOT warnings

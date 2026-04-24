@@ -14,3 +14,16 @@
 **By:** Michael Jolley
 **What:** Use WinUI 3 for all UI (settings window, tray integration via H.NotifyIcon.WinUI). NOT WPF or WinForms.
 **Why:** User preference. Modern Windows UI framework.
+
+### 2026-07-25T00:00:00Z: Enable Native AOT Compilation
+**By:** Biff
+**Status:** Implemented  
+**Branch:** squad/enable-native-aot  
+**What:** Enable `PublishAot=true` unconditionally in the main app project for compile-time trimming analysis and native AOT release builds.
+**Key Changes:** 
+- Source-generated JSON via AppJsonContext 
+- All DllImport → LibraryImport (compile-time marshalling)
+- Assembly.Location → Environment.ProcessPath (AOT-safe)
+- Extracted shared GitHubContentItem model
+**Why:** Windows App SDK 1.8 supports Native AOT for WinUI 3 apps. .NET 10 resolved the known AOT+WinUI 3 hang issue. Enables faster startup and self-contained release binaries.
+**Impact:** Release binaries are native and self-contained; all 48 tests pass; CI adds AOT publish verification; build times unchanged for debug workflows; publish times ~2-5x longer due to native compilation.
