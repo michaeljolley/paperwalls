@@ -47,10 +47,10 @@ public class CacheService : ICacheService
 
         try
         {
-            var response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            var imageBytes = await response.Content.ReadAsByteArrayAsync();
+            var imageBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 
             lock (_cacheLock)
             {

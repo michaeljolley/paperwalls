@@ -11,7 +11,7 @@
         DoubleClickCommand="{x:Bind ShowSettingsCommand}">
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem Text="Next Wallpaper" Click="NextWallpaper_Click"/>
+                <MenuFlyoutItem Text="Refresh PaperWall" Click="NextWallpaper_Click"/>
                 <MenuFlyoutItem Text="Settings..." Click="Settings_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Exit" Click="Exit_Click"/>

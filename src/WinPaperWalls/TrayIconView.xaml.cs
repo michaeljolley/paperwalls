@@ -37,7 +37,10 @@ public sealed partial class TrayIconView : UserControl, IDisposable
     {
         try
         {
-            await _wallpaperService.ChangeWallpaperAsync();
+            // Run off the UI thread to avoid deadlocking the message pump.
+            // SystemParametersInfo with SPIF_SENDCHANGE broadcasts WM_SETTINGCHANGE
+            // synchronously, which deadlocks if called on the UI thread.
+            await Task.Run(() => _wallpaperService.ChangeWallpaperAsync());
         }
         catch
         {

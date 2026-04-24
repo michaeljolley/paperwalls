@@ -48,13 +48,13 @@ public class GitHubImageService : IGitHubImageService
         {
             _logger.LogInformation("Fetching topics from GitHub");
             
-            var response = await _httpClient.GetAsync(ApiBaseUrl);
+            var response = await _httpClient.GetAsync(ApiBaseUrl).ConfigureAwait(false);
             
             CheckRateLimit(response);
             
             response.EnsureSuccessStatusCode();
 
-            var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>();
+            var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>().ConfigureAwait(false);
             if (items == null)
             {
                 _logger.LogWarning("GitHub API returned null response");
@@ -115,13 +115,13 @@ public class GitHubImageService : IGitHubImageService
             _logger.LogInformation("Fetching images for topic {Topic} from GitHub", topic);
             
             var url = $"{ApiBaseUrl}/{topic}";
-            var response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
             
             CheckRateLimit(response);
             
             response.EnsureSuccessStatusCode();
 
-            var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>();
+            var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>().ConfigureAwait(false);
             if (items == null)
             {
                 _logger.LogWarning("GitHub API returned null response for topic {Topic}", topic);
