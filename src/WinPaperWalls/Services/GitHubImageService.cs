@@ -5,7 +5,7 @@ using WinPaperWalls.Models;
 
 namespace WinPaperWalls.Services;
 
-public class GitHubImageService : IGitHubImageService
+internal sealed class GitHubImageService : IGitHubImageService
 {
 	private const string ApiBaseUrl = "https://api.github.com/repos/burkeholland/paper/contents/wallpapers";
 	private const string UserAgent = "WinPaperWalls/1.0";

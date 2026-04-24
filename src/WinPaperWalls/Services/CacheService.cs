@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace WinPaperWalls.Services;
 
-public class CacheService : ICacheService
+internal sealed class CacheService : ICacheService
 {
 	private readonly string _cacheDirectory;
 	private readonly HttpClient _httpClient;

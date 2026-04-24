@@ -2,7 +2,7 @@ using WinPaperWalls.Interop;
 
 namespace WinPaperWalls.Services;
 
-public class DesktopWallpaperService : IDesktopWallpaperService
+internal sealed class DesktopWallpaperService : IDesktopWallpaperService
 {
     public void SetWallpaper(string filePath, WallpaperStyle style)
     {

@@ -3,7 +3,7 @@ using WinPaperWalls.Models;
 
 namespace WinPaperWalls.Services;
 
-public class SettingsService : ISettingsService
+internal sealed class SettingsService : ISettingsService
 {
 	private readonly string _settingsPath;
 	private readonly object _lock = new();

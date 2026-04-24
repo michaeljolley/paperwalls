@@ -340,7 +340,7 @@ public sealed partial class MainWindow : Window
 	}
 }
 
-public class TopicItem : INotifyPropertyChanged
+internal sealed class TopicItem : INotifyPropertyChanged
 {
 	private bool _isSelected;
 

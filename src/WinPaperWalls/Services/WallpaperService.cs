@@ -3,7 +3,7 @@ using WinPaperWalls.Interop;
 
 namespace WinPaperWalls.Services;
 
-public class WallpaperService : IWallpaperService
+internal sealed class WallpaperService : IWallpaperService
 {
 	private const int RecentHistorySize = 20;
 

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace WinPaperWalls.Services;
 
-public class SchedulerService : ISchedulerService, IHostedService
+internal sealed class SchedulerService : ISchedulerService, IHostedService
 {
 	private readonly IWallpaperService _wallpaperService;
 	private readonly ISettingsService _settingsService;

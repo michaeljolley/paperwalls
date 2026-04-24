@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace WinPaperWalls.Services;
 
-public class StartupManager
+internal sealed class StartupManager
 {
 	private const string RegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
 	private const string AppName = "WinPaperWalls";
