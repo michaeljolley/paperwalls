@@ -38,8 +38,8 @@
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            Margin="0,0,0,24" />
 
-                <!-- General Section -->
-                <TextBlock Text="General"
+                <!-- Backgrounds Section -->
+                <TextBlock Text="Backgrounds"
                            Style="{StaticResource SubtitleTextBlockStyle}"
                            Margin="0,0,0,8" />
 
@@ -58,37 +58,6 @@
                               AutomationProperties.Name="Rotation interval" />
                 </controls:SettingsCard>
 
-                <!-- Cache Status -->
-                <controls:SettingsCard
-                    Header="Cache"
-                    Description="{x:Bind ViewModel.CacheSizeText, Mode=OneWay}"
-                    AutomationProperties.AutomationId="SettingsCardCache">
-                    <controls:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE74D;" />
-                    </controls:SettingsCard.HeaderIcon>
-                    <Button Content="Clear cache"
-                            Command="{x:Bind ViewModel.ClearCacheCommand}"
-                            AutomationProperties.AutomationId="ClearCacheButton"
-                            AutomationProperties.Name="Clear wallpaper cache" />
-                </controls:SettingsCard>
-
-                <!-- Cache Max Size -->
-                <controls:SettingsCard
-                    Header="Maximum cache size"
-                    Description="Oldest images are removed when the cache exceeds this limit"
-                    AutomationProperties.AutomationId="SettingsCardCacheMax">
-                    <controls:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xEDA2;" />
-                    </controls:SettingsCard.HeaderIcon>
-                    <NumberBox Value="{x:Bind ViewModel.CacheMaxMB, Mode=TwoWay}"
-                               Minimum="100"
-                               Maximum="2000"
-                               SpinButtonPlacementMode="Inline"
-                               MinWidth="160"
-                               AutomationProperties.AutomationId="CacheMaxNumberBox"
-                               AutomationProperties.Name="Maximum cache size in megabytes" />
-                </controls:SettingsCard>
-
                 <!-- Start with Windows -->
                 <controls:SettingsCard
                     Header="Start with Windows"
@@ -101,11 +70,6 @@
                                   AutomationProperties.AutomationId="StartWithWindowsToggle"
                                   AutomationProperties.Name="Start with Windows" />
                 </controls:SettingsCard>
-
-                <!-- Background Section -->
-                <TextBlock Text="Background"
-                           Style="{StaticResource SubtitleTextBlockStyle}"
-                           Margin="0,24,0,8" />
 
                 <!-- Wallpaper Style -->
                 <controls:SettingsCard
@@ -186,6 +150,42 @@
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
+
+                <!-- Diagnostics Section -->
+                <TextBlock Text="Diagnostics"
+                           Style="{StaticResource SubtitleTextBlockStyle}"
+                           Margin="0,24,0,8" />
+
+                <!-- Cache Status -->
+                <controls:SettingsCard
+                    Header="Cache"
+                    Description="{x:Bind ViewModel.CacheSizeText, Mode=OneWay}"
+                    AutomationProperties.AutomationId="SettingsCardCache">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE74D;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <Button Content="Clear cache"
+                            Command="{x:Bind ViewModel.ClearCacheCommand}"
+                            AutomationProperties.AutomationId="ClearCacheButton"
+                            AutomationProperties.Name="Clear wallpaper cache" />
+                </controls:SettingsCard>
+
+                <!-- Cache Max Size -->
+                <controls:SettingsCard
+                    Header="Maximum cache size"
+                    Description="Oldest images are removed when the cache exceeds this limit"
+                    AutomationProperties.AutomationId="SettingsCardCacheMax">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xEDA2;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <NumberBox Value="{x:Bind ViewModel.CacheMaxMB, Mode=TwoWay}"
+                               Minimum="100"
+                               Maximum="2000"
+                               SpinButtonPlacementMode="Inline"
+                               MinWidth="160"
+                               AutomationProperties.AutomationId="CacheMaxNumberBox"
+                               AutomationProperties.Name="Maximum cache size in megabytes" />
+                </controls:SettingsCard>
 
                 <!-- Save -->
                 <Button Content="Save settings"
