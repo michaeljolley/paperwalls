@@ -13,25 +13,20 @@ build something great together.
 ### Prerequisites
 
 - Windows 10 (build 1809) or later
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - Visual Studio 2022 (version 17.8+) or later with the following workloads:
   - .NET desktop development
   - Windows App SDK
-- [Windows App SDK 1.6+](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads-and-tools)
+- [Windows App SDK 1.8+](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads-and-tools)
 
 ### Building and Testing
 
 ```bash
-dotnet restore
-dotnet build
-dotnet test
+dotnet build win-paperwalls.slnx
+dotnet test win-paperwalls.slnx
 ```
 
-To run the application:
-
-```bash
-dotnet run --project src/WinPaperWalls/WinPaperWalls.csproj
-```
+To run the app, open `win-paperwalls.slnx` in Visual Studio and press F5, or build and run the output .exe directly.
 
 ## How to Contribute
 
@@ -93,14 +88,24 @@ src/WinPaperWalls/
 ├── Assets/              # App icons (logo.png, logo.ico)
 ├── Interop/             # Win32 P/Invoke for wallpaper setting
 ├── Models/              # Data models (AppSettings, WallpaperImage)
-├── Services/            # Business logic (Settings, GitHub, Cache, Wallpaper, Scheduler, DesktopWallpaper, Startup)
-├── App.xaml.cs          # App entry, DI host, single-instance mutex
+├── Services/            # Business logic (Settings, GitHub, Cache, Wallpaper, Scheduler, DesktopWallpaper, Startup, LogBundleService)
+├── App.xaml.cs          # App entry, DI host, single-instance mutex, system tray icon via WinUIEx
 ├── MainWindow.xaml      # Settings window
-├── TrayIconView.xaml    # System tray icon and context menu
+├── Package.appxmanifest # MSIX packaging manifest
+├── Properties/
+│   └── AssemblyInfo.cs  # InternalsVisibleTo declarations
 └── WinPaperWalls.csproj
 
-tests/WinPaperWalls.Tests/  # Unit tests (xunit + NSubstitute + FluentAssertions)
+tests/WinPaperWalls.Tests/  # Unit tests (xunit + NSubstitute + FluentAssertions) — 48 tests
 ```
+
+## Architecture Notes
+
+- All service classes are `internal sealed` — public API surface is minimal
+- The app uses [Serilog](https://serilog.net/) for structured file logging with daily rotation
+- Logs are stored in `%LocalAppData%\WinPaperWalls\logs\`
+- The system tray icon is managed via [WinUIEx](https://github.com/dotMorten/WinUIEx) TrayIcon in `App.xaml.cs`
+- MSIX packaging is configured via `Package.appxmanifest`
 
 ## License
 
