@@ -1,22 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap7="http://schemas.microsoft.com/appx/manifest/uap/windows10/7"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap uap3 rescap">
 
   <Identity
-    Name="BaldBeardedBuilder.WinPaperWalls"
+	Name="BaldBeardedBuilder.WinPaperWalls"
 	Publisher="CN=Bald Bearded Builder LLC, O=Bald Bearded Builder LLC, L=Odenville, S=Alabama, C=US"
-    Version="1.0.0.0" />
-
-  <mp:PhoneIdentity PhoneProductId="d4e8f5a0-1b2c-4d6e-9f0a-1b2c3d4e5f6a"
-                    PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+	Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>PaperWalls</DisplayName>
-    <PublisherDisplayName>BaldBeardedBuilder</PublisherDisplayName>
+    <PublisherDisplayName>Bald Bearded Builder</PublisherDisplayName>
     <Logo>Assets\logo.png</Logo>
   </Properties>
 
