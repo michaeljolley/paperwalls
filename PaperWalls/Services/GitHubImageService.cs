@@ -198,49 +198,49 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 2000, Level = LogLevel.Debug, Message = "Returning cached topics")]
-	private partial void LogReturningCachedTopics();
+	partial void LogReturningCachedTopics();
 
 	[LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Fetching topics from GitHub")]
-	private partial void LogFetchingTopicsFromGitHub();
+	partial void LogFetchingTopicsFromGitHub();
 
 	[LoggerMessage(EventId = 2002, Level = LogLevel.Warning, Message = "GitHub API returned null response")]
-	private partial void LogGitHubApiReturnedNull();
+	partial void LogGitHubApiReturnedNull();
 
 	[LoggerMessage(EventId = 2003, Level = LogLevel.Information, Message = "Fetched {Count} topics (filtered to {FilteredCount})")]
-	private partial void LogFetchedTopics(int count, int filteredCount);
+	partial void LogFetchedTopics(int count, int filteredCount);
 
 	[LoggerMessage(EventId = 2004, Level = LogLevel.Error, Message = "Failed to fetch topics from GitHub")]
-	private partial void LogFailedToFetchTopics(Exception ex);
+	partial void LogFailedToFetchTopics(Exception ex);
 
 	[LoggerMessage(EventId = 2005, Level = LogLevel.Warning, Message = "Returning stale cached topics due to error")]
-	private partial void LogReturningStaleCachedTopics();
+	partial void LogReturningStaleCachedTopics();
 
 	[LoggerMessage(EventId = 2006, Level = LogLevel.Debug, Message = "Returning cached images for topic {Topic}")]
-	private partial void LogReturningCachedImages(string topic);
+	partial void LogReturningCachedImages(string topic);
 
 	[LoggerMessage(EventId = 2007, Level = LogLevel.Information, Message = "Fetching images for topic {Topic} from GitHub")]
-	private partial void LogFetchingImagesForTopic(string topic);
+	partial void LogFetchingImagesForTopic(string topic);
 
 	[LoggerMessage(EventId = 2008, Level = LogLevel.Warning, Message = "GitHub API returned null response for topic {Topic}")]
-	private partial void LogGitHubApiReturnedNullForTopic(string topic);
+	partial void LogGitHubApiReturnedNullForTopic(string topic);
 
 	[LoggerMessage(EventId = 2009, Level = LogLevel.Information, Message = "Fetched {Count} images for topic {Topic}")]
-	private partial void LogFetchedImages(int count, string topic);
+	partial void LogFetchedImages(int count, string topic);
 
 	[LoggerMessage(EventId = 2010, Level = LogLevel.Error, Message = "Failed to fetch images for topic {Topic} from GitHub")]
-	private partial void LogFailedToFetchImages(Exception ex, string topic);
+	partial void LogFailedToFetchImages(Exception ex, string topic);
 
 	[LoggerMessage(EventId = 2011, Level = LogLevel.Warning, Message = "Returning stale cached images for topic {Topic} due to error")]
-	private partial void LogReturningStaleCachedImages(string topic);
+	partial void LogReturningStaleCachedImages(string topic);
 
 	[LoggerMessage(EventId = 2012, Level = LogLevel.Debug, Message = "GitHub API rate limit remaining: {Remaining}")]
-	private partial void LogGitHubApiRateLimit(int remaining);
+	partial void LogGitHubApiRateLimit(int remaining);
 
 	[LoggerMessage(EventId = 2013, Level = LogLevel.Warning, Message = "GitHub API rate limit running low: {Remaining} requests remaining")]
-	private partial void LogGitHubApiRateLimitRunningLow(int remaining);
+	partial void LogGitHubApiRateLimitRunningLow(int remaining);
 
 	[LoggerMessage(EventId = 2014, Level = LogLevel.Error, Message = "GitHub API rate limit exceeded. Resets at {ResetTime}")]
-	private partial void LogGitHubApiRateLimitExceeded(DateTimeOffset resetTime);
+	partial void LogGitHubApiRateLimitExceeded(DateTimeOffset resetTime);
 
 	private class GitHubContentItem
 	{

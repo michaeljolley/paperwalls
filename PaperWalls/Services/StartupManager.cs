@@ -84,17 +84,17 @@ public sealed partial class StartupManager
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 5000, Level = LogLevel.Error, Message = "Failed to open registry key for startup configuration")]
-	private partial void LogFailedToOpenRegistryKey();
+	partial void LogFailedToOpenRegistryKey();
 
 	[LoggerMessage(EventId = 5001, Level = LogLevel.Information, Message = "Added application to Windows startup: {ExePath}")]
-	private partial void LogAddedToWindowsStartup(string exePath);
+	partial void LogAddedToWindowsStartup(string exePath);
 
 	[LoggerMessage(EventId = 5002, Level = LogLevel.Information, Message = "Removed application from Windows startup")]
-	private partial void LogRemovedFromWindowsStartup();
+	partial void LogRemovedFromWindowsStartup();
 
 	[LoggerMessage(EventId = 5003, Level = LogLevel.Error, Message = "Failed to configure Windows startup")]
-	private partial void LogFailedToConfigureWindowsStartup(Exception ex);
+	partial void LogFailedToConfigureWindowsStartup(Exception ex);
 
 	[LoggerMessage(EventId = 5004, Level = LogLevel.Error, Message = "Failed to check Windows startup status")]
-	private partial void LogFailedToCheckWindowsStartupStatus(Exception ex);
+	partial void LogFailedToCheckWindowsStartupStatus(Exception ex);
 }

@@ -63,14 +63,14 @@ internal sealed partial class LogBundleService : ILogBundleService
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 6000, Level = LogLevel.Warning, Message = "Logs directory does not exist: {LogsDirectory}")]
-	private partial void LogLogsDirectoryDoesNotExist(string logsDirectory);
+	partial void LogLogsDirectoryDoesNotExist(string logsDirectory);
 
 	[LoggerMessage(EventId = 6001, Level = LogLevel.Warning, Message = "No log files found in {LogsDirectory}")]
-	private partial void LogNoLogFilesFound(string logsDirectory);
+	partial void LogNoLogFilesFound(string logsDirectory);
 
 	[LoggerMessage(EventId = 6002, Level = LogLevel.Warning, Message = "Failed to include log file in bug report: {LogFile}")]
-	private partial void LogFailedToIncludeLogFile(Exception ex, string logFile);
+	partial void LogFailedToIncludeLogFile(Exception ex, string logFile);
 
 	[LoggerMessage(EventId = 6003, Level = LogLevel.Information, Message = "Bug report created at {ZipPath}")]
-	private partial void LogBugReportCreated(string zipPath);
+	partial void LogBugReportCreated(string zipPath);
 }

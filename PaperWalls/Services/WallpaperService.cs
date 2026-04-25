@@ -170,38 +170,38 @@ internal sealed partial class WallpaperService : IWallpaperService
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 4000, Level = LogLevel.Information, Message = "Starting wallpaper change")]
-	private partial void LogStartingWallpaperChange();
+	partial void LogStartingWallpaperChange();
 
 	[LoggerMessage(EventId = 4001, Level = LogLevel.Warning, Message = "No topics available after filtering")]
-	private partial void LogNoTopicsAvailable();
+	partial void LogNoTopicsAvailable();
 
 	[LoggerMessage(EventId = 4002, Level = LogLevel.Debug, Message = "Selected topic: {Topic} (attempt {Attempt})")]
-	private partial void LogSelectedTopic(string topic, int attempt);
+	partial void LogSelectedTopic(string topic, int attempt);
 
 	[LoggerMessage(EventId = 4003, Level = LogLevel.Warning, Message = "No images found in topic {Topic}")]
-	private partial void LogNoImagesFoundInTopic(string topic);
+	partial void LogNoImagesFoundInTopic(string topic);
 
 	[LoggerMessage(EventId = 4004, Level = LogLevel.Debug, Message = "All images in topic {Topic} were recently used")]
-	private partial void LogAllImagesRecentlyUsed(string topic);
+	partial void LogAllImagesRecentlyUsed(string topic);
 
 	[LoggerMessage(EventId = 4005, Level = LogLevel.Information, Message = "Selected image: {FileName} from topic {Topic}")]
-	private partial void LogSelectedImage(string fileName, string topic);
+	partial void LogSelectedImage(string fileName, string topic);
 
 	[LoggerMessage(EventId = 4006, Level = LogLevel.Information, Message = "Cache size ({CurrentMB} MB) exceeds limit ({MaxMB} MB), evicting oldest files")]
-	private partial void LogCacheSizeExceedsLimit(long currentMB, int maxMB);
+	partial void LogCacheSizeExceedsLimit(long currentMB, int maxMB);
 
 	[LoggerMessage(EventId = 4007, Level = LogLevel.Error, Message = "Failed to download image {FileName}")]
-	private partial void LogFailedToDownloadImage(Exception ex, string fileName);
+	partial void LogFailedToDownloadImage(Exception ex, string fileName);
 
 	[LoggerMessage(EventId = 4008, Level = LogLevel.Error, Message = "Failed to find and download a suitable wallpaper after {Attempts} attempts")]
-	private partial void LogFailedToFindSuitableWallpaper(int attempts);
+	partial void LogFailedToFindSuitableWallpaper(int attempts);
 
 	[LoggerMessage(EventId = 4009, Level = LogLevel.Warning, Message = "Invalid wallpaper style {Style}, using Fill")]
-	private partial void LogInvalidWallpaperStyle(string style);
+	partial void LogInvalidWallpaperStyle(string style);
 
 	[LoggerMessage(EventId = 4010, Level = LogLevel.Information, Message = "Successfully changed wallpaper to {Path} with style {Style}")]
-	private partial void LogSuccessfullyChangedWallpaper(string path, WallpaperStyle style);
+	partial void LogSuccessfullyChangedWallpaper(string path, WallpaperStyle style);
 
 	[LoggerMessage(EventId = 4011, Level = LogLevel.Error, Message = "Failed to change wallpaper")]
-	private partial void LogFailedToChangeWallpaper(Exception ex);
+	partial void LogFailedToChangeWallpaper(Exception ex);
 }

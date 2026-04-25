@@ -291,7 +291,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 7000, Level = LogLevel.Error, Message = "Failed to load topics from GitHub")]
-	private partial void LogFailedToLoadTopics(Exception ex);
+	partial void LogFailedToLoadTopics(Exception ex);
 
 	private sealed class GitHubContentItem
 	{

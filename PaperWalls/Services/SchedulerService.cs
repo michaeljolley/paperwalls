@@ -173,38 +173,38 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 3000, Level = LogLevel.Information, Message = "Scheduler service starting")]
-	private partial void LogSchedulerServiceStarting();
+	partial void LogSchedulerServiceStarting();
 
 	[LoggerMessage(EventId = 3001, Level = LogLevel.Error, Message = "Failed to change wallpaper on startup")]
-	private partial void LogFailedToChangeWallpaperOnStartup(Exception ex);
+	partial void LogFailedToChangeWallpaperOnStartup(Exception ex);
 
 	[LoggerMessage(EventId = 3002, Level = LogLevel.Information, Message = "Scheduler started with interval of {IntervalMinutes} minutes")]
-	private partial void LogSchedulerStarted(int intervalMinutes);
+	partial void LogSchedulerStarted(int intervalMinutes);
 
 	[LoggerMessage(EventId = 3003, Level = LogLevel.Information, Message = "Scheduler service stopping")]
-	private partial void LogSchedulerServiceStopping();
+	partial void LogSchedulerServiceStopping();
 
 	[LoggerMessage(EventId = 3004, Level = LogLevel.Error, Message = "Error during scheduler shutdown")]
-	private partial void LogErrorDuringSchedulerShutdown(Exception ex);
+	partial void LogErrorDuringSchedulerShutdown(Exception ex);
 
 	[LoggerMessage(EventId = 3005, Level = LogLevel.Information, Message = "Scheduler service stopped")]
-	private partial void LogSchedulerServiceStopped();
+	partial void LogSchedulerServiceStopped();
 
 	[LoggerMessage(EventId = 3006, Level = LogLevel.Information, Message = "Timer tick - changing wallpaper")]
-	private partial void LogTimerTick();
+	partial void LogTimerTick();
 
 	[LoggerMessage(EventId = 3007, Level = LogLevel.Error, Message = "Error during scheduled wallpaper change")]
-	private partial void LogErrorDuringScheduledWallpaperChange(Exception ex);
+	partial void LogErrorDuringScheduledWallpaperChange(Exception ex);
 
 	[LoggerMessage(EventId = 3008, Level = LogLevel.Debug, Message = "Timer task cancelled")]
-	private partial void LogTimerTaskCancelled();
+	partial void LogTimerTaskCancelled();
 
 	[LoggerMessage(EventId = 3009, Level = LogLevel.Information, Message = "Settings changed - restarting timer with interval of {IntervalMinutes} minutes")]
-	private partial void LogSettingsChangedRestartingTimer(int intervalMinutes);
+	partial void LogSettingsChangedRestartingTimer(int intervalMinutes);
 
 	[LoggerMessage(EventId = 3010, Level = LogLevel.Information, Message = "Timer restarted successfully")]
-	private partial void LogTimerRestartedSuccessfully();
+	partial void LogTimerRestartedSuccessfully();
 
 	[LoggerMessage(EventId = 3011, Level = LogLevel.Error, Message = "Error restarting timer after settings change")]
-	private partial void LogErrorRestartingTimerAfterSettingsChange(Exception ex);
+	partial void LogErrorRestartingTimerAfterSettingsChange(Exception ex);
 }
