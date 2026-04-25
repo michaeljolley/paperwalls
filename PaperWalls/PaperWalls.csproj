@@ -77,7 +77,7 @@
 		<CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
 		<CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
 		<!-- Suppress DynamicallyAccessedMemberTypes.PublicParameterlessConstructor in fallback code path of Windows SDK projection -->
-		<WarningsNotAsErrors>IL2081</WarningsNotAsErrors>
+		<WarningsNotAsErrors>IL2081;IL2104</WarningsNotAsErrors>
 
 		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
