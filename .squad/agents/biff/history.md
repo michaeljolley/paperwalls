@@ -13,13 +13,13 @@
 
 **Solution Structure:**
 - `win-paperwalls.sln` - Main solution file at repo root
-- `src/WinPaperWalls/` - Unpackaged WinUI 3 app (net9.0-windows10.0.19041.0)
-- `tests/WinPaperWalls.Tests/` - xUnit test project (created but not in solution yet)
+- `src/PaperWalls/` - Unpackaged WinUI 3 app (net9.0-windows10.0.19041.0)
+- `tests/PaperWalls.Tests/` - xUnit test project (created but not in solution yet)
 
 **Core Components Built:**
-1. **App.xaml.cs** - Generic host pattern with `Microsoft.Extensions.Hosting`, single-instance mutex (`WinPaperWalls_SingleInstance`)
+1. **App.xaml.cs** - Generic host pattern with `Microsoft.Extensions.Hosting`, single-instance mutex (`PaperWalls_SingleInstance`)
 2. **Models/** - `AppSettings`, `WallpaperTopic`, `WallpaperImage`
-3. **Services/SettingsService** - Thread-safe JSON persistence to `%LOCALAPPDATA%\WinPaperWalls\settings.json`, fires `SettingsChanged` event
+3. **Services/SettingsService** - Thread-safe JSON persistence to `%LOCALAPPDATA%\PaperWalls\settings.json`, fires `SettingsChanged` event
 4. **Interop/DesktopWallpaper** - P/Invoke wrapper for `SystemParametersInfo`, supports Fill/Fit/Stretch/Tile/Center/Span via registry keys
 
 **DI Container:**
@@ -53,11 +53,11 @@
   - In-memory caching with 1-hour expiry to minimize API calls
   - Rate limit tracking via `X-RateLimit-Remaining` header with warnings at <10 requests
   - Filters topics by `AppSettings.ExcludedTopics`
-  - Sets `User-Agent: WinPaperWalls/1.0` header (required by GitHub API)
+  - Sets `User-Agent: PaperWalls/1.0` header (required by GitHub API)
   - Graceful fallback to stale cache on network errors
 
 **Cache Management:**
-- **CacheService** - LRU cache in `%LOCALAPPDATA%\WinPaperWalls\cache\`
+- **CacheService** - LRU cache in `%LOCALAPPDATA%\PaperWalls\cache\`
   - `DownloadImageAsync()` - Downloads and caches images, updates last access time
   - `GetCachedImagePath()` - Returns path if cached
   - `GetCacheSizeBytes()` - Calculates total cache size
@@ -244,7 +244,7 @@ Marty (Phase 4) built the complete settings window UI with all configuration opt
 Jennifer's comprehensive unit tests (40+ test cases) uncovered three testability issues preventing 11 tests from passing:
 
 **Issue 1: CacheService Directory Not Injectable**
-- Problem: _cacheDirectory hardcoded to %LOCALAPPDATA%\WinPaperWalls\cache
+- Problem: _cacheDirectory hardcoded to %LOCALAPPDATA%\PaperWalls\cache
 - Tests writing to temp directory but EvictOldestAsync/ClearCacheAsync operated on wrong location
 - Fix: Added optional cacheDirectory parameter to constructor
   - Production code: 
@@ -279,7 +279,7 @@ ull defaults to %LOCALAPPDATA% path
 Any code that touches external state (file system, registry, OS APIs) should be injectable. This allows tests to verify logic without side effects.
 
 **Build Status:**
-- Main project (src/WinPaperWalls/WinPaperWalls.csproj): ✅ Builds successfully
+- Main project (src/PaperWalls/PaperWalls.csproj): ✅ Builds successfully
 - Test project: Expected errors (Jennifer will update test mocks to match new signatures)
 - Zero breaking changes to public APIs or production behavior
 

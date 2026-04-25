@@ -13,7 +13,7 @@ Only the latest release receives security updates.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, use [GitHub's private vulnerability reporting](https://github.com/michaeljolley/win-paperwalls/security/advisories/new) to submit a report.
+Instead, use [GitHub's private vulnerability reporting](https://github.com/michaeljolley/paperwalls/security/advisories/new) to submit a report.
 
 Please include:
 

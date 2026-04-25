@@ -1,0 +1,9 @@
+<Solution>
+    <Project Path="PaperWalls/PaperWalls.csproj">
+      <Platform Project="x64" />
+      <Deploy Solution="Debug|*" />
+    </Project>
+    <Project Path="PaperWalls.Tests/PaperWalls.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+</Solution>

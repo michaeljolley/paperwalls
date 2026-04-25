@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/WinPaperWalls/Assets/logo.png" alt="WinPaperWalls" width="128" />
+  <img src="src/PaperWalls/Assets/logo.png" alt="PaperWalls" width="128" />
 </p>
 
 # PaperWalls
@@ -14,7 +14,7 @@ A Windows desktop application that automatically rotates your desktop wallpaper 
 - **System Tray Integration:** Runs minimized in the system tray with quick access to settings and manual wallpaper changes
 - **Start with Windows:** Optional automatic startup when Windows boots
 - **Wallpaper Styles:** Support for Fill, Fit, Stretch, Tile, Center, and Span display modes
-- **File Logging:** Serilog-based file logging with daily rotation (14-day retention) to `%LocalAppData%\WinPaperWalls\logs\`
+- **File Logging:** Serilog-based file logging with daily rotation (14-day retention) to `%LocalAppData%\PaperWalls\logs\`
 - **Bug Reporting:** One-click bug report from the tray menu — zips all logs to your Desktop
 
 ## Tech Stack
@@ -45,25 +45,25 @@ A Windows desktop application that automatically rotates your desktop wallpaper 
 
 ```bash
 # Clone the repository
-git clone https://github.com/michaeljolley/win-paperwalls.git
-cd win-paperwalls
+git clone https://github.com/michaeljolley/paperwalls.git
+cd paperwalls
 
 # Build
-dotnet build win-paperwalls.slnx
+dotnet build PaperWalls.slnx
 
 # Test
-dotnet test win-paperwalls.slnx
+dotnet test PaperWalls.slnx
 ```
 
 ### Visual Studio
 
-1. Open `win-paperwalls.slnx` in Visual Studio 2022
+1. Open `PaperWalls.slnx` in Visual Studio 2022
 2. Right-click the solution in Solution Explorer and select "Restore NuGet Packages"
 3. Press F5 to build and run
 
 ## Configuration
 
-Settings are stored in: `%LocalAppData%\WinPaperWalls\settings.json`
+Settings are stored in: `%LocalAppData%\PaperWalls\settings.json`
 
 The application provides a graphical settings UI accessible from the system tray icon. You can configure:
 
@@ -75,7 +75,7 @@ The application provides a graphical settings UI accessible from the system tray
 
 ## Usage
 
-1. Launch WinPaperWalls - it will minimize to the system tray
+1. Launch PaperWalls - it will minimize to the system tray
 2. Right-click the tray icon to access:
    - **Refresh PaperWall:** Immediately change to a new random wallpaper
    - **Settings:** Open the settings window to configure the application
@@ -85,7 +85,7 @@ The application provides a graphical settings UI accessible from the system tray
 
 ## Cache Management
 
-Downloaded wallpapers are cached in: `%LocalAppData%\WinPaperWalls\cache`
+Downloaded wallpapers are cached in: `%LocalAppData%\PaperWalls\cache`
 
 The cache uses a Least Recently Used (LRU) eviction strategy when it exceeds the configured size limit. You can manually clear the cache from the Settings window.
 
@@ -101,7 +101,7 @@ The cache uses a Least Recently Used (LRU) eviction strategy when it exceeds the
 ## Testing
 
 ```bash
-dotnet test win-paperwalls.slnx
+dotnet test PaperWalls.slnx
 ```
 
 48 xUnit tests covering services, models, and edge cases.

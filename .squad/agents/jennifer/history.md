@@ -35,7 +35,7 @@ The tests are well-written and comprehensive, but encounter a known build issue 
 
 **Resolution Options (per decisions.md):**
 1. Run tests in Visual Studio (has required build tools)
-2. Refactor services into separate class library (src/WinPaperWalls.Core/) that tests can reference directly
+2. Refactor services into separate class library (src/PaperWalls.Core/) that tests can reference directly
 3. Keep tests excluded from CI build until refactoring
 
 **Key Testing Patterns Used:**

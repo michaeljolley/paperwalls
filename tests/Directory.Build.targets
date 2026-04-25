@@ -1,7 +1,0 @@
-<Project>
-  <!-- Override WinAppSDK PRI generation targets that fail in test projects without full VS tooling -->
-  <Target Name="_ExpandPriContent" />
-  <Target Name="_GenerateProjectPriFile" />
-  <Target Name="_GenerateProjectPriConfigFile" />
-  <Target Name="_MrtCorePriGen" />
-</Project>

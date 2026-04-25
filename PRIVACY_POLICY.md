@@ -1,12 +1,12 @@
 # Privacy Policy
 
-**WinPaperWalls**
+**PaperWalls**
 
-*Last updated: January 2025*
+*Last updated: April 2026*
 
 ## Overview
 
-WinPaperWalls is an open-source Windows desktop application that automatically
+PaperWalls is an open-source Windows desktop application that automatically
 rotates your desktop wallpaper with 4K images from a public image repository.
 Your privacy is important to us, and this application is designed with that in
 mind.
@@ -38,7 +38,7 @@ for details on how they handle API requests.
 
 Settings you configure (such as rotation interval and enabled/disabled state)
 and cached images are stored locally on your device in
-`%LocalAppData%\WinPaperWalls\` and are never transmitted externally.
+`%LocalAppData%\PaperWalls\` and are never transmitted externally.
 
 ## Changes to This Policy
 
@@ -48,4 +48,4 @@ repository.
 ## Contact
 
 If you have questions about this privacy policy, please open an issue on the
-[GitHub repository](https://github.com/michaeljolley/win-paperwalls).
+[GitHub repository](https://github.com/michaeljolley/paperwalls).

@@ -1,6 +1,6 @@
-# Contributing to WinPaperWalls
+# Contributing to PaperWalls
 
-Thank you for your interest in contributing to WinPaperWalls! This guide will
+Thank you for your interest in contributing to PaperWalls! This guide will
 help you get started.
 
 ## Code of Conduct
@@ -22,17 +22,17 @@ build something great together.
 ### Building and Testing
 
 ```bash
-dotnet build win-paperwalls.slnx
-dotnet test win-paperwalls.slnx
+dotnet build PaperWalls.slnx
+dotnet test PaperWalls.slnx
 ```
 
-To run the app, open `win-paperwalls.slnx` in Visual Studio and press F5, or build and run the output .exe directly.
+To run the app, open `PaperWalls.slnx` in Visual Studio and press F5, or build and run the output .exe directly.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-- Search [existing issues](https://github.com/michaeljolley/win-paperwalls/issues)
+- Search [existing issues](https://github.com/michaeljolley/paperwalls/issues)
   before opening a new one
 - Include steps to reproduce, expected behavior, and actual behavior
 - Screenshots are very helpful for UI issues
@@ -84,7 +84,7 @@ Common types:
 ## Project Structure
 
 ```
-src/WinPaperWalls/
+PaperWalls/
 ├── Assets/              # App icons (logo.png, logo.ico)
 ├── Interop/             # Win32 P/Invoke for wallpaper setting
 ├── Models/              # Data models (AppSettings, WallpaperImage)
@@ -94,16 +94,16 @@ src/WinPaperWalls/
 ├── Package.appxmanifest # MSIX packaging manifest
 ├── Properties/
 │   └── AssemblyInfo.cs  # InternalsVisibleTo declarations
-└── WinPaperWalls.csproj
+└── PaperWalls.csproj
 
-tests/WinPaperWalls.Tests/  # Unit tests (xunit + NSubstitute + FluentAssertions) — 48 tests
+PaperWalls.Tests/  # Unit tests (xunit + NSubstitute + FluentAssertions) — 48 tests
 ```
 
 ## Architecture Notes
 
 - All service classes are `internal sealed` — public API surface is minimal
 - The app uses [Serilog](https://serilog.net/) for structured file logging with daily rotation
-- Logs are stored in `%LocalAppData%\WinPaperWalls\logs\`
+- Logs are stored in `%LocalAppData%\PaperWalls\logs\`
 - The system tray icon is managed via [WinUIEx](https://github.com/dotMorten/WinUIEx) TrayIcon in `App.xaml.cs`
 - MSIX packaging is configured via `Package.appxmanifest`
 

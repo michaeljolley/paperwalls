@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "PaperWalls (Package)": {
+      "commandName": "MsixPackage"
+    }
+  }
+}

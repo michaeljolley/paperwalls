@@ -41,7 +41,7 @@ jobs:
       - name: Update Package.appxmanifest version
         shell: pwsh
         run: |
-          $manifestPath = "src/WinPaperWalls/Package.appxmanifest"
+          $manifestPath = "PaperWalls/Package.appxmanifest"
           $version = "${{ steps.version.outputs.version }}"
           
           [xml]$manifest = Get-Content $manifestPath
@@ -52,29 +52,29 @@ jobs:
       
       - name: Restore dependencies
         run: |
-          dotnet restore src/WinPaperWalls/WinPaperWalls.csproj -r win-x64
-          dotnet restore tests/WinPaperWalls.Tests/WinPaperWalls.Tests.csproj -r win-x64
+          dotnet restore PaperWalls/PaperWalls.csproj -r win-x64
+          dotnet restore PaperWalls.Tests/PaperWalls.Tests.csproj -r win-x64
       
       - name: Build x64
-        run: dotnet build src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-x64 --no-restore
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release -r win-x64 --no-restore
       
       - name: Build ARM64
-        run: dotnet build src/WinPaperWalls/WinPaperWalls.csproj -c Release -r win-arm64
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release -r win-arm64
 
       - name: Build tests
-        run: dotnet build tests/WinPaperWalls.Tests/WinPaperWalls.Tests.csproj -c Release -r win-x64 --no-restore
+        run: dotnet build PaperWalls.Tests/PaperWalls.Tests.csproj -c Release -r win-x64 --no-restore
       
       - name: Run tests
-        run: dotnet test tests/WinPaperWalls.Tests/WinPaperWalls.Tests.csproj -c Release -r win-x64 --no-build
+        run: dotnet test PaperWalls.Tests/PaperWalls.Tests.csproj -c Release -r win-x64 --no-build
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
           name: build-output
           path: |
-            src/WinPaperWalls/bin/
-            src/WinPaperWalls/obj/
-            src/WinPaperWalls/Package.appxmanifest
+            PaperWalls/bin/
+            PaperWalls/obj/
+            PaperWalls/Package.appxmanifest
           retention-days: 1
 
   package:
@@ -98,7 +98,7 @@ jobs:
       - name: Update Package.appxmanifest version
         shell: pwsh
         run: |
-          $manifestPath = "src/WinPaperWalls/Package.appxmanifest"
+          $manifestPath = "PaperWalls/Package.appxmanifest"
           $version = "${{ needs.build-and-test.outputs.version }}"
 
           [xml]$manifest = Get-Content $manifestPath
@@ -108,18 +108,18 @@ jobs:
           Write-Host "Updated Package.appxmanifest to version $version"
 
       - name: Restore dependencies
-        run: dotnet restore win-paperwalls.slnx
+        run: dotnet restore PaperWalls.slnx
       
       - name: Publish x64 MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=x64
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=ARM64
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
@@ -135,7 +135,7 @@ jobs:
       #     endpoint: https://eus.codesigning.azure.net/
       #     signing-account-name: bbb-signing
       #     certificate-profile-name: BaldBeardedBuilder
-      #     files-folder: ${{ github.workspace }}\src\WinPaperWalls
+      #     files-folder: ${{ github.workspace }}\PaperWalls
       #     files-folder-filter: msix
       #     files-folder-recurse: false
       #     file-digest: SHA256
@@ -145,7 +145,7 @@ jobs:
       # - name: Verify MSIX signatures
       #   shell: pwsh
       #   run: |
-      #     $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+      #     $msixFiles = Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse
 
       #     if ($msixFiles.Count -eq 0) {
       #       Write-Error "No MSIX bundles found!"
@@ -169,7 +169,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: msix-packages
-          path: src/WinPaperWalls/**/*.msix
+          path: PaperWalls/**/*.msix
           retention-days: 7
 
       - name: Upload MSIX packages to GitHub Release
@@ -177,7 +177,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse
           
           foreach ($file in $msixFiles) {
             Write-Host "Uploading $($file.Name) to release..."
@@ -189,15 +189,15 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Removing sideload MSIX packages before Store build..."
-          Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse | Remove-Item -Force
-          if (Test-Path "src/WinPaperWalls/AppPackages") {
-            Remove-Item -Path "src/WinPaperWalls/AppPackages" -Recurse -Force
+          Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse | Remove-Item -Force
+          if (Test-Path "PaperWalls/AppPackages") {
+            Remove-Item -Path "PaperWalls/AppPackages" -Recurse -Force
           }
 
       - name: Patch manifest with Store publisher identity
         shell: pwsh
         run: |
-          $manifestPath = "src/WinPaperWalls/Package.appxmanifest"
+          $manifestPath = "PaperWalls/Package.appxmanifest"
           $storePublisher = "${{ secrets.STORE_PUBLISHER_NAME }}"
 
           [xml]$manifest = Get-Content $manifestPath
@@ -208,14 +208,14 @@ jobs:
 
       - name: Publish x64 Store MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=x64
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 Store MSIX
         run: >
-          dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=ARM64
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
@@ -224,7 +224,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse
           foreach ($file in $msixFiles) {
             Write-Host "Copying $($file.Name) to store-packages/"
             Copy-Item $file.FullName -Destination "store-packages/$($file.Name)"
@@ -248,7 +248,7 @@ jobs:
       - name: Update Package.appxmanifest for Store
         shell: pwsh
         run: |
-          $manifestPath = "src/WinPaperWalls/Package.appxmanifest"
+          $manifestPath = "PaperWalls/Package.appxmanifest"
           $version = "${{ needs.build-and-test.outputs.version }}"
           $storePublisher = "${{ secrets.STORE_PUBLISHER_NAME }}"
 
@@ -288,4 +288,4 @@ jobs:
       - name: Submit to Microsoft Store
         shell: pwsh
         run: |
-          msstore publish src/WinPaperWalls -i msix-packages -nc -id "${{ secrets.STORE_PRODUCT_ID }}"
+          msstore publish PaperWalls -i msix-packages -nc -id "${{ secrets.STORE_PRODUCT_ID }}"

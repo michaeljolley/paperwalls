@@ -7,12 +7,12 @@
 **Status:** Under Review  
 **Authors:** Biff, Jennifer  
 
-The test project (`tests/WinPaperWalls.Tests/`) encounters build conflicts when referencing the main WinUI 3 project. The WindowsAppSDK build targets expect Visual Studio build tools that aren't available in the .NET SDK alone (specifically MrtCore.PriGen.targets for PRI resource generation).
+The test project (`tests/PaperWalls.Tests/`) encounters build conflicts when referencing the main WinUI 3 project. The WindowsAppSDK build targets expect Visual Studio build tools that aren't available in the .NET SDK alone (specifically MrtCore.PriGen.targets for PRI resource generation).
 
 **Update (Jennifer, 2026-04-24):** Comprehensive unit tests have been written for all services and models (40+ test cases covering happy paths, error handling, edge cases, thread safety). Tests are production-ready but cannot build via `dotnet build` due to this infrastructure issue.
 
 **Options:**
-1. **Recommended:** Extract services into a separate class library (`src/WinPaperWalls.Core/`) for models and services; main WinUI app references Core, test project references Core only
+1. **Recommended:** Extract services into a separate class library (`src/PaperWalls.Core/`) for models and services; main WinUI app references Core, test project references Core only
 2. **Alternative:** Keep test project excluded from solution build; manual testing only until refactoring
 3. **Short-term:** Run tests in Visual Studio (has required build tools)
 
@@ -116,16 +116,16 @@ Settings window UI redesigned for modern Windows 11 aesthetics and improved usab
 **Status:** Decided  
 **Author:** Biff, Jennifer (with team consensus)
 
-**Decision:** Refactor services into a separate class library (`src/WinPaperWalls.Core/`) to enable testable, reusable service layer.
+**Decision:** Refactor services into a separate class library (`src/PaperWalls.Core/`) to enable testable, reusable service layer.
 
 **Rationale:**
-- Test project (`tests/WinPaperWalls.Tests/`) cannot build via `dotnet build` due to WindowsAppSDK conflicts
+- Test project (`tests/PaperWalls.Tests/`) cannot build via `dotnet build` due to WindowsAppSDK conflicts
 - Core services (GitHub, Cache, Wallpaper, Settings, Scheduler, Startup) are complete and stable
 - Extracting to Core library allows tests to reference services without WinUI/WindowsAppSDK dependencies
 - Services are fully generic and have no UI dependencies—natural fit for separate library
 
 **Implementation:**
-- Create `src/WinPaperWalls.Core/` class library (.NET Standard or .NET 8)
+- Create `src/PaperWalls.Core/` class library (.NET Standard or .NET 8)
 - Move all services and models to Core (GitHubImageService, CacheService, WallpaperService, SettingsService, SchedulerService, StartupManager)
 - Main app project references Core for service implementation
 - Test project references Core only (no WinUI/WindowsAppSDK needed)

@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "WinPaperWalls (Package)": {
-      "commandName": "MsixPackage"
-    }
-  }
-}

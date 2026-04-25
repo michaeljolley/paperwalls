@@ -204,16 +204,16 @@
 - The `Activated` event pattern (unsubscribe on first fire, re-subscribe on close) works well for "reload settings each time window appears" without duplicate handler accumulation
 
 **Files modified:**
-- `src/WinPaperWalls/Interop/DesktopWallpaper.cs` — added `GetCurrentWallpaperPath()`
-- `src/WinPaperWalls/Services/IDesktopWallpaperService.cs` — added method to interface
-- `src/WinPaperWalls/Services/DesktopWallpaperService.cs` — implemented new method
-- `src/WinPaperWalls/MainWindow.xaml.cs` — live preview, revert, and settings reload logic
+- `src/PaperWalls/Interop/DesktopWallpaper.cs` — added `GetCurrentWallpaperPath()`
+- `src/PaperWalls/Services/IDesktopWallpaperService.cs` — added method to interface
+- `src/PaperWalls/Services/DesktopWallpaperService.cs` — implemented new method
+- `src/PaperWalls/MainWindow.xaml.cs` — live preview, revert, and settings reload logic
 
 ### 2025-01-10 - Settings UX Overhaul
 
 **What was built:**
 - Custom title bar using `ExtendsContentIntoTitleBar = true` + `SetTitleBar()` with Mica backdrop
-- Renamed all "WinPaperWalls" references to "PaperWalls" in the Settings UI
+- Renamed all "PaperWalls" references to "PaperWalls" in the Settings UI
 - Grouped settings into "General" and "Background" sections with SubtitleTextBlockStyle headers
 - Replaced ItemsRepeater with virtualized ListView (MaxHeight=300) for topic list to prevent infinite scroll
 - General section: Rotation interval, Cache, Maximum cache size, Start with Windows
@@ -227,8 +227,8 @@
 - Custom title bar uses CaptionTextBlockStyle for the app name in the drag region
 
 **Files modified:**
-- `src/WinPaperWalls/MainWindow.xaml` — full layout restructure
-- `src/WinPaperWalls/MainWindow.xaml.cs` — added ExtendsContentIntoTitleBar and SetTitleBar() in constructor
+- `src/PaperWalls/MainWindow.xaml` — full layout restructure
+- `src/PaperWalls/MainWindow.xaml.cs` — added ExtendsContentIntoTitleBar and SetTitleBar() in constructor
 
 ### 2025-01-10 - Settings Layout & Scroll Fixes
 
@@ -241,8 +241,8 @@
 - Inside a `SettingsCard` (which uses Auto-sizing), `MaxHeight` on a ListView doesn't create a proper scrollable region because the parent doesn't constrain it enough. Using a fixed `Height` forces the ListView to define its own viewport, enabling its built-in virtualized scrolling.
 
 **Files modified:**
-- `src/WinPaperWalls/MainWindow.xaml` — reordered Start with Windows, fixed ListView Height
-- `src/WinPaperWalls/MainWindow.xaml.cs` — updated window Resize dimensions
+- `src/PaperWalls/MainWindow.xaml` — reordered Start with Windows, fixed ListView Height
+- `src/PaperWalls/MainWindow.xaml.cs` — updated window Resize dimensions
 
 
 
@@ -278,9 +278,9 @@
 - Keyboard support: Enter to add, Backspace to remove (if input empty)
 
 **Files modified:**
-- `src/WinPaperWalls/MainWindow.xaml` — added AutoSuggestBox, pill ItemsRepeater
-- `src/WinPaperWalls/MainWindow.xaml.cs` — AutoSuggestBox event handlers
-- `src/WinPaperWalls/ViewModels/SettingsViewModel.cs` — new collections, filter/add/refresh methods
+- `src/PaperWalls/MainWindow.xaml` — added AutoSuggestBox, pill ItemsRepeater
+- `src/PaperWalls/MainWindow.xaml.cs` — AutoSuggestBox event handlers
+- `src/PaperWalls/ViewModels/SettingsViewModel.cs` — new collections, filter/add/refresh methods
 
 **Design decisions:**
 - AutoSuggestBox placed above pills for natural top-to-bottom scanning
@@ -330,9 +330,9 @@
 - SettingsExpander provides better visual grouping and collapsible UI for complex settings sections
 
 **Files modified:**
-- `src/WinPaperWalls/MainWindow.xaml.cs` — window width 750 → 900
-- `src/WinPaperWalls/ViewModels/SettingsViewModel.cs` — flipped all topic selection logic to exclusion model
-- `src/WinPaperWalls/MainWindow.xaml` — restructured to SettingsExpander, updated labels/placeholders
+- `src/PaperWalls/MainWindow.xaml.cs` — window width 750 → 900
+- `src/PaperWalls/ViewModels/SettingsViewModel.cs` — flipped all topic selection logic to exclusion model
+- `src/PaperWalls/MainWindow.xaml` — restructured to SettingsExpander, updated labels/placeholders
 
 **Impact:**
 - All 48 tests pass
