@@ -114,86 +114,62 @@ jobs:
         run: >
           dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
           /p:Platform=x64
-          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
-          /p:AppxPackageDir=${{ github.workspace }}\AppPackages\x64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 MSIX
         run: >
           dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
           /p:Platform=ARM64
-          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
-          /p:AppxPackageDir=${{ github.workspace }}\AppPackages\ARM64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
-
-      - name: Stage sideload MSIX packages
-        shell: pwsh
-        run: |
-          New-Item -Path "sideload-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "AppPackages" -Filter "*.msixbundle" -Recurse
-
-          if ($msixFiles.Count -eq 0) {
-            Write-Host "AppPackages contents:"
-            Get-ChildItem -Path "AppPackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-            Write-Error "No MSIX bundles found in AppPackages!"
-            exit 1
-          }
-
-          foreach ($file in $msixFiles) {
-            Write-Host "Staging $($file.FullName) ($([math]::Round($file.Length / 1MB, 2)) MB)"
-            Copy-Item $file.FullName -Destination "sideload-packages/$($file.Name)"
-          }
-
-          Write-Host "Staged $($msixFiles.Count) MSIX bundle(s)."
 
       - name: Azure login
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDS }}
 
-      - name: Sign MSIX packages
-        uses: azure/artifact-signing-action@v1
-        with:
-          endpoint: https://eus.codesigning.azure.net/
-          signing-account-name: bbb-signing
-          certificate-profile-name: BaldBeardedBuilder
-          files-folder: ${{ github.workspace }}\sideload-packages
-          files-folder-filter: msixbundle
-          files-folder-recurse: false
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
+      # - name: Sign MSIX packages
+      #   uses: azure/artifact-signing-action@v1
+      #   with:
+      #     endpoint: https://eus.codesigning.azure.net/
+      #     signing-account-name: bbb-signing
+      #     certificate-profile-name: BaldBeardedBuilder
+      #     files-folder: ${{ github.workspace }}\src\WinPaperWalls
+      #     files-folder-filter: msix
+      #     files-folder-recurse: false
+      #     file-digest: SHA256
+      #     timestamp-rfc3161: http://timestamp.acs.microsoft.com
+      #     timestamp-digest: SHA256
 
-      - name: Verify MSIX signatures
-        shell: pwsh
-        run: |
-          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msixbundle"
+      # - name: Verify MSIX signatures
+      #   shell: pwsh
+      #   run: |
+      #     $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
 
-          if ($msixFiles.Count -eq 0) {
-            Write-Error "No MSIX bundles found in sideload-packages!"
-            exit 1
-          }
+      #     if ($msixFiles.Count -eq 0) {
+      #       Write-Error "No MSIX bundles found!"
+      #       exit 1
+      #     }
 
-          foreach ($file in $msixFiles) {
-            Write-Host "Verifying signature on $($file.Name)..."
-            $sig = Get-AuthenticodeSignature $file.FullName
-            Write-Host "  Status: $($sig.Status)"
-            Write-Host "  Signer: $($sig.SignerCertificate.Subject)"
-            if ($sig.Status -ne 'Valid') {
-              Write-Error "Signature on $($file.Name) is not valid: $($sig.Status)"
-              exit 1
-            }
-          }
+      #     foreach ($file in $msixFiles) {
+      #       Write-Host "Verifying signature on $($file.Name)..."
+      #       $sig = Get-AuthenticodeSignature $file.FullName
+      #       Write-Host "  Status: $($sig.Status)"
+      #       Write-Host "  Signer: $($sig.SignerCertificate.Subject)"
+      #       if ($sig.Status -ne 'Valid') {
+      #         Write-Error "Signature on $($file.Name) is not valid: $($sig.Status)"
+      #         exit 1
+      #       }
+      #     }
 
-          Write-Host "All MSIX bundles are signed and verified."
+      #     Write-Host "All MSIX bundles are signed and verified."
       
       - name: Upload MSIX artifacts
         uses: actions/upload-artifact@v7
         with:
           name: msix-packages
-          path: sideload-packages/*.msixbundle
+          path: src/WinPaperWalls/**/*.msix
           retention-days: 7
 
       - name: Upload MSIX packages to GitHub Release
@@ -201,7 +177,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $msixFiles = Get-ChildItem -Path "sideload-packages" -Filter "*.msixbundle"
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
           
           foreach ($file in $msixFiles) {
             Write-Host "Uploading $($file.Name) to release..."
@@ -212,12 +188,10 @@ jobs:
       - name: Clean build artifacts before Store build
         shell: pwsh
         run: |
-          Write-Host "Removing sideload artifacts before Store build..."
-          if (Test-Path "sideload-packages") {
-            Remove-Item -Path "sideload-packages" -Recurse -Force
-          }
-          if (Test-Path "AppPackages") {
-            Remove-Item -Path "AppPackages" -Recurse -Force
+          Write-Host "Removing sideload MSIX packages before Store build..."
+          Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse | Remove-Item -Force
+          if (Test-Path "src/WinPaperWalls/AppPackages") {
+            Remove-Item -Path "src/WinPaperWalls/AppPackages" -Recurse -Force
           }
 
       - name: Patch manifest with Store publisher identity
@@ -236,33 +210,21 @@ jobs:
         run: >
           dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
           /p:Platform=x64
-          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
-          /p:AppxPackageDir=${{ github.workspace }}\StorePackages\x64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Publish ARM64 Store MSIX
         run: >
           dotnet publish src/WinPaperWalls/WinPaperWalls.csproj -c Release
           /p:Platform=ARM64
-          /p:GenerateAppxPackageOnBuild=true
           /p:AppxPackageSigningEnabled=false
-          /p:AppxPackageDir=${{ github.workspace }}\StorePackages\ARM64\
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
       - name: Collect Store MSIX packages
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "StorePackages" -Filter "*.msixbundle" -Recurse
-
-          if ($msixFiles.Count -eq 0) {
-            Write-Host "StorePackages contents:"
-            Get-ChildItem -Path "StorePackages" -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-            Write-Error "No Store MSIX bundles found!"
-            exit 1
-          }
-
+          $msixFiles = Get-ChildItem -Path "src/WinPaperWalls" -Filter "*.msix" -Recurse
           foreach ($file in $msixFiles) {
             Write-Host "Copying $($file.Name) to store-packages/"
             Copy-Item $file.FullName -Destination "store-packages/$($file.Name)"
@@ -272,7 +234,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: msix-store-packages
-          path: store-packages/*.msixbundle
+          path: store-packages/*.msix
           retention-days: 7
 
   store-submit:

@@ -1,25 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>WinPaperWalls</RootNamespace>
-    <AssemblyName>BaldBeardedBuilder.WinPaperWalls</AssemblyName>
-    <Product>BaldBeardedBuilder.WinPaperWalls</Product>
-    <AssemblyTitle>BaldBeardedBuilder.WinPaperWalls</AssemblyTitle>
-    <Company>BaldBeardedBuilder</Company>
-    <Authors>BaldBeardedBuilder</Authors>
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>BaldBeardedBuilder.WinPaperWalls</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AppxManifest>$(ProjectDir)Package.appxmanifest</AppxManifest>
     <Description>Rotates your Windows wallpaper daily with 4K images from the Paper collection.</Description>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x64;ARM64</Platforms>
-    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
-    <UseWinUI>true</UseWinUI>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <AppxPackage>true</AppxPackage>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
+
+		<WindowsSdkPackageVersion>10.0.26100.68-preview</WindowsSdkPackageVersion>
+		<TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+		<DebugType>embedded</DebugType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<ImplicitUsings>enable</ImplicitUsings>
+    
+		<AssemblyName>BaldBeardedBuilder.PaperWalls</AssemblyName>
+		<Company>Bald Bearded Builder LLC</Company>
+		<Copyright>(c) Bald Bearded Builder LLC</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+    <Product>PaperWalls</Product>
+    <AssemblyTitle>PaperWalls</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,9 +44,68 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="WinUIEx" Version="2.9.0" />
     <PackageReference Include="System.Net.Http.Json" Version="10.0.7" />
+    
+		<!-- Needed to enable building an MSIX package -->
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
+  
+	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<ProjectCapability Include="Msix" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	</PropertyGroup>
+  
+	<PropertyGroup Condition=" '$(Configuration)' != 'DEBUG' ">
+		<IsAotCompatible>true</IsAotCompatible>
+		<PublishTrimmed>true</PublishTrimmed>
+		<PublishSingleFile>true</PublishSingleFile>
+		<PublishAot>true</PublishAot>
+	</PropertyGroup>
+  
+	<PropertyGroup>
+		<CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+		<CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
+		<!-- Suppress DynamicallyAccessedMemberTypes.PublicParameterlessConstructor in fallback code path of Windows SDK projection -->
+		<WarningsNotAsErrors>IL2081</WarningsNotAsErrors>
+
+		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+		<AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+		<AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+		<GenerateTestArtifacts>True</GenerateTestArtifacts>
+		<AppxBundle>Never</AppxBundle>
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+		<DefaultLanguage>en-US</DefaultLanguage>
+	</PropertyGroup>
+
+	<Target Name="UpdateVersionFromManifest" BeforeTargets="BeforeBuild">
+		<XmlPeek XmlInputPath="$(AppxManifest)" Query="/appx:Package/appx:Identity/@Version" Namespaces="&lt;Namespace Prefix='appx' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10'/&gt;">
+			<Output TaskParameter="Result" PropertyName="appxManifestVersion" />
+		</XmlPeek>
+
+		<Message Importance="High" Text="Set project version to match Appx manifest: $(appxManifestVersion)" />
+
+		<PropertyGroup>
+			<Version>$(appxManifestVersion)</Version>
+		</PropertyGroup>
+	</Target>
+
+	<Target Name="KillRunningExecutable" BeforeTargets="Build;Deploy;Publish">
+		<PropertyGroup>
+			<ExecutableName>$(AssemblyName).exe</ExecutableName>
+		</PropertyGroup>
+
+		<Exec Command="taskkill /F /IM $(ExecutableName)" ContinueOnError="true" IgnoreExitCode="true" />
+	</Target>
 </Project>
