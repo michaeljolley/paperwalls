@@ -56,10 +56,10 @@ jobs:
           dotnet restore PaperWalls.Tests/PaperWalls.Tests.csproj /p:Platform=x64
       
       - name: Build x64
-        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=x64 --no-restore
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=x64 /p:GenerateAppxPackageOnBuild=false --no-restore
       
       - name: Build ARM64
-        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=ARM64
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=ARM64 /p:GenerateAppxPackageOnBuild=false
 
       - name: Build tests
         run: dotnet build PaperWalls.Tests/PaperWalls.Tests.csproj -c Release /p:Platform=x64 --no-restore
