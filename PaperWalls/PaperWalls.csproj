@@ -1,26 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<RootNamespace>BaldBeardedBuilder.PaperWalls</RootNamespace>
+		<RootNamespace>PaperWalls</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AppxManifest>$(ProjectDir)Package.appxmanifest</AppxManifest>
     	<Description>Rotates your Windows wallpaper daily with 4K images from the Paper collection.</Description>
 
-		<WindowsSdkPackageVersion>10.0.26100.68-preview</WindowsSdkPackageVersion>
-		<TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+		<WindowsSdkPackageVersion>10.0.26100.84</WindowsSdkPackageVersion>
+		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
 		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
 
-		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
 		<EnableMsixTooling>true</EnableMsixTooling>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
 		<DebugType>embedded</DebugType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>CA1001,CA1305,CA1806,CA1822,CA1845,CA1848,CA1869,CA1873</NoWarn>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ImplicitUsings>enable</ImplicitUsings>
     
-		<AssemblyName>BaldBeardedBuilder.PaperWalls</AssemblyName>
+		<AssemblyName>PaperWalls</AssemblyName>
 		<Company>Bald Bearded Builder LLC</Company>
 		<Copyright>(c) Bald Bearded Builder LLC</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
@@ -33,20 +35,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Extensions.Http" />
-    <PackageReference Include="Serilog.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Sinks.File" />
-    <PackageReference Include="WinUIEx" />
-    <PackageReference Include="System.Net.Http.Json" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260416003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0-preview.3.26207.106" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-preview.3.26207.106" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0-preview.3.26207.106" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="WinUIEx" Version="2.9.0" />
+    <PackageReference Include="System.Net.Http.Json" Version="11.0.0-preview.3.26207.106" />
     
 	<!-- Needed to enable building an MSIX package -->
-	<PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX">
+	<PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX" Version="1.7.260316102">
 		<PrivateAssets>all</PrivateAssets>
 		<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	</PackageReference>
