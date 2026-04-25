@@ -6,6 +6,10 @@
 
 A Windows desktop application that automatically rotates your desktop wallpaper with beautiful 4K images from the [burkeholland/paper](https://github.com/burkeholland/paper) GitHub repository.
 
+<a href="https://get.microsoft.com/installer/download/9nlwtjcp24lq?referrer=appbadge" target="_self" >
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+</a>
+
 ## Features
 
 - **Automatic Wallpaper Rotation:** Change your desktop wallpaper on a configurable schedule (30 minutes to weekly)
