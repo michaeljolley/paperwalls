@@ -30,7 +30,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
-		LogSchedulerServiceStarting(_logger);
+		LogSchedulerServiceStarting();
 
 		var settings = _settingsService.LoadSettings();
 		var intervalMinutes = Math.Max(1, settings.IntervalMinutes);
@@ -53,16 +53,16 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			}
 			catch (Exception ex)
 			{
-				LogFailedToChangeWallpaperOnStartup(_logger, ex);
+				LogFailedToChangeWallpaperOnStartup(ex);
 			}
 		}, cancellationToken);
 
-		LogSchedulerStarted(_logger, intervalMinutes);
+		LogSchedulerStarted(intervalMinutes);
 	}
 
 	public async Task StopAsync(CancellationToken cancellationToken)
 	{
-		LogSchedulerServiceStopping(_logger);
+		LogSchedulerServiceStopping();
 
 		lock (_timerLock)
 		{
@@ -84,7 +84,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			}
 			catch (Exception ex)
 			{
-				LogErrorDuringSchedulerShutdown(_logger, ex);
+				LogErrorDuringSchedulerShutdown(ex);
 			}
 		}
 
@@ -92,7 +92,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 		_cts = null;
 		_timerTask = null;
 
-		LogSchedulerServiceStopped(_logger);
+		LogSchedulerServiceStopped();
 	}
 
 	private async Task RunTimerAsync(CancellationToken cancellationToken)
@@ -103,7 +103,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			{
 				try
 				{
-					LogTimerTick(_logger);
+					LogTimerTick();
 					await _wallpaperService.ChangeWallpaperAsync();
 
 					// Update next change time
@@ -112,14 +112,14 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				}
 				catch (Exception ex)
 				{
-					LogErrorDuringScheduledWallpaperChange(_logger, ex);
+					LogErrorDuringScheduledWallpaperChange(ex);
 					// Continue running - don't crash the service
 				}
 			}
 		}
 		catch (OperationCanceledException)
 		{
-			LogTimerTaskCancelled(_logger);
+			LogTimerTaskCancelled();
 		}
 	}
 
@@ -130,7 +130,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			var settings = _settingsService.LoadSettings();
 			var newIntervalMinutes = Math.Max(1, settings.IntervalMinutes);
 
-			LogSettingsChangedRestartingTimer(_logger, newIntervalMinutes);
+			LogSettingsChangedRestartingTimer(newIntervalMinutes);
 
 			// Stop current timer
 			lock (_timerLock)
@@ -163,48 +163,48 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				_timerTask = RunTimerAsync(_cts.Token);
 			}
 
-			LogTimerRestartedSuccessfully(_logger);
+			LogTimerRestartedSuccessfully();
 		}
 		catch (Exception ex)
 		{
-			LogErrorRestartingTimerAfterSettingsChange(_logger, ex);
+			LogErrorRestartingTimerAfterSettingsChange(ex);
 		}
 	}
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 3000, Level = LogLevel.Information, Message = "Scheduler service starting")]
-	private static partial void LogSchedulerServiceStarting(ILogger logger);
+	private partial void LogSchedulerServiceStarting();
 
 	[LoggerMessage(EventId = 3001, Level = LogLevel.Error, Message = "Failed to change wallpaper on startup")]
-	private static partial void LogFailedToChangeWallpaperOnStartup(ILogger logger, Exception ex);
+	private partial void LogFailedToChangeWallpaperOnStartup(Exception ex);
 
 	[LoggerMessage(EventId = 3002, Level = LogLevel.Information, Message = "Scheduler started with interval of {IntervalMinutes} minutes")]
-	private static partial void LogSchedulerStarted(ILogger logger, int intervalMinutes);
+	private partial void LogSchedulerStarted(int intervalMinutes);
 
 	[LoggerMessage(EventId = 3003, Level = LogLevel.Information, Message = "Scheduler service stopping")]
-	private static partial void LogSchedulerServiceStopping(ILogger logger);
+	private partial void LogSchedulerServiceStopping();
 
 	[LoggerMessage(EventId = 3004, Level = LogLevel.Error, Message = "Error during scheduler shutdown")]
-	private static partial void LogErrorDuringSchedulerShutdown(ILogger logger, Exception ex);
+	private partial void LogErrorDuringSchedulerShutdown(Exception ex);
 
 	[LoggerMessage(EventId = 3005, Level = LogLevel.Information, Message = "Scheduler service stopped")]
-	private static partial void LogSchedulerServiceStopped(ILogger logger);
+	private partial void LogSchedulerServiceStopped();
 
 	[LoggerMessage(EventId = 3006, Level = LogLevel.Information, Message = "Timer tick - changing wallpaper")]
-	private static partial void LogTimerTick(ILogger logger);
+	private partial void LogTimerTick();
 
 	[LoggerMessage(EventId = 3007, Level = LogLevel.Error, Message = "Error during scheduled wallpaper change")]
-	private static partial void LogErrorDuringScheduledWallpaperChange(ILogger logger, Exception ex);
+	private partial void LogErrorDuringScheduledWallpaperChange(Exception ex);
 
 	[LoggerMessage(EventId = 3008, Level = LogLevel.Debug, Message = "Timer task cancelled")]
-	private static partial void LogTimerTaskCancelled(ILogger logger);
+	private partial void LogTimerTaskCancelled();
 
 	[LoggerMessage(EventId = 3009, Level = LogLevel.Information, Message = "Settings changed - restarting timer with interval of {IntervalMinutes} minutes")]
-	private static partial void LogSettingsChangedRestartingTimer(ILogger logger, int intervalMinutes);
+	private partial void LogSettingsChangedRestartingTimer(int intervalMinutes);
 
 	[LoggerMessage(EventId = 3010, Level = LogLevel.Information, Message = "Timer restarted successfully")]
-	private static partial void LogTimerRestartedSuccessfully(ILogger logger);
+	private partial void LogTimerRestartedSuccessfully();
 
 	[LoggerMessage(EventId = 3011, Level = LogLevel.Error, Message = "Error restarting timer after settings change")]
-	private static partial void LogErrorRestartingTimerAfterSettingsChange(ILogger logger, Exception ex);
+	private partial void LogErrorRestartingTimerAfterSettingsChange(Exception ex);
 }

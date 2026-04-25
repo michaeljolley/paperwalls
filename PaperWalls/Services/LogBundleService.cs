@@ -25,14 +25,14 @@ internal sealed partial class LogBundleService : ILogBundleService
 
 			if (!Directory.Exists(_logsDirectory))
 			{
-				LogLogsDirectoryDoesNotExist(_logger, _logsDirectory);
+				LogLogsDirectoryDoesNotExist(_logsDirectory);
 				Directory.CreateDirectory(_logsDirectory);
 			}
 
 			var logFiles = Directory.GetFiles(_logsDirectory, "*.log");
 			if (logFiles.Length == 0)
 			{
-				LogNoLogFilesFound(_logger, _logsDirectory);
+				LogNoLogFilesFound(_logsDirectory);
 			}
 
 			using var zipStream = new FileStream(zipPath, FileMode.Create);
@@ -52,25 +52,25 @@ internal sealed partial class LogBundleService : ILogBundleService
 				}
 				catch (Exception ex)
 				{
-					LogFailedToIncludeLogFile(_logger, ex, logFile);
+					LogFailedToIncludeLogFile(ex, logFile);
 				}
 			}
 
-			LogBugReportCreated(_logger, zipPath);
+			LogBugReportCreated(zipPath);
 			return zipPath;
 		});
 	}
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 6000, Level = LogLevel.Warning, Message = "Logs directory does not exist: {LogsDirectory}")]
-	private static partial void LogLogsDirectoryDoesNotExist(ILogger logger, string logsDirectory);
+	private partial void LogLogsDirectoryDoesNotExist(string logsDirectory);
 
 	[LoggerMessage(EventId = 6001, Level = LogLevel.Warning, Message = "No log files found in {LogsDirectory}")]
-	private static partial void LogNoLogFilesFound(ILogger logger, string logsDirectory);
+	private partial void LogNoLogFilesFound(string logsDirectory);
 
 	[LoggerMessage(EventId = 6002, Level = LogLevel.Warning, Message = "Failed to include log file in bug report: {LogFile}")]
-	private static partial void LogFailedToIncludeLogFile(ILogger logger, Exception ex, string logFile);
+	private partial void LogFailedToIncludeLogFile(Exception ex, string logFile);
 
 	[LoggerMessage(EventId = 6003, Level = LogLevel.Information, Message = "Bug report created at {ZipPath}")]
-	private static partial void LogBugReportCreated(ILogger logger, string zipPath);
+	private partial void LogBugReportCreated(string zipPath);
 }

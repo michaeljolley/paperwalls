@@ -34,14 +34,14 @@ internal sealed partial class CacheService : ICacheService
 		// If already cached, return immediately
 		if (File.Exists(filePath))
 		{
-			LogImageAlreadyCached(_logger, fileName);
+			LogImageAlreadyCached(fileName);
 
 			// Update last access time for LRU tracking
 			File.SetLastAccessTime(filePath, DateTime.UtcNow);
 			return filePath;
 		}
 
-		LogDownloadingImage(_logger, fileName, url);
+		LogDownloadingImage(fileName, url);
 
 		try
 		{
@@ -56,7 +56,7 @@ internal sealed partial class CacheService : ICacheService
 				if (!File.Exists(filePath))
 				{
 					File.WriteAllBytes(filePath, imageBytes);
-					LogDownloadedAndCached(_logger, fileName, imageBytes.Length);
+					LogDownloadedAndCached(fileName, imageBytes.Length);
 				}
 			}
 
@@ -64,7 +64,7 @@ internal sealed partial class CacheService : ICacheService
 		}
 		catch (Exception ex)
 		{
-			LogFailedToDownloadImage(_logger, ex, fileName, url);
+			LogFailedToDownloadImage(ex, fileName, url);
 			throw;
 		}
 	}
@@ -97,14 +97,14 @@ internal sealed partial class CacheService : ICacheService
 		}
 		catch (Exception ex)
 		{
-			LogFailedToCalculateCacheSize(_logger, ex);
+			LogFailedToCalculateCacheSize(ex);
 			return 0;
 		}
 	}
 
 	public async Task EvictOldestAsync(long targetBytes)
 	{
-		LogStartingCacheEviction(_logger, targetBytes / 1024 / 1024);
+		LogStartingCacheEviction(targetBytes / 1024 / 1024);
 
 		if (!Directory.Exists(_cacheDirectory))
 		{
@@ -139,22 +139,22 @@ internal sealed partial class CacheService : ICacheService
 						freedBytes += fileSize;
 						deletedCount++;
 
-						LogEvictedFile(_logger, file.Name, fileSize);
+						LogEvictedFile(file.Name, fileSize);
 					}
 					catch (Exception ex)
 					{
-						LogFailedToDeleteCachedFile(_logger, ex, file.Name);
+						LogFailedToDeleteCachedFile(ex, file.Name);
 					}
 				}
 
-				LogCacheEvictionComplete(_logger, deletedCount, freedBytes / 1024 / 1024);
+				LogCacheEvictionComplete(deletedCount, freedBytes / 1024 / 1024);
 			}
 		});
 	}
 
 	public async Task ClearCacheAsync()
 	{
-		LogClearingAllCachedImages(_logger);
+		LogClearingAllCachedImages();
 
 		if (!Directory.Exists(_cacheDirectory))
 		{
@@ -176,15 +176,15 @@ internal sealed partial class CacheService : ICacheService
 						}
 						catch (Exception ex)
 						{
-							LogFailedToDeleteFile(_logger, ex, Path.GetFileName(file));
+							LogFailedToDeleteFile(ex, Path.GetFileName(file));
 						}
 					}
 
-					LogClearedCachedImages(_logger, files.Length);
+					LogClearedCachedImages(files.Length);
 				}
 				catch (Exception ex)
 				{
-					LogFailedToClearCache(_logger, ex);
+					LogFailedToClearCache(ex);
 					throw;
 				}
 			}
@@ -196,50 +196,50 @@ internal sealed partial class CacheService : ICacheService
 		if (!Directory.Exists(_cacheDirectory))
 		{
 			Directory.CreateDirectory(_cacheDirectory);
-			LogCreatedCacheDirectory(_logger, _cacheDirectory);
+			LogCreatedCacheDirectory(_cacheDirectory);
 		}
 	}
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 1000, Level = LogLevel.Debug, Message = "Image {FileName} already cached")]
-	private static partial void LogImageAlreadyCached(ILogger logger, string fileName);
+	private partial void LogImageAlreadyCached(string fileName);
 
 	[LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Downloading image {FileName} from {Url}")]
-	private static partial void LogDownloadingImage(ILogger logger, string fileName, string url);
+	private partial void LogDownloadingImage(string fileName, string url);
 
 	[LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Downloaded and cached {FileName} ({Size} bytes)")]
-	private static partial void LogDownloadedAndCached(ILogger logger, string fileName, long size);
+	private partial void LogDownloadedAndCached(string fileName, long size);
 
 	[LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Failed to download image {FileName} from {Url}")]
-	private static partial void LogFailedToDownloadImage(ILogger logger, Exception ex, string fileName, string url);
+	private partial void LogFailedToDownloadImage(Exception ex, string fileName, string url);
 
 	[LoggerMessage(EventId = 1004, Level = LogLevel.Error, Message = "Failed to calculate cache size")]
-	private static partial void LogFailedToCalculateCacheSize(ILogger logger, Exception ex);
+	private partial void LogFailedToCalculateCacheSize(Exception ex);
 
 	[LoggerMessage(EventId = 1005, Level = LogLevel.Information, Message = "Starting cache eviction to reach target size of {TargetMB} MB")]
-	private static partial void LogStartingCacheEviction(ILogger logger, long targetMB);
+	private partial void LogStartingCacheEviction(long targetMB);
 
 	[LoggerMessage(EventId = 1006, Level = LogLevel.Debug, Message = "Evicted {FileName} ({Size} bytes)")]
-	private static partial void LogEvictedFile(ILogger logger, string fileName, long size);
+	private partial void LogEvictedFile(string fileName, long size);
 
 	[LoggerMessage(EventId = 1007, Level = LogLevel.Error, Message = "Failed to delete cached file {FileName}")]
-	private static partial void LogFailedToDeleteCachedFile(ILogger logger, Exception ex, string fileName);
+	private partial void LogFailedToDeleteCachedFile(Exception ex, string fileName);
 
 	[LoggerMessage(EventId = 1008, Level = LogLevel.Information, Message = "Cache eviction complete: deleted {Count} files, freed {FreedMB} MB")]
-	private static partial void LogCacheEvictionComplete(ILogger logger, int count, long freedMB);
+	private partial void LogCacheEvictionComplete(int count, long freedMB);
 
 	[LoggerMessage(EventId = 1009, Level = LogLevel.Information, Message = "Clearing all cached images")]
-	private static partial void LogClearingAllCachedImages(ILogger logger);
+	private partial void LogClearingAllCachedImages();
 
 	[LoggerMessage(EventId = 1010, Level = LogLevel.Error, Message = "Failed to delete file {FileName}")]
-	private static partial void LogFailedToDeleteFile(ILogger logger, Exception ex, string fileName);
+	private partial void LogFailedToDeleteFile(Exception ex, string fileName);
 
 	[LoggerMessage(EventId = 1011, Level = LogLevel.Information, Message = "Cleared {Count} cached images")]
-	private static partial void LogClearedCachedImages(ILogger logger, int count);
+	private partial void LogClearedCachedImages(int count);
 
 	[LoggerMessage(EventId = 1012, Level = LogLevel.Error, Message = "Failed to clear cache")]
-	private static partial void LogFailedToClearCache(ILogger logger, Exception ex);
+	private partial void LogFailedToClearCache(Exception ex);
 
 	[LoggerMessage(EventId = 1013, Level = LogLevel.Information, Message = "Created cache directory at {Path}")]
-	private static partial void LogCreatedCacheDirectory(ILogger logger, string path);
+	private partial void LogCreatedCacheDirectory(string path);
 }

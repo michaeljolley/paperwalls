@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
+using PaperWalls.Models;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using PaperWalls.Models;
 
 namespace PaperWalls.Services;
 
@@ -37,14 +37,14 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		{
 			if (_cachedTopics != null && DateTime.UtcNow - _topicsCacheTime < CacheExpiry)
 			{
-				LogReturningCachedTopics(_logger);
+				LogReturningCachedTopics();
 				return new List<string>(_cachedTopics);
 			}
 		}
 
 		try
 		{
-			LogFetchingTopicsFromGitHub(_logger);
+			LogFetchingTopicsFromGitHub();
 
 			var response = await _httpClient.GetAsync(ApiBaseUrl).ConfigureAwait(false);
 
@@ -55,7 +55,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>().ConfigureAwait(false);
 			if (items == null)
 			{
-				LogGitHubApiReturnedNull(_logger);
+				LogGitHubApiReturnedNull();
 				return new List<string>();
 			}
 
@@ -75,19 +75,19 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				_topicsCacheTime = DateTime.UtcNow;
 			}
 
-			LogFetchedTopics(_logger, topics.Count, filteredTopics.Count);
+			LogFetchedTopics(topics.Count, filteredTopics.Count);
 			return filteredTopics;
 		}
 		catch (HttpRequestException ex)
 		{
-			LogFailedToFetchTopics(_logger, ex);
+			LogFailedToFetchTopics(ex);
 
 			// Return cached data if available
 			lock (_cacheLock)
 			{
 				if (_cachedTopics != null)
 				{
-					LogReturningStaleCachedTopics(_logger);
+					LogReturningStaleCachedTopics();
 					return new List<string>(_cachedTopics);
 				}
 			}
@@ -103,14 +103,14 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			if (_imageCache.TryGetValue(topic, out var cached) &&
 				DateTime.UtcNow - cached.timestamp < CacheExpiry)
 			{
-				LogReturningCachedImages(_logger, topic);
+				LogReturningCachedImages(topic);
 				return new List<WallpaperImage>(cached.images);
 			}
 		}
 
 		try
 		{
-			LogFetchingImagesForTopic(_logger, topic);
+			LogFetchingImagesForTopic(topic);
 
 			var url = $"{ApiBaseUrl}/{topic}";
 			var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
@@ -122,7 +122,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			var items = await response.Content.ReadFromJsonAsync<List<GitHubContentItem>>().ConfigureAwait(false);
 			if (items == null)
 			{
-				LogGitHubApiReturnedNullForTopic(_logger, topic);
+				LogGitHubApiReturnedNullForTopic(topic);
 				return new List<WallpaperImage>();
 			}
 
@@ -141,19 +141,19 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				_imageCache[topic] = (DateTime.UtcNow, images);
 			}
 
-			LogFetchedImages(_logger, images.Count, topic);
+			LogFetchedImages(images.Count, topic);
 			return images;
 		}
 		catch (HttpRequestException ex)
 		{
-			LogFailedToFetchImages(_logger, ex, topic);
+			LogFailedToFetchImages(ex, topic);
 
 			// Return cached data if available
 			lock (_cacheLock)
 			{
 				if (_imageCache.TryGetValue(topic, out var cached))
 				{
-					LogReturningStaleCachedImages(_logger, topic);
+					LogReturningStaleCachedImages(topic);
 					return new List<WallpaperImage>(cached.images);
 				}
 			}
@@ -168,11 +168,11 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		{
 			if (int.TryParse(remainingValues.FirstOrDefault(), out var remaining))
 			{
-				LogGitHubApiRateLimit(_logger, remaining);
+				LogGitHubApiRateLimit(remaining);
 
 				if (remaining < 10)
 				{
-					LogGitHubApiRateLimitRunningLow(_logger, remaining);
+					LogGitHubApiRateLimitRunningLow(remaining);
 				}
 			}
 		}
@@ -184,7 +184,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				if (long.TryParse(resetValues.FirstOrDefault(), out var resetTimestamp))
 				{
 					var resetTime = DateTimeOffset.FromUnixTimeSeconds(resetTimestamp);
-					LogGitHubApiRateLimitExceeded(_logger, resetTime);
+					LogGitHubApiRateLimitExceeded(resetTime);
 				}
 			}
 		}
@@ -198,49 +198,49 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 2000, Level = LogLevel.Debug, Message = "Returning cached topics")]
-	private static partial void LogReturningCachedTopics(ILogger logger);
+	private partial void LogReturningCachedTopics();
 
 	[LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Fetching topics from GitHub")]
-	private static partial void LogFetchingTopicsFromGitHub(ILogger logger);
+	private partial void LogFetchingTopicsFromGitHub();
 
 	[LoggerMessage(EventId = 2002, Level = LogLevel.Warning, Message = "GitHub API returned null response")]
-	private static partial void LogGitHubApiReturnedNull(ILogger logger);
+	private partial void LogGitHubApiReturnedNull();
 
 	[LoggerMessage(EventId = 2003, Level = LogLevel.Information, Message = "Fetched {Count} topics (filtered to {FilteredCount})")]
-	private static partial void LogFetchedTopics(ILogger logger, int count, int filteredCount);
+	private partial void LogFetchedTopics(int count, int filteredCount);
 
 	[LoggerMessage(EventId = 2004, Level = LogLevel.Error, Message = "Failed to fetch topics from GitHub")]
-	private static partial void LogFailedToFetchTopics(ILogger logger, Exception ex);
+	private partial void LogFailedToFetchTopics(Exception ex);
 
 	[LoggerMessage(EventId = 2005, Level = LogLevel.Warning, Message = "Returning stale cached topics due to error")]
-	private static partial void LogReturningStaleCachedTopics(ILogger logger);
+	private partial void LogReturningStaleCachedTopics();
 
 	[LoggerMessage(EventId = 2006, Level = LogLevel.Debug, Message = "Returning cached images for topic {Topic}")]
-	private static partial void LogReturningCachedImages(ILogger logger, string topic);
+	private partial void LogReturningCachedImages(string topic);
 
 	[LoggerMessage(EventId = 2007, Level = LogLevel.Information, Message = "Fetching images for topic {Topic} from GitHub")]
-	private static partial void LogFetchingImagesForTopic(ILogger logger, string topic);
+	private partial void LogFetchingImagesForTopic(string topic);
 
 	[LoggerMessage(EventId = 2008, Level = LogLevel.Warning, Message = "GitHub API returned null response for topic {Topic}")]
-	private static partial void LogGitHubApiReturnedNullForTopic(ILogger logger, string topic);
+	private partial void LogGitHubApiReturnedNullForTopic(string topic);
 
 	[LoggerMessage(EventId = 2009, Level = LogLevel.Information, Message = "Fetched {Count} images for topic {Topic}")]
-	private static partial void LogFetchedImages(ILogger logger, int count, string topic);
+	private partial void LogFetchedImages(int count, string topic);
 
 	[LoggerMessage(EventId = 2010, Level = LogLevel.Error, Message = "Failed to fetch images for topic {Topic} from GitHub")]
-	private static partial void LogFailedToFetchImages(ILogger logger, Exception ex, string topic);
+	private partial void LogFailedToFetchImages(Exception ex, string topic);
 
 	[LoggerMessage(EventId = 2011, Level = LogLevel.Warning, Message = "Returning stale cached images for topic {Topic} due to error")]
-	private static partial void LogReturningStaleCachedImages(ILogger logger, string topic);
+	private partial void LogReturningStaleCachedImages(string topic);
 
 	[LoggerMessage(EventId = 2012, Level = LogLevel.Debug, Message = "GitHub API rate limit remaining: {Remaining}")]
-	private static partial void LogGitHubApiRateLimit(ILogger logger, int remaining);
+	private partial void LogGitHubApiRateLimit(int remaining);
 
 	[LoggerMessage(EventId = 2013, Level = LogLevel.Warning, Message = "GitHub API rate limit running low: {Remaining} requests remaining")]
-	private static partial void LogGitHubApiRateLimitRunningLow(ILogger logger, int remaining);
+	private partial void LogGitHubApiRateLimitRunningLow(int remaining);
 
 	[LoggerMessage(EventId = 2014, Level = LogLevel.Error, Message = "GitHub API rate limit exceeded. Resets at {ResetTime}")]
-	private static partial void LogGitHubApiRateLimitExceeded(ILogger logger, DateTimeOffset resetTime);
+	private partial void LogGitHubApiRateLimitExceeded(DateTimeOffset resetTime);
 
 	private class GitHubContentItem
 	{

@@ -144,7 +144,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			LogFailedToLoadTopics(_logger, ex);
+			LogFailedToLoadTopics(ex);
 			TopicsError = true;
 			if (TopicItems.Count > 0)
 			{
@@ -291,7 +291,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 7000, Level = LogLevel.Error, Message = "Failed to load topics from GitHub")]
-	private static partial void LogFailedToLoadTopics(ILogger logger, Exception ex);
+	private partial void LogFailedToLoadTopics(Exception ex);
 
 	private sealed class GitHubContentItem
 	{
