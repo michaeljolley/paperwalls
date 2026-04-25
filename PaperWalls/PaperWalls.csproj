@@ -70,7 +70,6 @@
 	<PropertyGroup Condition=" '$(Configuration)' != 'DEBUG' ">
 		<IsAotCompatible>true</IsAotCompatible>
 		<PublishTrimmed>true</PublishTrimmed>
-		<PublishSingleFile>true</PublishSingleFile>
 		<PublishAot>true</PublishAot>
 	</PropertyGroup>
   
