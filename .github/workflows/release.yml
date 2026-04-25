@@ -52,20 +52,20 @@ jobs:
       
       - name: Restore dependencies
         run: |
-          dotnet restore PaperWalls/PaperWalls.csproj -r win-x64
-          dotnet restore PaperWalls.Tests/PaperWalls.Tests.csproj -r win-x64
+          dotnet restore PaperWalls/PaperWalls.csproj /p:Platform=x64
+          dotnet restore PaperWalls.Tests/PaperWalls.Tests.csproj /p:Platform=x64
       
       - name: Build x64
-        run: dotnet build PaperWalls/PaperWalls.csproj -c Release -r win-x64 --no-restore
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=x64 --no-restore
       
       - name: Build ARM64
-        run: dotnet build PaperWalls/PaperWalls.csproj -c Release -r win-arm64
+        run: dotnet build PaperWalls/PaperWalls.csproj -c Release /p:Platform=ARM64
 
       - name: Build tests
-        run: dotnet build PaperWalls.Tests/PaperWalls.Tests.csproj -c Release -r win-x64 --no-restore
+        run: dotnet build PaperWalls.Tests/PaperWalls.Tests.csproj -c Release /p:Platform=x64 --no-restore
       
       - name: Run tests
-        run: dotnet test PaperWalls.Tests/PaperWalls.Tests.csproj -c Release -r win-x64 --no-build
+        run: dotnet test PaperWalls.Tests/PaperWalls.Tests.csproj -c Release /p:Platform=x64 --no-build
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
@@ -114,6 +114,8 @@ jobs:
         run: >
           dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=x64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages/x64/
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
@@ -121,6 +123,8 @@ jobs:
         run: >
           dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=ARM64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages/arm64/
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
@@ -169,7 +173,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: msix-packages
-          path: PaperWalls/**/*.msix
+          path: PaperWalls/AppPackages/**/*.msix
           retention-days: 7
 
       - name: Upload MSIX packages to GitHub Release
@@ -177,7 +181,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $msixFiles = Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "PaperWalls/AppPackages" -Filter "*.msix" -Recurse
           
           foreach ($file in $msixFiles) {
             Write-Host "Uploading $($file.Name) to release..."
@@ -189,7 +193,6 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Removing sideload MSIX packages before Store build..."
-          Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse | Remove-Item -Force
           if (Test-Path "PaperWalls/AppPackages") {
             Remove-Item -Path "PaperWalls/AppPackages" -Recurse -Force
           }
@@ -210,6 +213,8 @@ jobs:
         run: >
           dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=x64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages-Store/x64/
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
@@ -217,6 +222,8 @@ jobs:
         run: >
           dotnet publish PaperWalls/PaperWalls.csproj -c Release
           /p:Platform=ARM64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages-Store/arm64/
           /p:AppxPackageSigningEnabled=false
           /p:Version=${{ needs.build-and-test.outputs.version }}
 
@@ -224,7 +231,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path "store-packages" -ItemType Directory -Force
-          $msixFiles = Get-ChildItem -Path "PaperWalls" -Filter "*.msix" -Recurse
+          $msixFiles = Get-ChildItem -Path "PaperWalls/AppPackages-Store" -Filter "*.msix" -Recurse
           foreach ($file in $msixFiles) {
             Write-Host "Copying $($file.Name) to store-packages/"
             Copy-Item $file.FullName -Destination "store-packages/$($file.Name)"
