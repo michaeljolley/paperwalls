@@ -115,9 +115,13 @@ public class CacheServiceTests : IDisposable
     public async Task GetCacheSizeBytes_CalculatesCacheSizeCorrectly()
     {
         // Arrange
-        var imageData1 = new byte[1024]; // 1 KB
-        var imageData2 = new byte[2048]; // 2 KB
-        
+        // PNG magic bytes at the front so new image validation passes; sizes stay 1 KB / 2 KB
+        var pngHeader = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        var imageData1 = new byte[1024];
+        pngHeader.CopyTo(imageData1, 0);
+        var imageData2 = new byte[2048];
+        pngHeader.CopyTo(imageData2, 0);
+
         _httpHandler.ResponseBytes = imageData1;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
