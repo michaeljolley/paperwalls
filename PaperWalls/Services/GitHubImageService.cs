@@ -31,7 +31,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		_logger = logger;
 	}
 
-	public async Task<List<string>> GetTopicsAsync()
+	public async Task<List<string>> GetTopicsAsync(CancellationToken cancellationToken = default)
 	{
 		lock (_cacheLock)
 		{
@@ -46,13 +46,13 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		{
 			LogFetchingTopicsFromGitHub();
 
-			var response = await _httpClient.GetAsync(ApiBaseUrl).ConfigureAwait(false);
+			var response = await _httpClient.GetAsync(ApiBaseUrl, cancellationToken).ConfigureAwait(false);
 
 			CheckRateLimit(response);
 
 			response.EnsureSuccessStatusCode();
 
-			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem).ConfigureAwait(false);
+			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem, cancellationToken).ConfigureAwait(false);
 			if (items == null)
 			{
 				LogGitHubApiReturnedNull();
@@ -96,7 +96,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		}
 	}
 
-	public async Task<List<WallpaperImage>> GetImagesAsync(string topic)
+	public async Task<List<WallpaperImage>> GetImagesAsync(string topic, CancellationToken cancellationToken = default)
 	{
 		lock (_cacheLock)
 		{
@@ -113,13 +113,13 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			LogFetchingImagesForTopic(topic);
 
 			var url = $"{ApiBaseUrl}/{topic}";
-			var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+			var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
 			CheckRateLimit(response);
 
 			response.EnsureSuccessStatusCode();
 
-			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem).ConfigureAwait(false);
+			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem, cancellationToken).ConfigureAwait(false);
 			if (items == null)
 			{
 				LogGitHubApiReturnedNullForTopic(topic);
