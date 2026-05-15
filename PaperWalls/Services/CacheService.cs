@@ -52,11 +52,17 @@ internal sealed partial class CacheService : ICacheService
 
 			if (!IsValidImageBytes(imageBytes))
 			{
-				var preview = imageBytes.Length >= 8
+				var magicBytes = imageBytes.Length >= 8
 					? BitConverter.ToString(imageBytes, 0, 8)
 					: BitConverter.ToString(imageBytes);
-				LogInvalidImageBytes(fileName, preview);
-				throw new InvalidOperationException($"Downloaded content for '{fileName}' is not a valid image (magic bytes: {preview}).");
+				var statusCode = (int)response.StatusCode;
+				var contentType = response.Content.Headers.ContentType?.ToString() ?? "(none)";
+				var contentLength = response.Content.Headers.ContentLength?.ToString() ?? "(none)";
+				var rateLimitRemaining = response.Headers.TryGetValues("X-RateLimit-Remaining", out var rlValues)
+					? string.Join(",", rlValues)
+					: "(none)";
+				LogInvalidImageDownload(fileName, url, statusCode, contentType, contentLength, imageBytes.Length, rateLimitRemaining, magicBytes);
+				throw new InvalidOperationException($"Downloaded content for '{fileName}' is not a valid image (status: {statusCode}, content-type: {contentType}, magic bytes: {magicBytes}).");
 			}
 
 			lock (_cacheLock)
@@ -278,6 +284,6 @@ internal sealed partial class CacheService : ICacheService
 		return false;
 	}
 
-	[LoggerMessage(EventId = 1014, Level = LogLevel.Warning, Message = "Downloaded content for '{FileName}' failed image validation (first bytes: {Preview})")]
-	partial void LogInvalidImageBytes(string fileName, string preview);
+	[LoggerMessage(EventId = 1015, Level = LogLevel.Warning, Message = "Downloaded content for {FileName} from {Url} is not a valid image. Status: {StatusCode}, Content-Type: {ContentType}, Content-Length: {ContentLength}, Bytes received: {BytesReceived}, X-RateLimit-Remaining: {RateLimitRemaining}, Magic bytes: {MagicBytes}")]
+	partial void LogInvalidImageDownload(string fileName, string url, int statusCode, string contentType, string contentLength, int bytesReceived, string rateLimitRemaining, string magicBytes);
 }
