@@ -248,4 +248,41 @@ public class WallpaperServiceTests
         await _githubService.Received().GetImagesAsync(Arg.Any<string>());
         await _cacheService.Received().DownloadImageAsync(Arg.Any<string>(), Arg.Any<string>());
     }
+
+    [Fact]
+    public async Task ChangeWallpaperAsync_RetriesWithDifferentImage_WhenSetWallpaperThrows()
+    {
+        // Arrange - two images available so retry can pick the other after SetWallpaper fails
+        var topics = new List<string> { "nature" };
+        var images = new List<WallpaperImage>
+        {
+            new() { FileName = "image1.jpg", Url = "https://example.com/image1.jpg", Topic = "nature" },
+            new() { FileName = "image2.jpg", Url = "https://example.com/image2.jpg", Topic = "nature" }
+        };
+
+        _githubService.GetTopicsAsync().Returns(topics);
+        _githubService.GetImagesAsync("nature").Returns(images);
+        _cacheService.DownloadImageAsync(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(x => $"C:\\test\\{x.ArgAt<string>(1)}");
+        _cacheService.GetCacheSizeBytes().Returns(100 * 1024 * 1024);
+
+        // SetWallpaper throws on first call, succeeds on second
+        var setWallpaperCallCount = 0;
+        _desktopWallpaperService
+            .When(x => x.SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>()))
+            .Do(_ =>
+            {
+                if (++setWallpaperCallCount == 1)
+                    throw new Exception("Win32 failure simulating black screen");
+            });
+
+        var service = new WallpaperService(
+            _githubService, _cacheService, _settingsService, _desktopWallpaperService, _logger);
+
+        // Act - should not throw; retry logic should absorb the first SetWallpaper failure
+        await service.ChangeWallpaperAsync();
+
+        // Assert - SetWallpaper was called twice: once failing, once succeeding
+        _desktopWallpaperService.Received(2).SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>());
+    }
 }

@@ -216,6 +216,61 @@ public class CacheServiceTests : IDisposable
         size.Should().BeGreaterThanOrEqualTo(0);
     }
 
+
+    [Fact]
+    public async Task DownloadImageAsync_ThrowsInvalidOperationException_WhenResponseBodyIsNotValidImage()
+    {
+        // Arrange - simulate GitHub returning an HTML error page instead of image bytes
+        var htmlBytes = System.Text.Encoding.UTF8.GetBytes("<html><body>Not Found</body></html>");
+        _httpHandler.ResponseBytes = htmlBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await service.DownloadImageAsync("https://example.com/image.jpg", "invalid.jpg"));
+    }
+
+    [Fact]
+    public async Task DownloadImageAsync_ThrowsInvalidOperationException_DoesNotCacheInvalidContent()
+    {
+        // Arrange - simulate truncated/garbage bytes that are not a valid image
+        var garbageBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 };
+        _httpHandler.ResponseBytes = garbageBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await service.DownloadImageAsync("https://example.com/image.jpg", "garbage.jpg"));
+
+        // Verify nothing was written to disk
+        File.Exists(Path.Combine(_testCacheDirectory, "garbage.jpg")).Should().BeFalse(
+            "invalid image content must not be cached to disk");
+    }
+
+    [Fact]
+    public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidPngMagicBytes()
+    {
+        // Arrange - PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
+        var pngBytes = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D };
+        _httpHandler.ResponseBytes = pngBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act
+        var filePath = await service.DownloadImageAsync("https://example.com/image.png", "valid.png");
+
+        // Assert
+        filePath.Should().NotBeNullOrEmpty();
+        File.Exists(filePath).Should().BeTrue();
+        var cachedBytes = await File.ReadAllBytesAsync(filePath);
+        cachedBytes.Should().BeEquivalentTo(pngBytes);
+    }
+
     private class TestHttpMessageHandler : HttpMessageHandler
     {
         public byte[] ResponseBytes { get; set; } = Array.Empty<byte>();
