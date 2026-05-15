@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: windows-2025
     outputs:
       version: ${{ steps.version.outputs.version }}
     
@@ -79,7 +79,7 @@ jobs:
 
   package:
     needs: build-and-test
-    runs-on: windows-latest
+    runs-on: windows-2025
     
     steps:
       - name: Checkout code
@@ -246,7 +246,7 @@ jobs:
 
   store-submit:
     needs: [package, build-and-test]
-    runs-on: windows-latest
+    runs-on: windows-2025
     
     steps:
       - name: Checkout code

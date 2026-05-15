@@ -12,7 +12,7 @@
 		<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
 		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
 
-		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<PublishProfile Condition="'$(Platform)' != 'AnyCPU'">win-$(Platform).pubxml</PublishProfile>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<Nullable>enable</Nullable>
