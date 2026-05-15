@@ -37,11 +37,13 @@ internal sealed partial class WallpaperService : IWallpaperService
 		{
 			LogStartingWallpaperChange();
 
+			cancellationToken.ThrowIfCancellationRequested();
+
 			// Get settings
 			var settings = _settingsService.LoadSettings();
 
 			// Get available topics
-			var topics = await _githubService.GetTopicsAsync();
+			var topics = await _githubService.GetTopicsAsync(cancellationToken);
 			if (topics.Count == 0)
 			{
 				LogNoTopicsAvailable();
@@ -67,7 +69,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 				LogSelectedTopic(topic, attempt + 1);
 
 				// Get images in topic
-				var images = await _githubService.GetImagesAsync(topic);
+				var images = await _githubService.GetImagesAsync(topic, cancellationToken);
 				if (images.Count == 0)
 				{
 					LogNoImagesFoundInTopic(topic);
@@ -104,7 +106,8 @@ internal sealed partial class WallpaperService : IWallpaperService
 				{
 					imagePath = await _cacheService.DownloadImageAsync(
 						selectedImage.Url,
-						selectedImage.FileName);
+						selectedImage.FileName,
+						cancellationToken);
 
 					// Check cache size and evict if needed
 					var cacheSize = _cacheService.GetCacheSizeBytes();
@@ -144,6 +147,10 @@ internal sealed partial class WallpaperService : IWallpaperService
 			{
 				LogFailedToFindSuitableWallpaper(maxAttempts);
 			}
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{

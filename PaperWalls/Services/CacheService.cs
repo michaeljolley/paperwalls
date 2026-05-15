@@ -27,7 +27,7 @@ internal sealed partial class CacheService : ICacheService
 		EnsureCacheDirectoryExists();
 	}
 
-	public async Task<string> DownloadImageAsync(string url, string fileName)
+	public async Task<string> DownloadImageAsync(string url, string fileName, CancellationToken cancellationToken = default)
 	{
 		var filePath = Path.Combine(_cacheDirectory, fileName);
 
@@ -45,10 +45,10 @@ internal sealed partial class CacheService : ICacheService
 
 		try
 		{
-			var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+			var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 			response.EnsureSuccessStatusCode();
 
-			var imageBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+			var imageBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
 
 			if (!IsValidImageBytes(imageBytes))
 			{

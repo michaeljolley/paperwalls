@@ -8,7 +8,7 @@ public interface ICacheService
 	/// <param name="url">The image download URL.</param>
 	/// <param name="fileName">The filename to save as.</param>
 	/// <returns>The local file path of the cached image.</returns>
-	Task<string> DownloadImageAsync(string url, string fileName);
+	Task<string> DownloadImageAsync(string url, string fileName, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Gets the cached file path if it exists.
