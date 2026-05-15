@@ -30,7 +30,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 		_logger = logger;
 	}
 
-	public async Task ChangeWallpaperAsync()
+	public async Task ChangeWallpaperAsync(CancellationToken cancellationToken = default)
 	{
 		try
 		{
@@ -60,6 +60,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 
 			for (int attempt = 0; attempt < maxAttempts && !wallpaperSet; attempt++)
 			{
+				cancellationToken.ThrowIfCancellationRequested();
 				// Pick random topic
 				var topic = topics[Random.Shared.Next(topics.Count)];
 				LogSelectedTopic(topic, attempt + 1);

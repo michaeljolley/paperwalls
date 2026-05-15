@@ -283,6 +283,35 @@ public class WallpaperServiceTests
         await service.ChangeWallpaperAsync();
 
         // Assert - SetWallpaper was called twice: once failing, once succeeding
+        // Assert - SetWallpaper was called twice: once failing, once succeeding
         _desktopWallpaperService.Received(2).SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>());
+    }
+
+    [Fact]
+    public async Task ChangeWallpaperAsync_ThrowsOperationCanceledException_WhenCancelled()
+    {
+        // Arrange - pre-cancelled token; the check fires on the first loop iteration
+        var topics = new List<string> { "nature" };
+        var images = new List<WallpaperImage>
+        {
+            new() { FileName = "image1.jpg", Url = "https://example.com/image1.jpg", Topic = "nature" }
+        };
+
+        _githubService.GetTopicsAsync().Returns(topics);
+        _githubService.GetImagesAsync("nature").Returns(images);
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var service = new WallpaperService(
+            _githubService, _cacheService, _settingsService, _desktopWallpaperService, _logger);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<OperationCanceledException>(
+            () => service.ChangeWallpaperAsync(cts.Token));
+
+        // Download and SetWallpaper should never be reached
+        await _cacheService.DidNotReceive().DownloadImageAsync(Arg.Any<string>(), Arg.Any<string>());
+        _desktopWallpaperService.DidNotReceive().SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>());
     }
 }

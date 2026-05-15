@@ -101,7 +101,7 @@ public partial class App : Application
 				try
 				{
 					var wallpaperService = Services.GetRequiredService<IWallpaperService>();
-					await Task.Run(() => wallpaperService.ChangeWallpaperAsync());
+					await Task.Run(() => wallpaperService.ChangeWallpaperAsync(CancellationToken.None));
 				}
 				catch
 				{
