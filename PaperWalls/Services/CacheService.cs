@@ -225,7 +225,7 @@ internal sealed partial class CacheService : ICacheService
 	[LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Downloaded and cached {FileName} ({Size} bytes)")]
 	partial void LogDownloadedAndCached(string fileName, long size);
 
-	[LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Failed to download image {FileName} from {Url}")]
+	[LoggerMessage(EventId = 1003, Level = LogLevel.Debug, Message = "Failed to download image {FileName} from {Url}")]
 	partial void LogFailedToDownloadImage(Exception ex, string fileName, string url);
 
 	[LoggerMessage(EventId = 1004, Level = LogLevel.Error, Message = "Failed to calculate cache size")]

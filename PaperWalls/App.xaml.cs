@@ -14,6 +14,7 @@ public partial class App : Application
 	private static Mutex? _instanceMutex;
 	private IHost? _host;
 	private TrayIcon? _trayIcon;
+	private DispatcherTimer? _tooltipTimer;
 
 	public App()
 	{
@@ -85,6 +86,10 @@ public partial class App : Application
 		_trayIcon = new TrayIcon(1, iconPath, "PaperWalls");
 		_trayIcon.IsVisible = true;
 
+		_tooltipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+		_tooltipTimer.Tick += (_, _) => UpdateTrayTooltip();
+		_tooltipTimer.Start();
+
 		_trayIcon.Selected += (s, e) =>
 		{
 			var mainWindow = Services.GetRequiredService<MainWindow>();
@@ -103,9 +108,9 @@ public partial class App : Application
 					var wallpaperService = Services.GetRequiredService<IWallpaperService>();
 					await Task.Run(() => wallpaperService.ChangeWallpaperAsync(CancellationToken.None));
 				}
-				catch
+				catch (Exception ex)
 				{
-					// Silently handle errors for now
+					Serilog.Log.Error(ex, "Failed to refresh wallpaper from tray menu");
 				}
 			};
 			flyout.Items.Add(refreshItem);
@@ -138,9 +143,9 @@ public partial class App : Application
 					};
 					await dialog.ShowAsync();
 				}
-				catch
+				catch (Exception ex)
 				{
-					// Silently handle errors for now
+					Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
 				}
 			};
 			flyout.Items.Add(reportBugItem);
@@ -157,8 +162,43 @@ public partial class App : Application
 		// Do NOT show MainWindow on startup - it opens when user clicks Settings
 	}
 
+	private void UpdateTrayTooltip()
+	{
+		if (_trayIcon == null) return;
+
+		try
+		{
+			var scheduler = Services.GetRequiredService<ISchedulerService>();
+			var nextChange = scheduler.NextChangeTime;
+
+			if (nextChange == null)
+			{
+				_trayIcon.Tooltip = "PaperWalls";
+				return;
+			}
+
+			var remaining = nextChange.Value - DateTime.Now;
+			if (remaining.TotalSeconds < 60)
+				_trayIcon.Tooltip = "PaperWalls — Next change in < 1 min";
+			else if (remaining.TotalMinutes < 60)
+				_trayIcon.Tooltip = $"PaperWalls — Next change in {(int)remaining.TotalMinutes} min";
+			else
+				_trayIcon.Tooltip = $"PaperWalls — Next change at {nextChange.Value:HH:mm}";
+		}
+		catch
+		{
+			_trayIcon.Tooltip = "PaperWalls";
+		}
+	}
+
 	public new async void Exit()
 	{
+		if (_tooltipTimer != null)
+		{
+			_tooltipTimer.Stop();
+			_tooltipTimer = null;
+		}
+
 		// Dispose tray icon properly
 		if (_trayIcon != null)
 		{

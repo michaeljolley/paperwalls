@@ -283,8 +283,46 @@ public class WallpaperServiceTests
         await service.ChangeWallpaperAsync();
 
         // Assert - SetWallpaper was called twice: once failing, once succeeding
-        // Assert - SetWallpaper was called twice: once failing, once succeeding
         _desktopWallpaperService.Received(2).SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>());
+    }
+
+    [Fact]
+    public async Task ChangeWallpaperAsync_EvictsOldestRecentlyUsed_WhenHistoryIsFull()
+    {
+        // Arrange - 22 distinct images; after 20 wallpaper changes the first two
+        // are evicted from the LRU history and become selectable again.
+        const int imageCount = 22;
+        var topics = new List<string> { "nature" };
+        var images = Enumerable.Range(1, imageCount)
+            .Select(i => new WallpaperImage
+            {
+                FileName = $"image{i:D2}.jpg",
+                Url = $"https://example.com/image{i:D2}.jpg",
+                Topic = "nature"
+            })
+            .ToList();
+
+        _githubService.GetTopicsAsync().Returns(topics);
+        _githubService.GetImagesAsync("nature").Returns(images);
+        _cacheService.DownloadImageAsync(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(x => $"C:\\test\\{x.ArgAt<string>(1)}");
+        _cacheService.GetCacheSizeBytes().Returns(100 * 1024 * 1024);
+
+        var service = new WallpaperService(
+            _githubService, _cacheService, _settingsService, _desktopWallpaperService, _logger);
+
+        // Act - 22 successive changes.  Without proper LRU eviction the 21st and 22nd
+        // calls would see all 22 images in the recently-used set before attempt >= 5,
+        // causing random fallback behaviour.  With correct LRU the two oldest entries
+        // are evicted at capacity and those images are available immediately again.
+        for (int i = 0; i < imageCount; i++)
+        {
+            await service.ChangeWallpaperAsync();
+        }
+
+        // Assert - SetWallpaper called exactly once per invocation proves every call
+        // found a fresh (non-recently-used) image without exhausting its attempt budget.
+        _desktopWallpaperService.Received(imageCount).SetWallpaper(Arg.Any<string>(), Arg.Any<WallpaperStyle>());
     }
 
     [Fact]
