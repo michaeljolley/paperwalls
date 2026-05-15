@@ -46,15 +46,24 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				return new List<string>(_cachedTopics);
 			}
 
-			if (_coolDownUntil.HasValue && DateTimeOffset.UtcNow < _coolDownUntil.Value)
+			if (_coolDownUntil.HasValue)
 			{
-				LogGitHubApiInCoolDown(_coolDownUntil.Value);
-				if (_cachedTopics != null)
+				if (DateTimeOffset.UtcNow < _coolDownUntil.Value)
 				{
-					LogReturningStaleCachedTopics();
-					return new List<string>(_cachedTopics);
+					LogGitHubApiInCoolDown(_coolDownUntil.Value);
+					if (_cachedTopics != null)
+					{
+						LogReturningStaleCachedTopics();
+						return new List<string>(_cachedTopics);
+					}
+					return new List<string>();
 				}
-				return new List<string>();
+				else
+				{
+					// Cool-down expired — clear so the breaker can re-trip if failures resume
+					_coolDownUntil = null;
+					_consecutiveFailures = 0;
+				}
 			}
 		}
 
@@ -125,15 +134,24 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				return new List<WallpaperImage>(cached.images);
 			}
 
-			if (_coolDownUntil.HasValue && DateTimeOffset.UtcNow < _coolDownUntil.Value)
+			if (_coolDownUntil.HasValue)
 			{
-				LogGitHubApiInCoolDown(_coolDownUntil.Value);
-				if (_imageCache.TryGetValue(topic, out var staleCached))
+				if (DateTimeOffset.UtcNow < _coolDownUntil.Value)
 				{
-					LogReturningStaleCachedImages(topic);
-					return new List<WallpaperImage>(staleCached.images);
+					LogGitHubApiInCoolDown(_coolDownUntil.Value);
+					if (_imageCache.TryGetValue(topic, out var staleCached))
+					{
+						LogReturningStaleCachedImages(topic);
+						return new List<WallpaperImage>(staleCached.images);
+					}
+					return new List<WallpaperImage>();
 				}
-				return new List<WallpaperImage>();
+				else
+				{
+					// Cool-down expired — clear so the breaker can re-trip if failures resume
+					_coolDownUntil = null;
+					_consecutiveFailures = 0;
+				}
 			}
 		}
 
@@ -243,7 +261,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		lock (_cacheLock)
 		{
 			_consecutiveFailures++;
-			if (_consecutiveFailures >= MaxConsecutiveFailures && !_coolDownUntil.HasValue)
+			if (_consecutiveFailures >= MaxConsecutiveFailures)
 			{
 				_coolDownUntil = DateTimeOffset.UtcNow + CoolDownDuration;
 				LogGitHubApiEnteringCoolDown(_consecutiveFailures, _coolDownUntil.Value);
