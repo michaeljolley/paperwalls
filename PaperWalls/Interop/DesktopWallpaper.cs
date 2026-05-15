@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace PaperWalls.Interop;
@@ -65,7 +66,11 @@ public static class DesktopWallpaper
 		}
 
 		// Apply the wallpaper
-		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, filePath, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+		var result = SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, filePath, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+		if (result == 0)
+		{
+			throw new Win32Exception(Marshal.GetLastWin32Error());
+		}
 	}
 
 	public static string? GetCurrentWallpaperPath()

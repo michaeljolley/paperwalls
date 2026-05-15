@@ -47,11 +47,18 @@ internal sealed partial class WallpaperService : IWallpaperService
 				return;
 			}
 
-			// Try to find a suitable image
-			string? imagePath = null;
+			// Parse wallpaper style once — settings don't change mid-loop
+			if (!Enum.TryParse<WallpaperStyle>(settings.WallpaperStyle, true, out var style))
+			{
+				LogInvalidWallpaperStyle(settings.WallpaperStyle);
+				style = WallpaperStyle.Fill;
+			}
+
+			// Try to find and set a suitable image
+			bool wallpaperSet = false;
 			int maxAttempts = Math.Min(10, topics.Count * 3);
 
-			for (int attempt = 0; attempt < maxAttempts && imagePath == null; attempt++)
+			for (int attempt = 0; attempt < maxAttempts && !wallpaperSet; attempt++)
 			{
 				// Pick random topic
 				var topic = topics[Random.Shared.Next(topics.Count)];
@@ -90,6 +97,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 				LogSelectedImage(selectedImage.FileName, selectedImage.Topic);
 
 				// Download/get from cache
+				string? imagePath;
 				try
 				{
 					imagePath = await _cacheService.DownloadImageAsync(
@@ -113,27 +121,27 @@ internal sealed partial class WallpaperService : IWallpaperService
 				catch (Exception ex)
 				{
 					LogFailedToDownloadImage(ex, selectedImage.FileName);
-					imagePath = null;
+					continue;
+				}
+
+				// Set wallpaper — if this fails, retry with a different image
+				try
+				{
+					_desktopWallpaperService.SetWallpaper(imagePath, style);
+					LogSuccessfullyChangedWallpaper(imagePath, style);
+					wallpaperSet = true;
+				}
+				catch (Exception ex)
+				{
+					LogFailedToSetWallpaper(ex, imagePath);
 					continue;
 				}
 			}
 
-			if (imagePath == null)
+			if (!wallpaperSet)
 			{
 				LogFailedToFindSuitableWallpaper(maxAttempts);
-				return;
 			}
-
-			// Parse wallpaper style
-			if (!Enum.TryParse<WallpaperStyle>(settings.WallpaperStyle, true, out var style))
-			{
-				LogInvalidWallpaperStyle(settings.WallpaperStyle);
-				style = WallpaperStyle.Fill;
-			}
-
-			// Set wallpaper
-			_desktopWallpaperService.SetWallpaper(imagePath, style);
-			LogSuccessfullyChangedWallpaper(imagePath, style);
 		}
 		catch (Exception ex)
 		{
@@ -193,7 +201,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 	[LoggerMessage(EventId = 4007, Level = LogLevel.Error, Message = "Failed to download image {FileName}")]
 	partial void LogFailedToDownloadImage(Exception ex, string fileName);
 
-	[LoggerMessage(EventId = 4008, Level = LogLevel.Error, Message = "Failed to find and download a suitable wallpaper after {Attempts} attempts")]
+	[LoggerMessage(EventId = 4008, Level = LogLevel.Error, Message = "Failed to find and set a suitable wallpaper after {Attempts} attempts")]
 	partial void LogFailedToFindSuitableWallpaper(int attempts);
 
 	[LoggerMessage(EventId = 4009, Level = LogLevel.Warning, Message = "Invalid wallpaper style {Style}, using Fill")]
@@ -204,4 +212,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 
 	[LoggerMessage(EventId = 4011, Level = LogLevel.Error, Message = "Failed to change wallpaper")]
 	partial void LogFailedToChangeWallpaper(Exception ex);
+
+	[LoggerMessage(EventId = 4012, Level = LogLevel.Error, Message = "Failed to set wallpaper from {Path}, will retry with a different image")]
+	partial void LogFailedToSetWallpaper(Exception ex, string path);
 }

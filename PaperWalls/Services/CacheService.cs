@@ -50,6 +50,15 @@ internal sealed partial class CacheService : ICacheService
 
 			var imageBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 
+			if (!IsValidImageBytes(imageBytes))
+			{
+				var preview = imageBytes.Length >= 8
+					? BitConverter.ToString(imageBytes, 0, 8)
+					: BitConverter.ToString(imageBytes);
+				LogInvalidImageBytes(fileName, preview);
+				throw new InvalidOperationException($"Downloaded content for '{fileName}' is not a valid image (magic bytes: {preview}).");
+			}
+
 			lock (_cacheLock)
 			{
 				// Double-check in case another thread downloaded it
@@ -242,4 +251,33 @@ internal sealed partial class CacheService : ICacheService
 
 	[LoggerMessage(EventId = 1013, Level = LogLevel.Information, Message = "Created cache directory at {Path}")]
 	partial void LogCreatedCacheDirectory(string path);
+
+	private static bool IsValidImageBytes(byte[] bytes)
+	{
+		if (bytes.Length < 4)
+			return false;
+
+		// JPEG: FF D8 FF
+		if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
+			return true;
+
+		// PNG: 89 50 4E 47
+		if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
+			return true;
+
+		// BMP: 42 4D
+		if (bytes[0] == 0x42 && bytes[1] == 0x4D)
+			return true;
+
+		// WEBP: RIFF....WEBP (bytes 0-3 = 52 49 46 46, bytes 8-11 = 57 45 42 50)
+		if (bytes.Length >= 12 &&
+			bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+			bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50)
+			return true;
+
+		return false;
+	}
+
+	[LoggerMessage(EventId = 1014, Level = LogLevel.Warning, Message = "Downloaded content for '{FileName}' failed image validation (first bytes: {Preview})")]
+	partial void LogInvalidImageBytes(string fileName, string preview);
 }
