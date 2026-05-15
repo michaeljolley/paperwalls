@@ -41,7 +41,7 @@ public class SchedulerServiceTests
         await service.StopAsync(CancellationToken.None);
 
         // Assert
-        await _wallpaperService.Received().ChangeWallpaperAsync();
+        await _wallpaperService.Received().ChangeWallpaperAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class SchedulerServiceTests
     public async Task StartAsync_HandlesSynchronousWallpaperChangeException()
     {
         // Arrange
-        _wallpaperService.ChangeWallpaperAsync()
+        _wallpaperService.ChangeWallpaperAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new Exception("Test exception")));
 
         var service = new SchedulerService(_wallpaperService, _settingsService, _logger);
@@ -96,7 +96,7 @@ public class SchedulerServiceTests
         await service.StopAsync(CancellationToken.None);
 
         // Assert - service should still be running
-        await _wallpaperService.Received().ChangeWallpaperAsync();
+        await _wallpaperService.Received().ChangeWallpaperAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public class SchedulerServiceTests
         await service.StopAsync(CancellationToken.None);
 
         // Assert - at least the initial call should have happened
-        await _wallpaperService.Received().ChangeWallpaperAsync();
+        await _wallpaperService.Received().ChangeWallpaperAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
