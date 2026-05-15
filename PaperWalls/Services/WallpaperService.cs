@@ -13,7 +13,8 @@ internal sealed partial class WallpaperService : IWallpaperService
 	private readonly IDesktopWallpaperService _desktopWallpaperService;
 	private readonly ILogger<WallpaperService> _logger;
 
-	private readonly HashSet<string> _recentlyUsed = new();
+	private readonly LinkedList<string> _recentlyUsedList = new();
+	private readonly HashSet<string> _recentlyUsedSet = new();
 	private readonly object _recentLock = new();
 
 	public WallpaperService(
@@ -154,7 +155,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 	{
 		lock (_recentLock)
 		{
-			return _recentlyUsed.Contains(fileName);
+			return _recentlyUsedSet.Contains(fileName);
 		}
 	}
 
@@ -162,16 +163,19 @@ internal sealed partial class WallpaperService : IWallpaperService
 	{
 		lock (_recentLock)
 		{
-			_recentlyUsed.Add(fileName);
-
-			// Trim to size if needed
-			if (_recentlyUsed.Count > RecentHistorySize)
+			if (_recentlyUsedSet.Contains(fileName))
 			{
-				// Remove oldest (first) item - HashSet doesn't maintain insertion order
-				// so we'll just remove one at random when we exceed the limit
-				// For better LRU, we'd use a LinkedHashSet-like structure
-				var toRemove = _recentlyUsed.First();
-				_recentlyUsed.Remove(toRemove);
+				_recentlyUsedList.Remove(fileName);
+			}
+
+			_recentlyUsedList.AddLast(fileName);
+			_recentlyUsedSet.Add(fileName);
+
+			while (_recentlyUsedList.Count > RecentHistorySize)
+			{
+				var oldest = _recentlyUsedList.First!.Value;
+				_recentlyUsedList.RemoveFirst();
+				_recentlyUsedSet.Remove(oldest);
 			}
 		}
 	}
