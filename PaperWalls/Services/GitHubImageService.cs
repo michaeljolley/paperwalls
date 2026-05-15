@@ -15,10 +15,15 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 	private readonly ISettingsService _settingsService;
 	private readonly ILogger<GitHubImageService> _logger;
 
+	private const int MaxConsecutiveFailures = 3;
+	private static readonly TimeSpan CoolDownDuration = TimeSpan.FromMinutes(5);
+
 	private DateTime _topicsCacheTime = DateTime.MinValue;
 	private List<string>? _cachedTopics;
 	private readonly Dictionary<string, (DateTime timestamp, List<WallpaperImage> images)> _imageCache = new();
 	private readonly object _cacheLock = new();
+	private int _consecutiveFailures;
+	private DateTimeOffset? _coolDownUntil;
 
 	public GitHubImageService(
 		IHttpClientFactory httpClientFactory,
@@ -39,6 +44,17 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			{
 				LogReturningCachedTopics();
 				return new List<string>(_cachedTopics);
+			}
+
+			if (_coolDownUntil.HasValue && DateTimeOffset.UtcNow < _coolDownUntil.Value)
+			{
+				LogGitHubApiInCoolDown(_coolDownUntil.Value);
+				if (_cachedTopics != null)
+				{
+					LogReturningStaleCachedTopics();
+					return new List<string>(_cachedTopics);
+				}
+				return new List<string>();
 			}
 		}
 
@@ -73,6 +89,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			{
 				_cachedTopics = filteredTopics;
 				_topicsCacheTime = DateTime.UtcNow;
+				ResetCircuitBreaker();
 			}
 
 			LogFetchedTopics(topics.Count, filteredTopics.Count);
@@ -81,6 +98,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		catch (HttpRequestException ex)
 		{
 			LogFailedToFetchTopics(ex);
+			RecordFailure();
 
 			// Return cached data if available
 			lock (_cacheLock)
@@ -105,6 +123,17 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			{
 				LogReturningCachedImages(topic);
 				return new List<WallpaperImage>(cached.images);
+			}
+
+			if (_coolDownUntil.HasValue && DateTimeOffset.UtcNow < _coolDownUntil.Value)
+			{
+				LogGitHubApiInCoolDown(_coolDownUntil.Value);
+				if (_imageCache.TryGetValue(topic, out var staleCached))
+				{
+					LogReturningStaleCachedImages(topic);
+					return new List<WallpaperImage>(staleCached.images);
+				}
+				return new List<WallpaperImage>();
 			}
 		}
 
@@ -139,6 +168,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			lock (_cacheLock)
 			{
 				_imageCache[topic] = (DateTime.UtcNow, images);
+				ResetCircuitBreaker();
 			}
 
 			LogFetchedImages(images.Count, topic);
@@ -147,6 +177,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		catch (HttpRequestException ex)
 		{
 			LogFailedToFetchImages(ex, topic);
+			RecordFailure();
 
 			// Return cached data if available
 			lock (_cacheLock)
@@ -196,6 +227,30 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		return extension is ".jpg" or ".jpeg" or ".png" or ".bmp" or ".webp";
 	}
 
+	// Must be called inside _cacheLock
+	private void ResetCircuitBreaker()
+	{
+		if (_consecutiveFailures > 0)
+		{
+			LogGitHubApiCircuitBreakerReset(_consecutiveFailures);
+		}
+		_consecutiveFailures = 0;
+		_coolDownUntil = null;
+	}
+
+	private void RecordFailure()
+	{
+		lock (_cacheLock)
+		{
+			_consecutiveFailures++;
+			if (_consecutiveFailures >= MaxConsecutiveFailures && !_coolDownUntil.HasValue)
+			{
+				_coolDownUntil = DateTimeOffset.UtcNow + CoolDownDuration;
+				LogGitHubApiEnteringCoolDown(_consecutiveFailures, _coolDownUntil.Value);
+			}
+		}
+	}
+
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 2000, Level = LogLevel.Debug, Message = "Returning cached topics")]
 	partial void LogReturningCachedTopics();
@@ -241,4 +296,13 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	[LoggerMessage(EventId = 2014, Level = LogLevel.Error, Message = "GitHub API rate limit exceeded. Resets at {ResetTime}")]
 	partial void LogGitHubApiRateLimitExceeded(DateTimeOffset resetTime);
+
+	[LoggerMessage(EventId = 2015, Level = LogLevel.Warning, Message = "GitHub API in cool-down until {CoolDownUntil} — skipping API call")]
+	partial void LogGitHubApiInCoolDown(DateTimeOffset coolDownUntil);
+
+	[LoggerMessage(EventId = 2016, Level = LogLevel.Warning, Message = "GitHub API entering cool-down after {FailureCount} consecutive failures. Will retry after {CoolDownUntil}")]
+	partial void LogGitHubApiEnteringCoolDown(int failureCount, DateTimeOffset coolDownUntil);
+
+	[LoggerMessage(EventId = 2017, Level = LogLevel.Information, Message = "GitHub API circuit breaker reset after {FailureCount} recorded failures")]
+	partial void LogGitHubApiCircuitBreakerReset(int failureCount);
 }
