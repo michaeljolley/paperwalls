@@ -49,7 +49,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 		{
 			try
 			{
-				await _wallpaperService.ChangeWallpaperAsync();
+				await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -104,7 +104,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				try
 				{
 					LogTimerTick();
-					await _wallpaperService.ChangeWallpaperAsync();
+					await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
 
 					// Update next change time
 					var settings = _settingsService.LoadSettings();
