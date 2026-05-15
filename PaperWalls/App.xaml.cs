@@ -103,9 +103,9 @@ public partial class App : Application
 					var wallpaperService = Services.GetRequiredService<IWallpaperService>();
 					await Task.Run(() => wallpaperService.ChangeWallpaperAsync());
 				}
-				catch
+				catch (Exception ex)
 				{
-					// Silently handle errors for now
+					Serilog.Log.Error(ex, "Failed to refresh wallpaper from tray menu");
 				}
 			};
 			flyout.Items.Add(refreshItem);
@@ -138,9 +138,9 @@ public partial class App : Application
 					};
 					await dialog.ShowAsync();
 				}
-				catch
+				catch (Exception ex)
 				{
-					// Silently handle errors for now
+					Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
 				}
 			};
 			flyout.Items.Add(reportBugItem);
