@@ -22,6 +22,7 @@ public class SettingsServiceTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         // Clean up test directory
         if (Directory.Exists(_testSettingsPath))
         {

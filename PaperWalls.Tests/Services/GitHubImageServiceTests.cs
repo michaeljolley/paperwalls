@@ -8,7 +8,7 @@ using PaperWalls.Services;
 
 namespace PaperWalls.Tests.Services;
 
-public class GitHubImageServiceTests
+public class GitHubImageServiceTests : IDisposable
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISettingsService _settingsService;
@@ -30,6 +30,12 @@ public class GitHubImageServiceTests
         {
             ExcludedTopics = new List<string>()
         });
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _httpHandler.Dispose();
     }
 
     [Fact]
@@ -228,7 +234,7 @@ public class GitHubImageServiceTests
             await service.GetImagesAsync("nonexistent"));
     }
 
-    private class TestHttpMessageHandler : HttpMessageHandler
+    private sealed class TestHttpMessageHandler : HttpMessageHandler
     {
         public string ResponseContent { get; set; } = "[]";
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;

@@ -6,6 +6,8 @@ namespace PaperWalls.Tests.Models;
 
 public class AppSettingsTests
 {
+    private static readonly JsonSerializerOptions IndentedOptions = new() { WriteIndented = true };
+
     [Fact]
     public void DefaultValues_AreCorrect()
     {
@@ -60,10 +62,7 @@ public class AppSettingsTests
         };
 
         // Act
-        var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
+        var json = JsonSerializer.Serialize(settings, IndentedOptions);
 
         // Assert
         json.Should().Contain("IntervalMinutes");
