@@ -1,0 +1,4 @@
+# xUnit test naming convention uses underscores (MethodName_Scenario_ExpectedResult)
+# Suppress CA1707 for test project only
+[*.cs]
+dotnet_diagnostic.CA1707.severity = none

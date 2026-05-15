@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PaperWalls.Services;
+using PaperWalls.Tests.Helpers;
 
 namespace PaperWalls.Tests.Services;
 
@@ -30,6 +31,7 @@ public class CacheServiceTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         // Clean up test cache directory
         if (Directory.Exists(_testCacheDirectory))
         {
@@ -41,7 +43,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_DownloadsImageToCacheDirectory()
     {
         // Arrange
-        var imageData = new byte[] { 0x89, 0x50, 0x4E, 0x47 }; // PNG header
+        var imageData = ValidImageBytes.PngShort; // PNG header
         _httpHandler.ResponseBytes = imageData;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -60,7 +62,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_ReturnsCachedPathForExistingImage()
     {
         // Arrange
-        var imageData = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
+        var imageData = ValidImageBytes.PngShort;
         _httpHandler.ResponseBytes = imageData;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -96,7 +98,7 @@ public class CacheServiceTests : IDisposable
     public async Task GetCachedImagePath_ReturnsPathForCachedImage()
     {
         // Arrange
-        var imageData = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
+        var imageData = ValidImageBytes.PngShort;
         _httpHandler.ResponseBytes = imageData;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -116,11 +118,10 @@ public class CacheServiceTests : IDisposable
     {
         // Arrange
         // PNG magic bytes at the front so new image validation passes; sizes stay 1 KB / 2 KB
-        var pngHeader = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
         var imageData1 = new byte[1024];
-        pngHeader.CopyTo(imageData1, 0);
+        ValidImageBytes.PngShort.CopyTo(imageData1, 0);
         var imageData2 = new byte[2048];
-        pngHeader.CopyTo(imageData2, 0);
+        ValidImageBytes.PngShort.CopyTo(imageData2, 0);
 
         _httpHandler.ResponseBytes = imageData1;
         _httpHandler.StatusCode = HttpStatusCode.OK;
@@ -259,7 +260,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidPngMagicBytes()
     {
         // Arrange - PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
-        var pngBytes = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D };
+        var pngBytes = ValidImageBytes.Png;
         _httpHandler.ResponseBytes = pngBytes;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -280,7 +281,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidJpegMagicBytes()
     {
         // Arrange - JPEG magic bytes: FF D8 FF
-        var jpegBytes = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 };
+        var jpegBytes = ValidImageBytes.Jpeg;
         _httpHandler.ResponseBytes = jpegBytes;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -300,7 +301,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidBmpMagicBytes()
     {
         // Arrange - BMP magic bytes: 42 4D ("BM")
-        var bmpBytes = new byte[] { 0x42, 0x4D, 0x46, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00 };
+        var bmpBytes = ValidImageBytes.Bmp;
         _httpHandler.ResponseBytes = bmpBytes;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
@@ -320,12 +321,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidWebpMagicBytes()
     {
         // Arrange - WEBP: RIFF (52 49 46 46) + 4-byte size + WEBP (57 45 42 50)
-        var webpBytes = new byte[]
-        {
-            0x52, 0x49, 0x46, 0x46, // "RIFF"
-            0x24, 0x00, 0x00, 0x00, // file size (little-endian)
-            0x57, 0x45, 0x42, 0x50  // "WEBP"
-        };
+        var webpBytes = ValidImageBytes.Webp;
         _httpHandler.ResponseBytes = webpBytes;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
