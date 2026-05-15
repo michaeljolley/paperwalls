@@ -37,6 +37,8 @@ internal sealed partial class WallpaperService : IWallpaperService
 		{
 			LogStartingWallpaperChange();
 
+			cancellationToken.ThrowIfCancellationRequested();
+
 			// Get settings
 			var settings = _settingsService.LoadSettings();
 
@@ -145,6 +147,10 @@ internal sealed partial class WallpaperService : IWallpaperService
 			{
 				LogFailedToFindSuitableWallpaper(maxAttempts);
 			}
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{
