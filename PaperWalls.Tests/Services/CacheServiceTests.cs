@@ -275,6 +275,86 @@ public class CacheServiceTests : IDisposable
         cachedBytes.Should().BeEquivalentTo(pngBytes);
     }
 
+
+    [Fact]
+    public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidJpegMagicBytes()
+    {
+        // Arrange - JPEG magic bytes: FF D8 FF
+        var jpegBytes = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 };
+        _httpHandler.ResponseBytes = jpegBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act
+        var filePath = await service.DownloadImageAsync("https://example.com/image.jpg", "valid.jpg");
+
+        // Assert
+        filePath.Should().NotBeNullOrEmpty();
+        File.Exists(filePath).Should().BeTrue();
+        var cachedBytes = await File.ReadAllBytesAsync(filePath);
+        cachedBytes.Should().BeEquivalentTo(jpegBytes);
+    }
+
+    [Fact]
+    public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidBmpMagicBytes()
+    {
+        // Arrange - BMP magic bytes: 42 4D ("BM")
+        var bmpBytes = new byte[] { 0x42, 0x4D, 0x46, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00 };
+        _httpHandler.ResponseBytes = bmpBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act
+        var filePath = await service.DownloadImageAsync("https://example.com/image.bmp", "valid.bmp");
+
+        // Assert
+        filePath.Should().NotBeNullOrEmpty();
+        File.Exists(filePath).Should().BeTrue();
+        var cachedBytes = await File.ReadAllBytesAsync(filePath);
+        cachedBytes.Should().BeEquivalentTo(bmpBytes);
+    }
+
+    [Fact]
+    public async Task DownloadImageAsync_Succeeds_WhenResponseContainsValidWebpMagicBytes()
+    {
+        // Arrange - WEBP: RIFF (52 49 46 46) + 4-byte size + WEBP (57 45 42 50)
+        var webpBytes = new byte[]
+        {
+            0x52, 0x49, 0x46, 0x46, // "RIFF"
+            0x24, 0x00, 0x00, 0x00, // file size (little-endian)
+            0x57, 0x45, 0x42, 0x50  // "WEBP"
+        };
+        _httpHandler.ResponseBytes = webpBytes;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act
+        var filePath = await service.DownloadImageAsync("https://example.com/image.webp", "valid.webp");
+
+        // Assert
+        filePath.Should().NotBeNullOrEmpty();
+        File.Exists(filePath).Should().BeTrue();
+        var cachedBytes = await File.ReadAllBytesAsync(filePath);
+        cachedBytes.Should().BeEquivalentTo(webpBytes);
+    }
+
+    [Fact]
+    public async Task DownloadImageAsync_ThrowsInvalidOperationException_WhenResponseIsEmpty()
+    {
+        // Arrange - 0-byte response (e.g. network truncation)
+        _httpHandler.ResponseBytes = new byte[0];
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await service.DownloadImageAsync("https://example.com/image.jpg", "empty.jpg"));
+    }
+
     private class TestHttpMessageHandler : HttpMessageHandler
     {
         public byte[] ResponseBytes { get; set; } = Array.Empty<byte>();
