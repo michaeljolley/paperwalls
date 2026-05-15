@@ -124,7 +124,7 @@ public class WallpaperServiceTests
         
         // First download fails, second succeeds
         _cacheService.DownloadImageAsync(Arg.Any<string>(), "image1.jpg")
-            .Returns(Task.FromException<string>(new Exception("Download failed")));
+            .Returns(Task.FromException<string>(new InvalidOperationException("Download failed")));
         _cacheService.DownloadImageAsync(Arg.Any<string>(), "image2.jpg")
             .Returns("C:\\test\\image2.jpg");
         _cacheService.GetCacheSizeBytes().Returns(100 * 1024 * 1024);
@@ -273,7 +273,7 @@ public class WallpaperServiceTests
             .Do(_ =>
             {
                 if (++setWallpaperCallCount == 1)
-                    throw new Exception("Win32 failure simulating black screen");
+                    throw new InvalidOperationException("Win32 failure simulating black screen");
             });
 
         var service = new WallpaperService(

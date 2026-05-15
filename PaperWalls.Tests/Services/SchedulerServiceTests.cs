@@ -82,7 +82,7 @@ public class SchedulerServiceTests
     {
         // Arrange
         _wallpaperService.ChangeWallpaperAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromException(new Exception("Test exception")));
+            .Returns(Task.FromException(new InvalidOperationException("Test exception")));
 
         var service = new SchedulerService(_wallpaperService, _settingsService, _logger);
 

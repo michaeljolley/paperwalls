@@ -341,7 +341,7 @@ public class CacheServiceTests : IDisposable
     public async Task DownloadImageAsync_ThrowsInvalidOperationException_WhenResponseIsEmpty()
     {
         // Arrange - 0-byte response (e.g. network truncation)
-        _httpHandler.ResponseBytes = new byte[0];
+        _httpHandler.ResponseBytes = Array.Empty<byte>();
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
         var service = new CacheService(_httpClientFactory, _logger, _testCacheDirectory);
@@ -351,7 +351,7 @@ public class CacheServiceTests : IDisposable
             await service.DownloadImageAsync("https://example.com/image.jpg", "empty.jpg"));
     }
 
-    private class TestHttpMessageHandler : HttpMessageHandler
+    private sealed class TestHttpMessageHandler : HttpMessageHandler
     {
         public byte[] ResponseBytes { get; set; } = Array.Empty<byte>();
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
