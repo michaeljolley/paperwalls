@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using PaperWalls.Models;
 using PaperWalls.Services;
 
@@ -17,7 +19,7 @@ public class SettingsServiceTests : IDisposable
         Directory.CreateDirectory(_testSettingsPath);
 
         // Set environment for test
-        _service = new SettingsService();
+        _service = new SettingsService(Substitute.For<ILogger<SettingsService>>());
     }
 
     public void Dispose()

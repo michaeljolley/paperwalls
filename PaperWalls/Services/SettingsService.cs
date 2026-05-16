@@ -1,18 +1,22 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using PaperWalls.Models;
 using PaperWalls.Serialization;
 
 namespace PaperWalls.Services;
 
-internal sealed class SettingsService : ISettingsService
+internal sealed partial class SettingsService : ISettingsService
 {
 	private readonly string _settingsPath;
 	private readonly object _lock = new();
+	private readonly ILogger<SettingsService> _logger;
 
 	public event EventHandler? SettingsChanged;
 
-	public SettingsService()
+	public SettingsService(ILogger<SettingsService> logger)
 	{
+		_logger = logger;
+
 		var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 		var appFolder = Path.Combine(localAppData, "PaperWalls");
 
@@ -37,9 +41,9 @@ internal sealed class SettingsService : ISettingsService
 				var json = File.ReadAllText(_settingsPath);
 				return JsonSerializer.Deserialize(json, AppJsonContext.Default.AppSettings) ?? new AppSettings();
 			}
-			catch
+			catch (Exception ex)
 			{
-				// If deserialization fails, return default settings
+				LogFailedToLoadSettings(ex);
 				return new AppSettings();
 			}
 		}
@@ -59,4 +63,7 @@ internal sealed class SettingsService : ISettingsService
 		var json = JsonSerializer.Serialize(settings, AppJsonContext.Default.AppSettings);
 		File.WriteAllText(_settingsPath, json);
 	}
+
+	[LoggerMessage(EventId = 8000, Level = LogLevel.Warning, Message = "Failed to load settings, returning defaults")]
+	partial void LogFailedToLoadSettings(Exception ex);
 }
