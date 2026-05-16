@@ -1,11 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Net.Http.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using PaperWalls.Interop;
 using PaperWalls.Models;
-using PaperWalls.Serialization;
 using PaperWalls.Services;
 
 namespace PaperWalls.ViewModels;
@@ -18,6 +16,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 	private readonly ICacheService _cacheService;
 	private readonly IDesktopWallpaperService _desktopWallpaperService;
 	private readonly StartupManager _startupManager;
+	private readonly IGitHubImageService _gitHubImageService;
 	private readonly ILogger<SettingsViewModel> _logger;
 
 	private string _savedStyle = "Fill";
@@ -27,12 +26,14 @@ public sealed partial class SettingsViewModel : ObservableObject
 		ICacheService cacheService,
 		IDesktopWallpaperService desktopWallpaperService,
 		StartupManager startupManager,
+		IGitHubImageService gitHubImageService,
 		ILogger<SettingsViewModel> logger)
 	{
 		_settingsService = settingsService;
 		_cacheService = cacheService;
 		_desktopWallpaperService = desktopWallpaperService;
 		_startupManager = startupManager;
+		_gitHubImageService = gitHubImageService;
 		_logger = logger;
 	}
 
@@ -120,7 +121,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
 		try
 		{
-			var allTopics = await GetAllTopicsFromGitHubAsync();
+			var allTopics = await _gitHubImageService.GetAllTopicsAsync();
 
 			TopicItems.Clear();
 			foreach (var topic in allTopics)
@@ -159,21 +160,6 @@ public sealed partial class SettingsViewModel : ObservableObject
 		}
 	}
 
-	private static async Task<List<string>> GetAllTopicsFromGitHubAsync()
-	{
-		using var httpClient = new System.Net.Http.HttpClient();
-		httpClient.DefaultRequestHeaders.Add("User-Agent", "PaperWalls/1.0");
-
-		var response = await httpClient.GetAsync("https://api.github.com/repos/burkeholland/paper/contents/wallpapers");
-		response.EnsureSuccessStatusCode();
-
-		var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem);
-		return items?
-			.Where(i => i.Type == "dir")
-			.Select(i => i.Name)
-			.OrderBy(n => n)
-			.ToList() ?? [];
-	}
 
 	private void UpdateCacheSizeDisplay()
 	{

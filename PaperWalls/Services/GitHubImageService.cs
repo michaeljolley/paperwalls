@@ -20,6 +20,8 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	private DateTime _topicsCacheTime = DateTime.MinValue;
 	private List<string>? _cachedTopics;
+	private DateTime _allTopicsCacheTime = DateTime.MinValue;
+	private List<string>? _cachedAllTopics;
 	private readonly Dictionary<string, (DateTime timestamp, List<WallpaperImage> images)> _imageCache = new();
 	private readonly object _cacheLock = new();
 	private int _consecutiveFailures;
@@ -116,6 +118,87 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				{
 					LogReturningStaleCachedTopics();
 					return new List<string>(_cachedTopics);
+				}
+			}
+
+			throw;
+		}
+	}
+
+	public async Task<List<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
+	{
+		lock (_cacheLock)
+		{
+			if (_cachedAllTopics != null && DateTime.UtcNow - _allTopicsCacheTime < CacheExpiry)
+			{
+				LogReturningCachedTopics();
+				return new List<string>(_cachedAllTopics);
+			}
+
+			if (_coolDownUntil.HasValue)
+			{
+				if (DateTimeOffset.UtcNow < _coolDownUntil.Value)
+				{
+					LogGitHubApiInCoolDown(_coolDownUntil.Value);
+					if (_cachedAllTopics != null)
+					{
+						LogReturningStaleCachedTopics();
+						return new List<string>(_cachedAllTopics);
+					}
+					return new List<string>();
+				}
+				else
+				{
+					_coolDownUntil = null;
+					_consecutiveFailures = 0;
+				}
+			}
+		}
+
+		try
+		{
+			LogFetchingTopicsFromGitHub();
+
+			var response = await _httpClient.GetAsync(ApiBaseUrl, cancellationToken).ConfigureAwait(false);
+
+			CheckRateLimit(response);
+
+			response.EnsureSuccessStatusCode();
+
+			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem, cancellationToken).ConfigureAwait(false);
+			if (items == null)
+			{
+				LogGitHubApiReturnedNull();
+				return new List<string>();
+			}
+
+			var allTopics = items
+				.Where(i => i.Type == "dir")
+				.Select(i => i.Name)
+				.OrderBy(n => n)
+				.ToList();
+
+			lock (_cacheLock)
+			{
+				_cachedAllTopics = allTopics;
+				_allTopicsCacheTime = DateTime.UtcNow;
+				ResetCircuitBreaker();
+			}
+
+			LogFetchedTopics(allTopics.Count, allTopics.Count);
+			return new List<string>(allTopics);
+		}
+		catch (HttpRequestException ex)
+		{
+			LogFailedToFetchTopics(ex);
+			RecordFailure();
+
+			lock (_cacheLock)
+			{
+				if (_cachedAllTopics != null)
+				{
+					LogReturningStaleCachedTopics();
+					return new List<string>(_cachedAllTopics);
 				}
 			}
 
