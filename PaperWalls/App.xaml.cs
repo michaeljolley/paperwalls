@@ -150,6 +150,25 @@ public partial class App : Application
 					catch (Exception ex)
 					{
 						Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
+
+						try
+						{
+							var mainWindow = Services.GetRequiredService<MainWindow>();
+							mainWindow.Activate();
+
+							var errorDialog = new ContentDialog
+							{
+								Title = "Bug Report Failed",
+								Content = "Failed to create bug report. Check the logs for details.",
+								CloseButtonText = "OK",
+								XamlRoot = mainWindow.Content.XamlRoot
+							};
+							await errorDialog.ShowAsync();
+						}
+						catch (Exception dialogEx)
+						{
+							Serilog.Log.Warning(dialogEx, "Failed to show bug report error dialog");
+						}
 					}
 				};
 				flyout.Items.Add(reportBugItem);
@@ -181,19 +200,28 @@ public partial class App : Application
 			var scheduler = Services.GetRequiredService<ISchedulerService>();
 			var nextChange = scheduler.NextChangeTime;
 
+			string tooltip;
 			if (nextChange == null)
 			{
-				_trayIcon.Tooltip = "PaperWalls";
-				return;
+				tooltip = "PaperWalls";
+			}
+			else
+			{
+				var remaining = nextChange.Value - DateTime.Now;
+				if (remaining.TotalSeconds < 60)
+					tooltip = "PaperWalls — Next change in < 1 min";
+				else if (remaining.TotalMinutes < 60)
+					tooltip = $"PaperWalls — Next change in {(int)remaining.TotalMinutes} min";
+				else
+					tooltip = $"PaperWalls — Next change at {nextChange.Value:HH:mm}";
 			}
 
-			var remaining = nextChange.Value - DateTime.Now;
-			if (remaining.TotalSeconds < 60)
-				_trayIcon.Tooltip = "PaperWalls — Next change in < 1 min";
-			else if (remaining.TotalMinutes < 60)
-				_trayIcon.Tooltip = $"PaperWalls — Next change in {(int)remaining.TotalMinutes} min";
-			else
-				_trayIcon.Tooltip = $"PaperWalls — Next change at {nextChange.Value:HH:mm}";
+			if (scheduler.LastChangeSucceeded == false)
+			{
+				tooltip += " — ⚠ Last change failed";
+			}
+
+			_trayIcon.Tooltip = tooltip;
 		}
 		catch (Exception ex)
 		{

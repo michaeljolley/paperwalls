@@ -16,6 +16,8 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 
 	public DateTime? NextChangeTime { get; private set; }
 
+	public bool? LastChangeSucceeded { get; private set; }
+
 	public SchedulerService(
 		IWallpaperService wallpaperService,
 		ISettingsService settingsService,
@@ -50,10 +52,12 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			try
 			{
 				await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
+				LastChangeSucceeded = true;
 			}
 			catch (Exception ex)
 			{
 				LogFailedToChangeWallpaperOnStartup(ex);
+				LastChangeSucceeded = false;
 			}
 		}, cancellationToken);
 
@@ -105,6 +109,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				{
 					LogTimerTick();
 					await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
+					LastChangeSucceeded = true;
 
 					// Update next change time
 					var settings = _settingsService.LoadSettings();
@@ -113,6 +118,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				catch (Exception ex)
 				{
 					LogErrorDuringScheduledWallpaperChange(ex);
+					LastChangeSucceeded = false;
 					// Continue running - don't crash the service
 				}
 			}
