@@ -68,6 +68,12 @@ public sealed partial class SettingsViewModel : ObservableObject
 	private bool _saveSuccessVisible;
 
 	[ObservableProperty]
+	private bool _saveErrorVisible;
+
+	[ObservableProperty]
+	private bool _clearCacheErrorVisible;
+
+	[ObservableProperty]
 	private bool _settingsLoaded;
 
 	public ObservableCollection<TopicItemViewModel> TopicItems { get; } = new();
@@ -245,31 +251,52 @@ public sealed partial class SettingsViewModel : ObservableObject
 	[RelayCommand]
 	private async Task ClearCacheAsync()
 	{
-		await _cacheService.ClearCacheAsync();
-		UpdateCacheSizeDisplay();
+		ClearCacheErrorVisible = false;
+
+		try
+		{
+			await _cacheService.ClearCacheAsync();
+			UpdateCacheSizeDisplay();
+		}
+		catch (Exception ex)
+		{
+			LogFailedToClearCache(ex);
+			ClearCacheErrorVisible = true;
+		}
 	}
 
 	[RelayCommand]
 	private void Save()
 	{
-		var settings = new Models.AppSettings
+		SaveSuccessVisible = false;
+		SaveErrorVisible = false;
+
+		try
 		{
-			IntervalMinutes = IntervalOptions[SelectedIntervalIndex].Minutes,
-			ExcludedTopics = TopicItems
-				.Where(t => !t.IsSelected)
-				.Select(t => t.Name)
-				.ToList(),
-			WallpaperStyle = StyleOptions[SelectedStyleIndex],
-			CacheMaxMB = (int)CacheMaxMB,
-			StartWithWindows = StartWithWindows
-		};
+			var settings = new Models.AppSettings
+			{
+				IntervalMinutes = IntervalOptions[SelectedIntervalIndex].Minutes,
+				ExcludedTopics = TopicItems
+					.Where(t => !t.IsSelected)
+					.Select(t => t.Name)
+					.ToList(),
+				WallpaperStyle = StyleOptions[SelectedStyleIndex],
+				CacheMaxMB = (int)CacheMaxMB,
+				StartWithWindows = StartWithWindows
+			};
 
-		_settingsService.SaveSettings(settings);
-		_savedStyle = settings.WallpaperStyle;
+			_settingsService.SaveSettings(settings);
+			_savedStyle = settings.WallpaperStyle;
 
-		_startupManager.SetStartWithWindows(settings.StartWithWindows);
+			_startupManager.SetStartWithWindows(settings.StartWithWindows);
 
-		SaveSuccessVisible = true;
+			SaveSuccessVisible = true;
+		}
+		catch (Exception ex)
+		{
+			LogFailedToSaveSettings(ex);
+			SaveErrorVisible = true;
+		}
 	}
 
 	public void RevertStyleIfNeeded()
@@ -306,6 +333,12 @@ public sealed partial class SettingsViewModel : ObservableObject
 
 	[LoggerMessage(EventId = 7002, Level = LogLevel.Error, Message = "Failed to revert wallpaper style")]
 	partial void LogFailedToRevertWallpaperStyle(Exception ex);
+
+	[LoggerMessage(EventId = 7003, Level = LogLevel.Error, Message = "Failed to save settings")]
+	partial void LogFailedToSaveSettings(Exception ex);
+
+	[LoggerMessage(EventId = 7004, Level = LogLevel.Error, Message = "Failed to clear cache")]
+	partial void LogFailedToClearCache(Exception ex);
 }
 
 public sealed partial class TopicItemViewModel : ObservableObject
