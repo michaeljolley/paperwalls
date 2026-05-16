@@ -48,7 +48,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			.Where(t => !settings.ExcludedTopics.Contains(t, StringComparer.OrdinalIgnoreCase))
 			.ToList();
 
-		LogFetchedTopics(allTopics.Count, filtered.Count);
+		LogFilteredTopics(filtered.Count, allTopics.Count - filtered.Count);
 		return filtered;
 	}
 
@@ -333,4 +333,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	[LoggerMessage(EventId = 2017, Level = LogLevel.Information, Message = "GitHub API circuit breaker reset after {FailureCount} recorded failures")]
 	partial void LogGitHubApiCircuitBreakerReset(int failureCount);
+
+	[LoggerMessage(EventId = 2018, Level = LogLevel.Debug, Message = "Filtered to {Count} topics after excluding {ExcludedCount}")]
+	partial void LogFilteredTopics(int count, int excludedCount);
 }
