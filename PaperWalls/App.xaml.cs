@@ -19,6 +19,8 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
+		UnhandledException += OnUnhandledException;
+		TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 	}
 
 	public static IServiceProvider Services => ((App)Current)._host!.Services;
@@ -34,132 +36,140 @@ public partial class App : Application
 			return;
 		}
 
-		// Build the host with DI container
-		var logPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-			"PaperWalls", "logs", "PaperWalls-.log");
-
-		_host = Host.CreateDefaultBuilder()
-			.UseSerilog((context, configuration) =>
-			{
-				configuration
-					.WriteTo.File(
-						logPath,
-						rollingInterval: Serilog.RollingInterval.Day,
-						retainedFileCountLimit: 14,
-						fileSizeLimitBytes: 10 * 1024 * 1024,
-						outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}");
-			})
-			.ConfigureServices((context, services) =>
-			{
-				// Register HTTP client factory
-				services.AddHttpClient("GitHub");
-				services.AddHttpClient();
-
-				// Register services
-				services.AddSingleton<ISettingsService, SettingsService>();
-				services.AddSingleton<IGitHubImageService, GitHubImageService>();
-				services.AddSingleton<ICacheService, CacheService>();
-				services.AddSingleton<IDesktopWallpaperService, DesktopWallpaperService>();
-				services.AddSingleton<IWallpaperService, WallpaperService>();
-				services.AddSingleton<StartupManager>();
-				services.AddSingleton<ILogBundleService, LogBundleService>();
-
-				// Register view models
-				services.AddSingleton<SettingsViewModel>();
-
-				// Register scheduler as both ISchedulerService and IHostedService
-				services.AddSingleton<SchedulerService>();
-				services.AddSingleton<ISchedulerService>(sp => sp.GetRequiredService<SchedulerService>());
-				services.AddHostedService(sp => sp.GetRequiredService<SchedulerService>());
-
-				// Register window (created on-demand but kept as singleton)
-				services.AddSingleton<MainWindow>();
-			})
-			.Build();
-
-		// Start the host
-		_host.Start();
-
-		// Create and show tray icon (app starts minimized to tray)
-		var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "logo.ico");
-		_trayIcon = new TrayIcon(1, iconPath, "PaperWalls");
-		_trayIcon.IsVisible = true;
-
-		_tooltipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
-		_tooltipTimer.Tick += (_, _) => UpdateTrayTooltip();
-		_tooltipTimer.Start();
-
-		_trayIcon.Selected += (s, e) =>
+		try
 		{
-			var mainWindow = Services.GetRequiredService<MainWindow>();
-			mainWindow.Activate();
-		};
+			// Build the host with DI container
+			var logPath = Path.Combine(
+				Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+				"PaperWalls", "logs", "PaperWalls-.log");
 
-		_trayIcon.ContextMenu += (s, e) =>
-		{
-			var flyout = new MenuFlyout();
-
-			var refreshItem = new MenuFlyoutItem { Text = "Refresh PaperWall" };
-			refreshItem.Click += async (_, _) =>
-			{
-				try
+			_host = Host.CreateDefaultBuilder()
+				.UseSerilog((context, configuration) =>
 				{
-					var wallpaperService = Services.GetRequiredService<IWallpaperService>();
-					await Task.Run(() => wallpaperService.ChangeWallpaperAsync(CancellationToken.None));
-				}
-				catch (Exception ex)
+					configuration
+						.WriteTo.File(
+							logPath,
+							rollingInterval: Serilog.RollingInterval.Day,
+							retainedFileCountLimit: 14,
+							fileSizeLimitBytes: 10 * 1024 * 1024,
+							outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+				})
+				.ConfigureServices((context, services) =>
 				{
-					Serilog.Log.Error(ex, "Failed to refresh wallpaper from tray menu");
-				}
-			};
-			flyout.Items.Add(refreshItem);
+					// Register HTTP client factory
+					services.AddHttpClient("GitHub");
+					services.AddHttpClient();
 
-			var settingsItem = new MenuFlyoutItem { Text = "Settings..." };
-			settingsItem.Click += (_, _) =>
+					// Register services
+					services.AddSingleton<ISettingsService, SettingsService>();
+					services.AddSingleton<IGitHubImageService, GitHubImageService>();
+					services.AddSingleton<ICacheService, CacheService>();
+					services.AddSingleton<IDesktopWallpaperService, DesktopWallpaperService>();
+					services.AddSingleton<IWallpaperService, WallpaperService>();
+					services.AddSingleton<StartupManager>();
+					services.AddSingleton<ILogBundleService, LogBundleService>();
+
+					// Register view models
+					services.AddSingleton<SettingsViewModel>();
+
+					// Register scheduler as both ISchedulerService and IHostedService
+					services.AddSingleton<SchedulerService>();
+					services.AddSingleton<ISchedulerService>(sp => sp.GetRequiredService<SchedulerService>());
+					services.AddHostedService(sp => sp.GetRequiredService<SchedulerService>());
+
+					// Register window (created on-demand but kept as singleton)
+					services.AddSingleton<MainWindow>();
+				})
+				.Build();
+
+			// Start the host
+			_host.Start();
+
+			// Create and show tray icon (app starts minimized to tray)
+			var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "logo.ico");
+			_trayIcon = new TrayIcon(1, iconPath, "PaperWalls");
+			_trayIcon.IsVisible = true;
+
+			_tooltipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+			_tooltipTimer.Tick += (_, _) => UpdateTrayTooltip();
+			_tooltipTimer.Start();
+
+			_trayIcon.Selected += (s, e) =>
 			{
 				var mainWindow = Services.GetRequiredService<MainWindow>();
 				mainWindow.Activate();
 			};
-			flyout.Items.Add(settingsItem);
 
-			var reportBugItem = new MenuFlyoutItem { Text = "Report bug" };
-			reportBugItem.Click += async (_, _) =>
+			_trayIcon.ContextMenu += (s, e) =>
 			{
-				try
-				{
-					var logBundleService = Services.GetRequiredService<ILogBundleService>();
-					var zipPath = await Task.Run(() => logBundleService.CreateBugReportAsync());
+				var flyout = new MenuFlyout();
 
+				var refreshItem = new MenuFlyoutItem { Text = "Refresh PaperWall" };
+				refreshItem.Click += async (_, _) =>
+				{
+					try
+					{
+						var wallpaperService = Services.GetRequiredService<IWallpaperService>();
+						await Task.Run(() => wallpaperService.ChangeWallpaperAsync(CancellationToken.None));
+					}
+					catch (Exception ex)
+					{
+						Serilog.Log.Error(ex, "Failed to refresh wallpaper from tray menu");
+					}
+				};
+				flyout.Items.Add(refreshItem);
+
+				var settingsItem = new MenuFlyoutItem { Text = "Settings..." };
+				settingsItem.Click += (_, _) =>
+				{
 					var mainWindow = Services.GetRequiredService<MainWindow>();
 					mainWindow.Activate();
+				};
+				flyout.Items.Add(settingsItem);
 
-					var dialog = new ContentDialog
-					{
-						Title = "Bug Report Created",
-						Content = "Bug report .zip has been created on your Desktop.",
-						CloseButtonText = "OK",
-						XamlRoot = mainWindow.Content.XamlRoot
-					};
-					await dialog.ShowAsync();
-				}
-				catch (Exception ex)
+				var reportBugItem = new MenuFlyoutItem { Text = "Report bug" };
+				reportBugItem.Click += async (_, _) =>
 				{
-					Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
-				}
+					try
+					{
+						var logBundleService = Services.GetRequiredService<ILogBundleService>();
+						var zipPath = await Task.Run(() => logBundleService.CreateBugReportAsync());
+
+						var mainWindow = Services.GetRequiredService<MainWindow>();
+						mainWindow.Activate();
+
+						var dialog = new ContentDialog
+						{
+							Title = "Bug Report Created",
+							Content = "Bug report .zip has been created on your Desktop.",
+							CloseButtonText = "OK",
+							XamlRoot = mainWindow.Content.XamlRoot
+						};
+						await dialog.ShowAsync();
+					}
+					catch (Exception ex)
+					{
+						Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
+					}
+				};
+				flyout.Items.Add(reportBugItem);
+
+				flyout.Items.Add(new MenuFlyoutSeparator());
+
+				var exitItem = new MenuFlyoutItem { Text = "Exit" };
+				exitItem.Click += (_, _) => Exit();
+				flyout.Items.Add(exitItem);
+
+				e.Flyout = flyout;
 			};
-			flyout.Items.Add(reportBugItem);
 
-			flyout.Items.Add(new MenuFlyoutSeparator());
-
-			var exitItem = new MenuFlyoutItem { Text = "Exit" };
-			exitItem.Click += (_, _) => Exit();
-			flyout.Items.Add(exitItem);
-
-			e.Flyout = flyout;
-		};
-
-		// Do NOT show MainWindow on startup - it opens when user clicks Settings
+			// Do NOT show MainWindow on startup - it opens when user clicks Settings
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Fatal(ex, "Failed to initialize application");
+			Exit();
+		}
 	}
 
 	private void UpdateTrayTooltip()
@@ -185,41 +195,78 @@ public partial class App : Application
 			else
 				_trayIcon.Tooltip = $"PaperWalls — Next change at {nextChange.Value:HH:mm}";
 		}
-		catch
+		catch (Exception ex)
 		{
+			Serilog.Log.Debug(ex, "Failed to update tray tooltip");
 			_trayIcon.Tooltip = "PaperWalls";
 		}
 	}
 
 	public new async void Exit()
 	{
-		if (_tooltipTimer != null)
+		try
 		{
-			_tooltipTimer.Stop();
-			_tooltipTimer = null;
+			if (_tooltipTimer != null)
+			{
+				_tooltipTimer.Stop();
+				_tooltipTimer = null;
+			}
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Warning(ex, "Failed to stop tooltip timer during shutdown");
 		}
 
-		// Dispose tray icon properly
-		if (_trayIcon != null)
+		try
 		{
-			_trayIcon.Dispose();
-			_trayIcon = null;
+			if (_trayIcon != null)
+			{
+				_trayIcon.Dispose();
+				_trayIcon = null;
+			}
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Warning(ex, "Failed to dispose tray icon during shutdown");
 		}
 
-		// Stop the host gracefully
-		if (_host != null)
+		try
 		{
-			await _host.StopAsync(TimeSpan.FromSeconds(5));
-			_host.Dispose();
-			_host = null;
+			if (_host != null)
+			{
+				await _host.StopAsync(TimeSpan.FromSeconds(5));
+				_host.Dispose();
+				_host = null;
+			}
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Warning(ex, "Failed to stop host during shutdown");
 		}
 
-		// Release mutex
-		_instanceMutex?.ReleaseMutex();
-		_instanceMutex?.Dispose();
-		_instanceMutex = null;
+		try
+		{
+			_instanceMutex?.ReleaseMutex();
+			_instanceMutex?.Dispose();
+			_instanceMutex = null;
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Warning(ex, "Failed to release mutex during shutdown");
+		}
 
-		// Call base Exit to actually exit the application
 		base.Exit();
+	}
+
+	private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+	{
+		Serilog.Log.Fatal(e.Exception, "Unhandled exception");
+		e.Handled = true;
+	}
+
+	private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+	{
+		Serilog.Log.Error(e.Exception, "Unobserved task exception");
+		e.SetObserved();
 	}
 }
