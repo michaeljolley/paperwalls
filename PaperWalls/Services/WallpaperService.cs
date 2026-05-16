@@ -222,7 +222,7 @@ internal sealed partial class WallpaperService : IWallpaperService
 	[LoggerMessage(EventId = 4010, Level = LogLevel.Information, Message = "Successfully changed wallpaper to {Path} with style {Style}")]
 	partial void LogSuccessfullyChangedWallpaper(string path, WallpaperStyle style);
 
-	[LoggerMessage(EventId = 4011, Level = LogLevel.Error, Message = "Failed to change wallpaper")]
+	[LoggerMessage(EventId = 4011, Level = LogLevel.Warning, Message = "Failed to change wallpaper")]
 	partial void LogFailedToChangeWallpaper(Exception ex);
 
 	[LoggerMessage(EventId = 4012, Level = LogLevel.Error, Message = "Failed to set wallpaper from {Path}, will retry with a different image")]
