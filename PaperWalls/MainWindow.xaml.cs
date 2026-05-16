@@ -25,6 +25,7 @@ public sealed partial class MainWindow : Window
 		appWindow.Resize(new Windows.Graphics.SizeInt32(900, 1200));
 
 		ViewModel = App.Services.GetRequiredService<SettingsViewModel>();
+		RootGrid.DataContext = ViewModel;
 
 		// Populate ComboBox items from ViewModel arrays
 		foreach (var (label, _) in SettingsViewModel.IntervalOptions)
@@ -70,9 +71,6 @@ public sealed partial class MainWindow : Window
 		PInvoke.User32.ShowWindow(hwnd, PInvoke.User32.WindowShowStyle.SW_HIDE);
 	}
 
-	// Helper for x:Bind visibility conversion
-	public Visibility BoolToVisibility(bool value) =>
-		value ? Visibility.Visible : Visibility.Collapsed;
 
 	private void TopicSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
 	{
