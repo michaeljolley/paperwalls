@@ -31,3 +31,44 @@ jobs:
 
       - name: Test
         run: dotnet test PaperWalls.Tests/PaperWalls.Tests.csproj -r win-x64 --no-build
+
+  publish-dry-run:
+    needs: build-and-test
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+
+      - name: Restore dependencies
+        run: dotnet restore PaperWalls.slnx
+
+      - name: Publish x64 MSIX (dry-run)
+        run: >
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
+          /p:Platform=x64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages/x64/
+          /p:AppxPackageSigningEnabled=false
+          /p:Version=0.0.0.1
+
+      - name: Publish ARM64 MSIX (dry-run)
+        run: >
+          dotnet publish PaperWalls/PaperWalls.csproj -c Release
+          /p:Platform=ARM64
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxPackageDir=AppPackages/arm64/
+          /p:AppxPackageSigningEnabled=false
+          /p:Version=0.0.0.1
+
+      - name: Upload dry-run MSIX artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: msix-dry-run
+          path: PaperWalls/AppPackages/**/*.msix
+          retention-days: 3
