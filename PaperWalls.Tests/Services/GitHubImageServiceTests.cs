@@ -234,6 +234,90 @@ public class GitHubImageServiceTests : IDisposable
             await service.GetImagesAsync("nonexistent"));
     }
 
+    [Fact]
+    public async Task GetAllTopicsAsync_ReturnsAllTopics_IgnoresExcludedTopicsFilter()
+    {
+        // Arrange
+        var responseContent = JsonSerializer.Serialize(new[]
+        {
+            new { name = "nature", type = "dir", path = "wallpapers/nature" },
+            new { name = "space", type = "dir", path = "wallpapers/space" },
+            new { name = "abstract", type = "dir", path = "wallpapers/abstract" }
+        });
+
+        _httpHandler.ResponseContent = responseContent;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        // Configure settings to exclude two of the three topics
+        _settingsService.LoadSettings().Returns(new AppSettings
+        {
+            ExcludedTopics = new List<string> { "space", "abstract" }
+        });
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // Act
+        var allTopics = await service.GetAllTopicsAsync();
+
+        // Assert — all three topics returned regardless of ExcludedTopics
+        allTopics.Should().HaveCount(3);
+        allTopics.Should().Contain("nature");
+        allTopics.Should().Contain("space");
+        allTopics.Should().Contain("abstract");
+    }
+
+    [Fact]
+    public async Task GetAllTopicsAsync_CachesResultsIndependentlyFromGetTopicsAsync()
+    {
+        // Arrange
+        var responseContent = JsonSerializer.Serialize(new[]
+        {
+            new { name = "nature", type = "dir", path = "wallpapers/nature" }
+        });
+
+        _httpHandler.ResponseContent = responseContent;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // Act — first call populates the GetAllTopicsAsync cache
+        await service.GetAllTopicsAsync();
+        _httpHandler.RequestCount = 0;
+
+        // Second call should use the cache — no HTTP request
+        await service.GetAllTopicsAsync();
+        _httpHandler.RequestCount.Should().Be(0, "second GetAllTopicsAsync call should use its own cache");
+
+        // GetTopicsAsync has a separate cache; it must make its own HTTP request
+        await service.GetTopicsAsync();
+        _httpHandler.RequestCount.Should().Be(1, "GetTopicsAsync must populate its own independent cache");
+    }
+
+    [Fact]
+    public async Task GetAllTopicsAsync_ReturnsEmpty_WhenSharedCircuitBreakerIsTripped()
+    {
+        // Arrange — trip the breaker via GetTopicsAsync failures (3 = MaxConsecutiveFailures)
+        _httpHandler.ShouldThrow = true;
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        for (var i = 0; i < 3; i++)
+        {
+            await Assert.ThrowsAsync<HttpRequestException>(() => service.GetTopicsAsync());
+        }
+
+        // Stop throwing — circuit breaker should now block all methods
+        _httpHandler.ShouldThrow = false;
+        _httpHandler.RequestCount = 0;
+
+        // Act — GetAllTopicsAsync should see the tripped breaker and return empty without HTTP
+        var topics = await service.GetAllTopicsAsync();
+
+        // Assert
+        topics.Should().BeEmpty("circuit breaker is tripped; no HTTP call should be made");
+        _httpHandler.RequestCount.Should().Be(0, "circuit breaker should short-circuit before hitting the network");
+    }
+
     private sealed class TestHttpMessageHandler : HttpMessageHandler
     {
         public string ResponseContent { get; set; } = "[]";
