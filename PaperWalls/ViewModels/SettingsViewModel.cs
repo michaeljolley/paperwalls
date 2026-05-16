@@ -192,7 +192,17 @@ public sealed partial class SettingsViewModel : ObservableObject
 		if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper) &&
 			Enum.TryParse<WallpaperStyle>(newStyle, out var styleEnum))
 		{
-			Task.Run(() => _desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum));
+			Task.Run(() =>
+			{
+				try
+				{
+					_desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum);
+				}
+				catch (Exception ex)
+				{
+					LogFailedToApplyStylePreview(ex);
+				}
+			});
 		}
 	}
 
@@ -285,7 +295,17 @@ public sealed partial class SettingsViewModel : ObservableObject
 			if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper) &&
 				Enum.TryParse<WallpaperStyle>(_savedStyle, out var styleEnum))
 			{
-				Task.Run(() => _desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum));
+				Task.Run(() =>
+				{
+					try
+					{
+						_desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum);
+					}
+					catch (Exception ex)
+					{
+						LogFailedToRevertWallpaperStyle(ex);
+					}
+				});
 			}
 			SelectedStyleIndex = Array.IndexOf(StyleOptions, _savedStyle);
 		}
@@ -294,6 +314,12 @@ public sealed partial class SettingsViewModel : ObservableObject
 	// LoggerMessage source-generated methods for Native AOT compatibility
 	[LoggerMessage(EventId = 7000, Level = LogLevel.Error, Message = "Failed to load topics from GitHub")]
 	partial void LogFailedToLoadTopics(Exception ex);
+
+	[LoggerMessage(EventId = 7001, Level = LogLevel.Error, Message = "Failed to apply wallpaper style preview")]
+	partial void LogFailedToApplyStylePreview(Exception ex);
+
+	[LoggerMessage(EventId = 7002, Level = LogLevel.Error, Message = "Failed to revert wallpaper style")]
+	partial void LogFailedToRevertWallpaperStyle(Exception ex);
 }
 
 public sealed partial class TopicItemViewModel : ObservableObject
