@@ -25,7 +25,7 @@ public sealed partial class MainWindow : Window
 		appWindow.Resize(new Windows.Graphics.SizeInt32(900, 1200));
 
 		ViewModel = App.Services.GetRequiredService<SettingsViewModel>();
-		DataContext = ViewModel;
+		RootGrid.DataContext = ViewModel;
 
 		// Populate ComboBox items from ViewModel arrays
 		foreach (var (label, _) in SettingsViewModel.IntervalOptions)
