@@ -267,7 +267,7 @@ public class GitHubImageServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetAllTopicsAsync_CachesResultsIndependentlyFromGetTopicsAsync()
+    public async Task GetTopicsAsync_SharesCacheWithGetAllTopicsAsync()
     {
         // Arrange
         var responseContent = JsonSerializer.Serialize(new[]
@@ -280,17 +280,13 @@ public class GitHubImageServiceTests : IDisposable
 
         var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
 
-        // Act — first call populates the GetAllTopicsAsync cache
+        // Act — first call populates the shared cache via GetAllTopicsAsync
         await service.GetAllTopicsAsync();
         _httpHandler.RequestCount = 0;
 
-        // Second call should use the cache — no HTTP request
-        await service.GetAllTopicsAsync();
-        _httpHandler.RequestCount.Should().Be(0, "second GetAllTopicsAsync call should use its own cache");
-
-        // GetTopicsAsync has a separate cache; it must make its own HTTP request
+        // GetTopicsAsync delegates to GetAllTopicsAsync and must reuse the same cache
         await service.GetTopicsAsync();
-        _httpHandler.RequestCount.Should().Be(1, "GetTopicsAsync must populate its own independent cache");
+        _httpHandler.RequestCount.Should().Be(0, "GetTopicsAsync delegates to GetAllTopicsAsync and shares its cache");
     }
 
     [Fact]

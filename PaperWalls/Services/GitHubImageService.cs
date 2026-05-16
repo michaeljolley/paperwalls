@@ -18,8 +18,6 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 	private const int MaxConsecutiveFailures = 3;
 	private static readonly TimeSpan CoolDownDuration = TimeSpan.FromMinutes(5);
 
-	private DateTime _topicsCacheTime = DateTime.MinValue;
-	private List<string>? _cachedTopics;
 	private DateTime _allTopicsCacheTime = DateTime.MinValue;
 	private List<string>? _cachedAllTopics;
 	private readonly Dictionary<string, (DateTime timestamp, List<WallpaperImage> images)> _imageCache = new();
@@ -40,89 +38,18 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	public async Task<List<string>> GetTopicsAsync(CancellationToken cancellationToken = default)
 	{
-		lock (_cacheLock)
-		{
-			if (_cachedTopics != null && DateTime.UtcNow - _topicsCacheTime < CacheExpiry)
-			{
-				LogReturningCachedTopics();
-				return new List<string>(_cachedTopics);
-			}
+		var allTopics = await GetAllTopicsAsync(cancellationToken).ConfigureAwait(false);
 
-			if (_coolDownUntil.HasValue)
-			{
-				if (DateTimeOffset.UtcNow < _coolDownUntil.Value)
-				{
-					LogGitHubApiInCoolDown(_coolDownUntil.Value);
-					if (_cachedTopics != null)
-					{
-						LogReturningStaleCachedTopics();
-						return new List<string>(_cachedTopics);
-					}
-					return new List<string>();
-				}
-				else
-				{
-					// Cool-down expired — clear so the breaker can re-trip if failures resume
-					_coolDownUntil = null;
-					_consecutiveFailures = 0;
-				}
-			}
-		}
+		if (allTopics.Count == 0)
+			return allTopics;
 
-		try
-		{
-			LogFetchingTopicsFromGitHub();
+		var settings = _settingsService.LoadSettings();
+		var filtered = allTopics
+			.Where(t => !settings.ExcludedTopics.Contains(t, StringComparer.OrdinalIgnoreCase))
+			.ToList();
 
-			var response = await _httpClient.GetAsync(ApiBaseUrl, cancellationToken).ConfigureAwait(false);
-
-			CheckRateLimit(response);
-
-			response.EnsureSuccessStatusCode();
-
-			var items = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ListGitHubContentItem, cancellationToken).ConfigureAwait(false);
-			if (items == null)
-			{
-				LogGitHubApiReturnedNull();
-				return new List<string>();
-			}
-
-			var topics = items
-				.Where(i => i.Type == "dir")
-				.Select(i => i.Name)
-				.ToList();
-
-			var settings = _settingsService.LoadSettings();
-			var filteredTopics = topics
-				.Where(t => !settings.ExcludedTopics.Contains(t, StringComparer.OrdinalIgnoreCase))
-				.ToList();
-
-			lock (_cacheLock)
-			{
-				_cachedTopics = filteredTopics;
-				_topicsCacheTime = DateTime.UtcNow;
-				ResetCircuitBreaker();
-			}
-
-			LogFetchedTopics(topics.Count, filteredTopics.Count);
-			return filteredTopics;
-		}
-		catch (HttpRequestException ex)
-		{
-			LogFailedToFetchTopics(ex);
-			RecordFailure();
-
-			// Return cached data if available
-			lock (_cacheLock)
-			{
-				if (_cachedTopics != null)
-				{
-					LogReturningStaleCachedTopics();
-					return new List<string>(_cachedTopics);
-				}
-			}
-
-			throw;
-		}
+		LogFetchedTopics(allTopics.Count, filtered.Count);
+		return filtered;
 	}
 
 	public async Task<List<string>> GetAllTopicsAsync(CancellationToken cancellationToken = default)
