@@ -70,9 +70,6 @@ public sealed partial class MainWindow : Window
 		PInvoke.User32.ShowWindow(hwnd, PInvoke.User32.WindowShowStyle.SW_HIDE);
 	}
 
-	// Helper for x:Bind visibility conversion
-	public Visibility BoolToVisibility(bool value) =>
-		value ? Visibility.Visible : Visibility.Collapsed;
 
 	private void TopicSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
 	{

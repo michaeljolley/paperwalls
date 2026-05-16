@@ -80,10 +80,10 @@
                     </controls:SettingsExpander.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <ProgressRing IsActive="{x:Bind ViewModel.IsTopicsLoading, Mode=OneWay}"
-                                      Visibility="{x:Bind BoolToVisibility(ViewModel.IsTopicsLoading), Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsTopicsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
                                       Width="20" Height="20" />
                         <TextBlock Text="Loading..."
-                                   Visibility="{x:Bind BoolToVisibility(ViewModel.IsTopicsLoading), Mode=OneWay}"
+                                   Visibility="{x:Bind ViewModel.IsTopicsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
                                    VerticalAlignment="Center"
                                    Style="{StaticResource CaptionTextBlockStyle}" />
                     </StackPanel>
@@ -98,10 +98,10 @@
                                          IsClosable="False"
                                          Title="Failed to load topics"
                                          Message="Could not connect to GitHub."
-                                         Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsError), Mode=OneWay}" />
+                                         Visibility="{x:Bind ViewModel.TopicsError, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
 
                                 <!-- Topic search and pills -->
-                                <StackPanel Visibility="{x:Bind BoolToVisibility(ViewModel.TopicsLoaded), Mode=OneWay}"
+                                <StackPanel Visibility="{x:Bind ViewModel.TopicsLoaded, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
                                             Spacing="8">
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
