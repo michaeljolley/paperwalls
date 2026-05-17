@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-and-test:
-    runs-on: windows-2025
+    runs-on: windows-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     
@@ -80,7 +80,7 @@ jobs:
 
   package:
     needs: build-and-test
-    runs-on: windows-2025
+    runs-on: windows-latest
     
     steps:
       - name: Checkout code
@@ -301,4 +301,4 @@ jobs:
       - name: Submit to Microsoft Store
         shell: pwsh
         run: |
-          msstore publish PaperWalls -i msix-packages -nc -id "${{ secrets.STORE_PRODUCT_ID }}"
+          msstore publish PaperWalls -i msix-packages -id "${{ secrets.STORE_PRODUCT_ID }}"
