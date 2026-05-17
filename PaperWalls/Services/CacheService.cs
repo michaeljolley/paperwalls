@@ -22,6 +22,7 @@ internal sealed partial class CacheService : ICacheService
 		}
 
 		_httpClient = httpClientFactory.CreateClient();
+		_httpClient.Timeout = TimeSpan.FromSeconds(20);
 		_logger = logger;
 
 		EnsureCacheDirectoryExists();
