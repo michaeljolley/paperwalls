@@ -24,6 +24,22 @@ public sealed partial class MainWindow : Window
 		var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 		appWindow.Resize(new Windows.Graphics.SizeInt32(900, 1200));
 
+		appWindow.Changed += (sender, args) =>
+		{
+			if (!args.DidSizeChange) return;
+
+			var size = sender.Size;
+			int width = size.Width;
+			int height = size.Height;
+			bool needsResize = false;
+
+			if (width < 600) { width = 600; needsResize = true; }
+			if (height < 500) { height = 500; needsResize = true; }
+
+			if (needsResize)
+				sender.Resize(new Windows.Graphics.SizeInt32(width, height));
+		};
+
 		ViewModel = App.Services.GetRequiredService<SettingsViewModel>();
 		RootGrid.DataContext = ViewModel;
 
