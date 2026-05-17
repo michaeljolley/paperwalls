@@ -235,6 +235,22 @@
                          Title="Settings saved"
                          Message="Your settings have been saved successfully."
                          Margin="0,4,0,0" />
+
+                <InfoBar x:Name="SaveErrorBar"
+                         Severity="Error"
+                         IsOpen="{x:Bind ViewModel.SaveErrorVisible, Mode=TwoWay}"
+                         IsClosable="True"
+                         Title="Save failed"
+                         Message="Could not save settings. Check that you have write permissions and sufficient disk space."
+                         Margin="0,4,0,0" />
+
+                <InfoBar x:Name="ClearCacheErrorBar"
+                         Severity="Error"
+                         IsOpen="{x:Bind ViewModel.ClearCacheErrorVisible, Mode=TwoWay}"
+                         IsClosable="True"
+                         Title="Clear cache failed"
+                         Message="Could not clear the image cache. Some files may be in use."
+                         Margin="0,4,0,0" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
