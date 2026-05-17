@@ -24,6 +24,8 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 	private readonly object _cacheLock = new();
 	private int _consecutiveFailures;
 	private DateTimeOffset? _coolDownUntil;
+	private string? _allTopicsETag;
+	private readonly Dictionary<string, string> _imageETags = new();
 
 	public GitHubImageService(
 		IHttpClientFactory httpClientFactory,
@@ -86,9 +88,32 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 		{
 			LogFetchingTopicsFromGitHub();
 
-			var response = await _httpClient.GetAsync(ApiBaseUrl, cancellationToken).ConfigureAwait(false);
+			using var request = new HttpRequestMessage(HttpMethod.Get, ApiBaseUrl);
+			lock (_cacheLock)
+			{
+				if (_allTopicsETag != null)
+					request.Headers.TryAddWithoutValidation("If-None-Match", _allTopicsETag);
+			}
+
+			var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
 			CheckRateLimit(response);
+
+			if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+			{
+				LogGitHubApiNotModified();
+				lock (_cacheLock)
+				{
+					_allTopicsCacheTime = DateTime.UtcNow;
+					ResetCircuitBreaker();
+					if (_cachedAllTopics != null)
+					{
+						LogReturningCachedTopics();
+						return new List<string>(_cachedAllTopics);
+					}
+				}
+				return new List<string>();
+			}
 
 			response.EnsureSuccessStatusCode();
 
@@ -105,8 +130,11 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				.OrderBy(n => n)
 				.ToList();
 
+			var topicsETag = response.Headers.ETag?.ToString();
+
 			lock (_cacheLock)
 			{
+				_allTopicsETag = topicsETag;
 				_cachedAllTopics = allTopics;
 				_allTopicsCacheTime = DateTime.UtcNow;
 				ResetCircuitBreaker();
@@ -170,9 +198,32 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			LogFetchingImagesForTopic(topic);
 
 			var url = $"{ApiBaseUrl}/{topic}";
-			var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+			using var request = new HttpRequestMessage(HttpMethod.Get, url);
+			lock (_cacheLock)
+			{
+				if (_imageETags.TryGetValue(topic, out var cachedETag))
+					request.Headers.TryAddWithoutValidation("If-None-Match", cachedETag);
+			}
+
+			var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
 			CheckRateLimit(response);
+
+			if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
+			{
+				LogGitHubApiNotModified();
+				lock (_cacheLock)
+				{
+					if (_imageCache.TryGetValue(topic, out var cachedImages))
+					{
+						_imageCache[topic] = (DateTime.UtcNow, cachedImages.images);
+						ResetCircuitBreaker();
+						LogReturningCachedImages(topic);
+						return new List<WallpaperImage>(cachedImages.images);
+					}
+				}
+				return new List<WallpaperImage>();
+			}
 
 			response.EnsureSuccessStatusCode();
 
@@ -193,8 +244,12 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 				})
 				.ToList();
 
+			var imageETag = response.Headers.ETag?.ToString();
+
 			lock (_cacheLock)
 			{
+				if (imageETag != null)
+					_imageETags[topic] = imageETag;
 				_imageCache[topic] = (DateTime.UtcNow, images);
 				ResetCircuitBreaker();
 			}
@@ -336,4 +391,7 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 	[LoggerMessage(EventId = 2018, Level = LogLevel.Debug, Message = "Filtered to {Count} topics after excluding {ExcludedCount}")]
 	partial void LogFilteredTopics(int count, int excludedCount);
+
+	[LoggerMessage(EventId = 2019, Level = LogLevel.Debug, Message = "GitHub API returned 304 Not Modified, using cached data")]
+	partial void LogGitHubApiNotModified();
 }
