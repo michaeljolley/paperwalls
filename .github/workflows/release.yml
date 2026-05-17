@@ -51,6 +51,14 @@ jobs:
           
           Write-Host "Updated Package.appxmanifest to version $version"
       
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore dependencies
         run: |
           dotnet restore PaperWalls/PaperWalls.csproj /p:Platform=x64
@@ -107,6 +115,14 @@ jobs:
           $manifest.Save($manifestPath)
 
           Write-Host "Updated Package.appxmanifest to version $version"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
         run: dotnet restore PaperWalls.slnx
