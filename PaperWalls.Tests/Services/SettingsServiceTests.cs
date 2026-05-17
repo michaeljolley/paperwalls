@@ -21,6 +21,7 @@ public class SettingsServiceTests : IDisposable
 
         // Set environment for test
         _logger = Substitute.For<ILogger<SettingsService>>();
+        _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
         _service = new SettingsService(_logger);
     }
 
