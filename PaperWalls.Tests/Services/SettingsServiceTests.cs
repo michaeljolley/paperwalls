@@ -10,6 +10,7 @@ public class SettingsServiceTests : IDisposable
 {
     private readonly string _testSettingsPath;
     private readonly SettingsService _service;
+    private readonly ILogger<SettingsService> _logger;
 
     public SettingsServiceTests()
     {
@@ -19,7 +20,8 @@ public class SettingsServiceTests : IDisposable
         Directory.CreateDirectory(_testSettingsPath);
 
         // Set environment for test
-        _service = new SettingsService(Substitute.For<ILogger<SettingsService>>());
+        _logger = Substitute.For<ILogger<SettingsService>>();
+        _service = new SettingsService(_logger);
     }
 
     public void Dispose()
@@ -145,5 +147,42 @@ public class SettingsServiceTests : IDisposable
 
         // Assert
         eventCount.Should().Be(3);
+    }
+
+    [Fact]
+    public void LoadSettings_WithCorruptedJson_LogsWarning()
+    {
+        // Arrange - write a corrupted settings file to the real PaperWalls path
+        var settingsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "PaperWalls",
+            "settings.json");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
+        File.WriteAllText(settingsPath, "{ not valid json !!!");
+
+        try
+        {
+            // Act
+            var settings = _service.LoadSettings();
+
+            // Assert - defaults returned
+            settings.Should().NotBeNull();
+            settings.IntervalMinutes.Should().Be(1440);
+
+            // Assert - Warning logged with a non-null exception (EventId 8000 from LogFailedToLoadSettings)
+            _logger.Received(1).Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Any<object>(),
+                Arg.Is<Exception>(e => e != null),
+                Arg.Any<Func<object, Exception?, string>>());
+        }
+        finally
+        {
+            // Clean up the corrupted file so subsequent tests are unaffected
+            if (File.Exists(settingsPath))
+                File.Delete(settingsPath);
+        }
     }
 }
