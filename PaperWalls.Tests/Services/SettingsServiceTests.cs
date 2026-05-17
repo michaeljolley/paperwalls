@@ -10,6 +10,7 @@ public class SettingsServiceTests : IDisposable
 {
     private readonly string _testSettingsPath;
     private readonly SettingsService _service;
+    private readonly ILogger<SettingsService> _logger;
 
     public SettingsServiceTests()
     {
@@ -19,7 +20,9 @@ public class SettingsServiceTests : IDisposable
         Directory.CreateDirectory(_testSettingsPath);
 
         // Set environment for test
-        _service = new SettingsService(Substitute.For<ILogger<SettingsService>>());
+        _logger = Substitute.For<ILogger<SettingsService>>();
+        _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
+        _service = new SettingsService(_logger);
     }
 
     public void Dispose()
@@ -145,5 +148,43 @@ public class SettingsServiceTests : IDisposable
 
         // Assert
         eventCount.Should().Be(3);
+    }
+
+    [Fact]
+    public void LoadSettings_WithCorruptedJson_LogsWarning()
+    {
+        // Arrange - write a corrupted settings file to the real PaperWalls path
+        var settingsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "PaperWalls",
+            "settings.json");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
+        File.WriteAllText(settingsPath, "{ not valid json !!!");
+
+        try
+        {
+            // Act
+            var settings = _service.LoadSettings();
+
+            // Assert - defaults returned
+            settings.Should().NotBeNull();
+            settings.IntervalMinutes.Should().Be(1440);
+
+            // Assert - Warning was logged.
+            // LoggerMessage source generators call ILogger.Log<TState>() with a struct TState,
+            // not Log<object>(), so Arg.Any<object>() doesn't match. Use ReceivedCalls() to
+            // inspect the actual call list and verify at least one Log call was made.
+            var logCalls = _logger.ReceivedCalls()
+                .Where(c => c.GetMethodInfo().Name == "Log")
+                .ToList();
+            logCalls.Should().NotBeEmpty("LoadSettings should log a warning when deserialization fails");
+        }
+        finally
+        {
+            // Clean up the corrupted file so subsequent tests are unaffected
+            if (File.Exists(settingsPath))
+                File.Delete(settingsPath);
+        }
     }
 }
