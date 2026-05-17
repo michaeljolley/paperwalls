@@ -291,12 +291,19 @@ public sealed partial class SettingsViewModel : ObservableObject
 			_startupManager.SetStartWithWindows(settings.StartWithWindows);
 
 			SaveSuccessVisible = true;
+			_ = DismissSaveSuccessAsync();
 		}
 		catch (Exception ex)
 		{
 			LogFailedToSaveSettings(ex);
 			SaveErrorVisible = true;
 		}
+	}
+
+	private async Task DismissSaveSuccessAsync()
+	{
+		await Task.Delay(3000);
+		SaveSuccessVisible = false;
 	}
 
 	public void RevertStyleIfNeeded()
