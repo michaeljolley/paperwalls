@@ -62,7 +62,8 @@ public partial class App : Application
 
 					// Register services
 					services.AddSingleton<ISettingsService, SettingsService>();
-					services.AddSingleton<IGitHubImageService, GitHubImageService>();
+					services.AddSingleton<IETagCacheService, ETagCacheService>();
+				services.AddSingleton<IGitHubImageService, GitHubImageService>();
 					services.AddSingleton<ICacheService, CacheService>();
 					services.AddSingleton<IDesktopWallpaperService, DesktopWallpaperService>();
 					services.AddSingleton<IWallpaperService, WallpaperService>();

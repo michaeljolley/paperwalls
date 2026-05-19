@@ -24,18 +24,20 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 	private readonly object _cacheLock = new();
 	private int _consecutiveFailures;
 	private DateTimeOffset? _coolDownUntil;
-	private string? _allTopicsETag;
-	private readonly Dictionary<string, string> _imageETags = new();
+	private readonly IETagCacheService _etagCache;
 
 	public GitHubImageService(
 		IHttpClientFactory httpClientFactory,
 		ISettingsService settingsService,
+		IETagCacheService etagCache,
 		ILogger<GitHubImageService> logger)
 	{
 		_httpClient = httpClientFactory.CreateClient("GitHub");
 		_httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 		_settingsService = settingsService;
+		_etagCache = etagCache;
 		_logger = logger;
+		_etagCache.Load();
 	}
 
 	public async Task<List<string>> GetTopicsAsync(CancellationToken cancellationToken = default)
@@ -89,10 +91,11 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 			LogFetchingTopicsFromGitHub();
 
 			using var request = new HttpRequestMessage(HttpMethod.Get, ApiBaseUrl);
+			var currentTopicsETag = _etagCache.GetETag("topics");
 			lock (_cacheLock)
 			{
-				if (_allTopicsETag != null)
-					request.Headers.TryAddWithoutValidation("If-None-Match", _allTopicsETag);
+				if (currentTopicsETag != null)
+					request.Headers.TryAddWithoutValidation("If-None-Match", currentTopicsETag);
 			}
 
 			var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -132,13 +135,18 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 			var topicsETag = response.Headers.ETag?.ToString();
 
+			if (topicsETag != null)
+				_etagCache.SetETag("topics", topicsETag);
+
 			lock (_cacheLock)
 			{
-				_allTopicsETag = topicsETag;
 				_cachedAllTopics = allTopics;
 				_allTopicsCacheTime = DateTime.UtcNow;
 				ResetCircuitBreaker();
 			}
+
+			if (topicsETag != null)
+				_etagCache.Save();
 
 			LogFetchedTopics(allTopics.Count, allTopics.Count);
 			return new List<string>(allTopics);
@@ -199,11 +207,12 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 			var url = $"{ApiBaseUrl}/{topic}";
 			using var request = new HttpRequestMessage(HttpMethod.Get, url);
-			lock (_cacheLock)
-			{
-				if (_imageETags.TryGetValue(topic, out var cachedETag))
-					request.Headers.TryAddWithoutValidation("If-None-Match", cachedETag);
-			}
+			var currentImageETag = _etagCache.GetETag($"images:{topic}");
+		lock (_cacheLock)
+		{
+			if (currentImageETag != null)
+				request.Headers.TryAddWithoutValidation("If-None-Match", currentImageETag);
+		}
 
 			var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -246,13 +255,17 @@ internal sealed partial class GitHubImageService : IGitHubImageService
 
 			var imageETag = response.Headers.ETag?.ToString();
 
+			if (imageETag != null)
+				_etagCache.SetETag($"images:{topic}", imageETag);
+
 			lock (_cacheLock)
 			{
-				if (imageETag != null)
-					_imageETags[topic] = imageETag;
 				_imageCache[topic] = (DateTime.UtcNow, images);
 				ResetCircuitBreaker();
 			}
+
+			if (imageETag != null)
+				_etagCache.Save();
 
 			LogFetchedImages(images.Count, topic);
 			return images;
