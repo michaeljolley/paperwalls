@@ -75,18 +75,18 @@ public class SettingsViewModelTests
     [Fact]
     public void Save_ResetsFlagsBeforeAttempt()
     {
-        // Prime SaveErrorVisible via a failing first call
+        var shouldThrow = true;
         _settingsService
             .When(x => x.SaveSettings(Arg.Any<AppSettings>()))
-            .Do(_ => throw new IOException("first call fails"));
+            .Do(_ => { if (shouldThrow) throw new IOException("first call fails"); });
+
+        // First call fails — sets SaveErrorVisible
         _viewModel.SaveCommand.Execute(null);
         _viewModel.SaveErrorVisible.Should().BeTrue("precondition: error flag set by first call");
 
-        // Reconfigure to succeed for the second call
+        // Second call succeeds
+        shouldThrow = false;
         _settingsService.ClearReceivedCalls();
-        _settingsService
-            .When(x => x.SaveSettings(Arg.Any<AppSettings>()))
-            .Do(_ => { });
         _viewModel.StartWithWindows = false;
 
         _viewModel.SaveCommand.Execute(null);
