@@ -15,7 +15,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 	private readonly ISettingsService _settingsService;
 	private readonly ICacheService _cacheService;
 	private readonly IDesktopWallpaperService _desktopWallpaperService;
-	private readonly StartupManager _startupManager;
+	private readonly IStartupManager _startupManager;
 	private readonly IGitHubImageService _gitHubImageService;
 	private readonly ILogger<SettingsViewModel> _logger;
 
@@ -25,7 +25,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 		ISettingsService settingsService,
 		ICacheService cacheService,
 		IDesktopWallpaperService desktopWallpaperService,
-		StartupManager startupManager,
+		IStartupManager startupManager,
 		IGitHubImageService gitHubImageService,
 		ILogger<SettingsViewModel> logger)
 	{
