@@ -3,7 +3,7 @@ using Microsoft.Win32;
 
 namespace PaperWalls.Services;
 
-public sealed partial class StartupManager
+public sealed partial class StartupManager : IStartupManager
 {
 	private const string RegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
 	private const string AppName = "PaperWalls";

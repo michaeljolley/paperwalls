@@ -13,7 +13,7 @@ public class SettingsViewModelTests
     private readonly ISettingsService _settingsService;
     private readonly ICacheService _cacheService;
     private readonly IDesktopWallpaperService _desktopWallpaperService;
-    private readonly StartupManager _startupManager;
+    private readonly IStartupManager _startupManager;
     private readonly IGitHubImageService _gitHubImageService;
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly SettingsViewModel _viewModel;
@@ -23,8 +23,7 @@ public class SettingsViewModelTests
         _settingsService = Substitute.For<ISettingsService>();
         _cacheService = Substitute.For<ICacheService>();
         _desktopWallpaperService = Substitute.For<IDesktopWallpaperService>();
-        // StartupManager is sealed — use a real instance with a mocked logger
-        _startupManager = new StartupManager(Substitute.For<ILogger<StartupManager>>());
+        _startupManager = Substitute.For<IStartupManager>();
         _gitHubImageService = Substitute.For<IGitHubImageService>();
         _logger = Substitute.For<ILogger<SettingsViewModel>>();
 
@@ -47,20 +46,17 @@ public class SettingsViewModelTests
             _logger);
     }
 
-    // Save ────────────────────────────────────────────────────────────────────
-
     [Fact]
     public void Save_Success_InvokesSettingsSave()
     {
-        // StartupManager is sealed/non-virtual and hits the real registry on CI.
-        // Verify the ViewModel's responsibility: it calls SaveSettings with the
-        // correct data. The success/error visible flags depend on whether
-        // StartupManager's registry write succeeds in the test environment.
         _viewModel.StartWithWindows = false;
 
         _viewModel.SaveCommand.Execute(null);
 
         _settingsService.Received(1).SaveSettings(Arg.Any<AppSettings>());
+        _startupManager.Received(1).SetStartWithWindows(false);
+        _viewModel.SaveSuccessVisible.Should().BeTrue();
+        _viewModel.SaveErrorVisible.Should().BeFalse();
     }
 
     [Fact]
@@ -95,11 +91,9 @@ public class SettingsViewModelTests
 
         _viewModel.SaveCommand.Execute(null);
 
-        // Verify the second SaveSettings call was reached — the ViewModel did
-        // not short-circuit due to stale SaveErrorVisible state.
-        // (Flag assertions omitted: StartupManager is sealed/non-virtual and
-        // may throw on CI registry access, making SaveErrorVisible environment-dependent.)
         _settingsService.Received(1).SaveSettings(Arg.Any<AppSettings>());
+        _viewModel.SaveSuccessVisible.Should().BeTrue();
+        _viewModel.SaveErrorVisible.Should().BeFalse();
     }
 
     [Fact]
@@ -112,6 +106,19 @@ public class SettingsViewModelTests
 
         _settingsService.Received(1).SaveSettings(
             Arg.Is<AppSettings>(s => s.WallpaperStyle == "Stretch"));
+    }
+
+    [Fact]
+    public void Save_WhenStartupManagerThrows_SetsSaveErrorVisible()
+    {
+        _startupManager
+            .When(x => x.SetStartWithWindows(Arg.Any<bool>()))
+            .Do(_ => throw new InvalidOperationException("registry access denied"));
+
+        _viewModel.SaveCommand.Execute(null);
+
+        _viewModel.SaveErrorVisible.Should().BeTrue();
+        _viewModel.SaveSuccessVisible.Should().BeFalse();
     }
 
     // ClearCache ──────────────────────────────────────────────────────────────

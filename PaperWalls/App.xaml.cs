@@ -66,7 +66,7 @@ public partial class App : Application
 					services.AddSingleton<ICacheService, CacheService>();
 					services.AddSingleton<IDesktopWallpaperService, DesktopWallpaperService>();
 					services.AddSingleton<IWallpaperService, WallpaperService>();
-					services.AddSingleton<StartupManager>();
+					services.AddSingleton<IStartupManager, StartupManager>();
 					services.AddSingleton<ILogBundleService, LogBundleService>();
 
 					// Register view models
