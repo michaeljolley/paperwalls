@@ -7,7 +7,7 @@ internal sealed partial class CacheService : ICacheService
 	private readonly string _cacheDirectory;
 	private readonly HttpClient _httpClient;
 	private readonly ILogger<CacheService> _logger;
-	private readonly object _cacheLock = new();
+	private readonly SemaphoreSlim _cacheLock = new(1, 1);
 
 	public CacheService(IHttpClientFactory httpClientFactory, ILogger<CacheService> logger, string? cacheDirectory = null)
 	{
@@ -66,14 +66,19 @@ internal sealed partial class CacheService : ICacheService
 				throw new InvalidOperationException($"Downloaded content for '{fileName}' is not a valid image (status: {statusCode}, content-type: {contentType}, magic bytes: {magicBytes}).");
 			}
 
-			lock (_cacheLock)
+			await _cacheLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+			try
 			{
-				// Double-check in case another thread downloaded it
+				// Double-check in case another task downloaded it
 				if (!File.Exists(filePath))
 				{
-					File.WriteAllBytes(filePath, imageBytes);
+					await File.WriteAllBytesAsync(filePath, imageBytes, cancellationToken).ConfigureAwait(false);
 					LogDownloadedAndCached(fileName, imageBytes.Length);
 				}
+			}
+			finally
+			{
+				_cacheLock.Release();
 			}
 
 			return filePath;
@@ -127,45 +132,43 @@ internal sealed partial class CacheService : ICacheService
 			return;
 		}
 
-		await Task.Run(() =>
+		await _cacheLock.WaitAsync().ConfigureAwait(false);
+		try
 		{
-			lock (_cacheLock)
+			var files = Directory.GetFiles(_cacheDirectory)
+				.Select(f => new FileInfo(f))
+				.OrderBy(fi => fi.LastAccessTime)
+				.ToList();
+
+			var currentSize = files.Sum(f => f.Length);
+			var deletedCount = 0;
+			var freedBytes = 0L;
+
+			foreach (var file in files)
 			{
-				var files = Directory.GetFiles(_cacheDirectory)
-					.Select(f => new FileInfo(f))
-					.OrderBy(fi => fi.LastAccessTime)
-					.ToList();
+				if (currentSize <= targetBytes) break;
 
-				var currentSize = files.Sum(f => f.Length);
-				var deletedCount = 0;
-				var freedBytes = 0L;
-
-				foreach (var file in files)
+				try
 				{
-					if (currentSize <= targetBytes)
-					{
-						break;
-					}
-
-					try
-					{
-						var fileSize = file.Length;
-						file.Delete();
-						currentSize -= fileSize;
-						freedBytes += fileSize;
-						deletedCount++;
-
-						LogEvictedFile(file.Name, fileSize);
-					}
-					catch (Exception ex)
-					{
-						LogFailedToDeleteCachedFile(ex, file.Name);
-					}
+					var fileSize = file.Length;
+					file.Delete();
+					currentSize -= fileSize;
+					freedBytes += fileSize;
+					deletedCount++;
+					LogEvictedFile(file.Name, fileSize);
 				}
-
-				LogCacheEvictionComplete(deletedCount, freedBytes / 1024 / 1024);
+				catch (Exception ex)
+				{
+					LogFailedToDeleteCachedFile(ex, file.Name);
+				}
 			}
-		});
+
+			LogCacheEvictionComplete(deletedCount, freedBytes / 1024 / 1024);
+		}
+		finally
+		{
+			_cacheLock.Release();
+		}
 	}
 
 	public async Task ClearCacheAsync()
@@ -177,34 +180,32 @@ internal sealed partial class CacheService : ICacheService
 			return;
 		}
 
-		await Task.Run(() =>
+		await _cacheLock.WaitAsync().ConfigureAwait(false);
+		try
 		{
-			lock (_cacheLock)
+			var files = Directory.GetFiles(_cacheDirectory);
+			foreach (var file in files)
 			{
 				try
 				{
-					var files = Directory.GetFiles(_cacheDirectory);
-					foreach (var file in files)
-					{
-						try
-						{
-							File.Delete(file);
-						}
-						catch (Exception ex)
-						{
-							LogFailedToDeleteFile(ex, Path.GetFileName(file));
-						}
-					}
-
-					LogClearedCachedImages(files.Length);
+					File.Delete(file);
 				}
 				catch (Exception ex)
 				{
-					LogFailedToClearCache(ex);
-					throw;
+					LogFailedToDeleteFile(ex, Path.GetFileName(file));
 				}
 			}
-		});
+			LogClearedCachedImages(files.Length);
+		}
+		catch (Exception ex)
+		{
+			LogFailedToClearCache(ex);
+			throw;
+		}
+		finally
+		{
+			_cacheLock.Release();
+		}
 	}
 
 	private void EnsureCacheDirectoryExists()
