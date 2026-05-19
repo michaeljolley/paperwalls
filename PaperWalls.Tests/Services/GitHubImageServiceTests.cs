@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -15,6 +14,7 @@ public class GitHubImageServiceTests : IDisposable
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISettingsService _settingsService;
     private readonly ILogger<GitHubImageService> _logger;
+    private readonly IETagCacheService _etagCacheService;
     private readonly TestHttpMessageHandler _httpHandler;
 
     public GitHubImageServiceTests()
@@ -22,6 +22,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpClientFactory = Substitute.For<IHttpClientFactory>();
         _settingsService = Substitute.For<ISettingsService>();
         _logger = Substitute.For<ILogger<GitHubImageService>>();
+        _etagCacheService = Substitute.For<IETagCacheService>();
         _httpHandler = new TestHttpMessageHandler();
 
         var httpClient = new HttpClient(_httpHandler);
@@ -54,7 +55,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = responseContent;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var topics = await service.GetTopicsAsync();
@@ -85,7 +86,7 @@ public class GitHubImageServiceTests : IDisposable
             ExcludedTopics = new List<string> { "space", "abstract" }
         });
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var topics = await service.GetTopicsAsync();
@@ -109,7 +110,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = responseContent;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var topics1 = await service.GetTopicsAsync();
@@ -133,7 +134,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.Headers.Add("X-RateLimit-Remaining", "0");
         _httpHandler.Headers.Add("X-RateLimit-Reset", "1234567890");
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(async () => 
@@ -146,7 +147,7 @@ public class GitHubImageServiceTests : IDisposable
         // Arrange
         _httpHandler.ShouldThrow = true;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(async () => 
@@ -160,7 +161,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = "null";
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var topics = await service.GetTopicsAsync();
@@ -183,7 +184,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = responseContent;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var images = await service.GetImagesAsync("nature");
@@ -207,7 +208,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = responseContent;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var images1 = await service.GetImagesAsync("nature");
@@ -229,7 +230,7 @@ public class GitHubImageServiceTests : IDisposable
         // Arrange
         _httpHandler.StatusCode = HttpStatusCode.NotFound;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(async () => 
@@ -256,7 +257,7 @@ public class GitHubImageServiceTests : IDisposable
             ExcludedTopics = new List<string> { "space", "abstract" }
         });
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act
         var allTopics = await service.GetAllTopicsAsync();
@@ -280,7 +281,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.ResponseContent = responseContent;
         _httpHandler.StatusCode = HttpStatusCode.OK;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // Act — first call populates the shared cache via GetAllTopicsAsync
         await service.GetAllTopicsAsync();
@@ -297,7 +298,7 @@ public class GitHubImageServiceTests : IDisposable
         // Arrange — trip the breaker via GetTopicsAsync failures (3 = MaxConsecutiveFailures)
         _httpHandler.ShouldThrow = true;
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         for (var i = 0; i < 3; i++)
         {
@@ -330,7 +331,7 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.StatusCode = HttpStatusCode.OK;
         _httpHandler.Headers["ETag"] = "\"abc123\"";
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         await service.GetAllTopicsAsync();
 
@@ -346,6 +347,12 @@ public class GitHubImageServiceTests : IDisposable
             new { name = "nature", type = "dir", path = "wallpapers/nature" },
             new { name = "space", type = "dir", path = "wallpapers/space" }
         });
+
+        // Track ETag state through mock
+        string? storedETag = null;
+        _etagCacheService.GetETag("topics").Returns(_ => storedETag);
+        _etagCacheService.When(x => x.SetETag("topics", Arg.Any<string>()))
+            .Do(ci => storedETag = ci.ArgAt<string>(1));
 
         var callCount = 0;
         _httpHandler.ResponseFactory = request =>
@@ -369,7 +376,7 @@ public class GitHubImageServiceTests : IDisposable
             }
         };
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // First call — populates cache and stores ETag
         var topics1 = await service.GetAllTopicsAsync();
@@ -377,7 +384,7 @@ public class GitHubImageServiceTests : IDisposable
 
         // Expire the in-memory cache timestamp so the service makes a new HTTP request
         var cacheTimeField = typeof(GitHubImageService).GetField("_allTopicsCacheTime",
-            BindingFlags.NonPublic | BindingFlags.Instance)!;
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
         cacheTimeField.SetValue(service, DateTime.MinValue);
 
         // Second call — sends If-None-Match, gets 304, returns cached data
@@ -392,14 +399,10 @@ public class GitHubImageServiceTests : IDisposable
     public async Task GetAllTopicsAsync_304WithNoCachedData_ReturnsEmptyList()
     {
         // Edge case: ETag stored but in-memory cache is empty (e.g. after restart)
+        _etagCacheService.GetETag("topics").Returns("\"stale-etag\"");
         _httpHandler.ResponseFactory = _ => new HttpResponseMessage(HttpStatusCode.NotModified);
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
-
-        // Force an ETag with no cached topics
-        var etagField = typeof(GitHubImageService).GetField("_allTopicsETag",
-            BindingFlags.NonPublic | BindingFlags.Instance)!;
-        etagField.SetValue(service, "\"stale-etag\"");
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         var topics = await service.GetAllTopicsAsync();
         topics.Should().BeEmpty();
@@ -412,6 +415,12 @@ public class GitHubImageServiceTests : IDisposable
         {
             new { name = "sunset.jpg", type = "file", path = "wallpapers/nature/sunset.jpg", download_url = "https://example.com/sunset.jpg" }
         });
+
+        // Track ETag state through mock
+        string? storedImageETag = null;
+        _etagCacheService.GetETag("images:nature").Returns(_ => storedImageETag);
+        _etagCacheService.When(x => x.SetETag("images:nature", Arg.Any<string>()))
+            .Do(ci => storedImageETag = ci.ArgAt<string>(1));
 
         var callCount = 0;
         _httpHandler.ResponseFactory = request =>
@@ -434,7 +443,7 @@ public class GitHubImageServiceTests : IDisposable
             }
         };
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         // First call — populates cache and ETag
         var images1 = await service.GetImagesAsync("nature");
@@ -443,7 +452,7 @@ public class GitHubImageServiceTests : IDisposable
 
         // Expire the image cache timestamp via reflection
         var imageCacheField = typeof(GitHubImageService).GetField("_imageCache",
-            BindingFlags.NonPublic | BindingFlags.Instance)!;
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
         var imageCache = (Dictionary<string, (DateTime timestamp, List<WallpaperImage> images)>)imageCacheField.GetValue(service)!;
         var cached = imageCache["nature"];
         imageCache["nature"] = (DateTime.MinValue, cached.images);
@@ -458,15 +467,10 @@ public class GitHubImageServiceTests : IDisposable
     [Fact]
     public async Task GetImagesAsync_304WithNoCachedData_ReturnsEmptyList()
     {
+        _etagCacheService.GetETag("images:nature").Returns("\"stale-image-etag\"");
         _httpHandler.ResponseFactory = _ => new HttpResponseMessage(HttpStatusCode.NotModified);
 
-        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
-
-        // Set an ETag for the topic but no cached images
-        var etagsField = typeof(GitHubImageService).GetField("_imageETags",
-            BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var etags = (Dictionary<string, string>)etagsField.GetValue(service)!;
-        etags["nature"] = "\"stale-image-etag\"";
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _etagCacheService, _logger);
 
         var images = await service.GetImagesAsync("nature");
         images.Should().BeEmpty();
