@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -314,23 +316,187 @@ public class GitHubImageServiceTests : IDisposable
         _httpHandler.RequestCount.Should().Be(0, "circuit breaker should short-circuit before hitting the network");
     }
 
-    private sealed class TestHttpMessageHandler : HttpMessageHandler
+    // ETag / 304 Not Modified ─────────────────────────────────────────────────
+
+    [Fact]
+    public async Task GetAllTopicsAsync_FirstRequest_DoesNotSendIfNoneMatch()
+    {
+        var responseContent = JsonSerializer.Serialize(new[]
+        {
+            new { name = "nature", type = "dir", path = "wallpapers/nature" }
+        });
+
+        _httpHandler.ResponseContent = responseContent;
+        _httpHandler.StatusCode = HttpStatusCode.OK;
+        _httpHandler.Headers["ETag"] = "\"abc123\"";
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        await service.GetAllTopicsAsync();
+
+        _httpHandler.CapturedRequests[0].Headers.IfNoneMatch.Should().BeEmpty(
+            "first request should not send If-None-Match");
+    }
+
+    [Fact]
+    public async Task GetAllTopicsAsync_SecondRequest_SendsIfNoneMatchAndHandles304()
+    {
+        var responseContent = JsonSerializer.Serialize(new[]
+        {
+            new { name = "nature", type = "dir", path = "wallpapers/nature" },
+            new { name = "space", type = "dir", path = "wallpapers/space" }
+        });
+
+        var callCount = 0;
+        _httpHandler.ResponseFactory = request =>
+        {
+            callCount++;
+            if (callCount == 1)
+            {
+                var resp = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(responseContent, System.Text.Encoding.UTF8, "application/json")
+                };
+                resp.Headers.ETag = new EntityTagHeaderValue("\"etag-topics\"");
+                return resp;
+            }
+            else
+            {
+                // Second call should have If-None-Match
+                request.Headers.IfNoneMatch.Should().ContainSingle()
+                    .Which.Tag.Should().Be("\"etag-topics\"");
+                return new HttpResponseMessage(HttpStatusCode.NotModified);
+            }
+        };
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // First call — populates cache and stores ETag
+        var topics1 = await service.GetAllTopicsAsync();
+        topics1.Should().HaveCount(2);
+
+        // Expire the in-memory cache timestamp so the service makes a new HTTP request
+        var cacheTimeField = typeof(GitHubImageService).GetField("_allTopicsCacheTime",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+        cacheTimeField.SetValue(service, DateTime.MinValue);
+
+        // Second call — sends If-None-Match, gets 304, returns cached data
+        var topics2 = await service.GetAllTopicsAsync();
+        topics2.Should().HaveCount(2);
+        topics2.Should().Contain("nature");
+        topics2.Should().Contain("space");
+        callCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAllTopicsAsync_304WithNoCachedData_ReturnsEmptyList()
+    {
+        // Edge case: ETag stored but in-memory cache is empty (e.g. after restart)
+        _httpHandler.ResponseFactory = _ => new HttpResponseMessage(HttpStatusCode.NotModified);
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // Force an ETag with no cached topics
+        var etagField = typeof(GitHubImageService).GetField("_allTopicsETag",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+        etagField.SetValue(service, "\"stale-etag\"");
+
+        var topics = await service.GetAllTopicsAsync();
+        topics.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetImagesAsync_SecondRequest_SendsIfNoneMatchAndHandles304()
+    {
+        var responseContent = JsonSerializer.Serialize(new[]
+        {
+            new { name = "sunset.jpg", type = "file", path = "wallpapers/nature/sunset.jpg", download_url = "https://example.com/sunset.jpg" }
+        });
+
+        var callCount = 0;
+        _httpHandler.ResponseFactory = request =>
+        {
+            callCount++;
+            if (callCount == 1)
+            {
+                var resp = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(responseContent, System.Text.Encoding.UTF8, "application/json")
+                };
+                resp.Headers.ETag = new EntityTagHeaderValue("\"etag-nature\"");
+                return resp;
+            }
+            else
+            {
+                request.Headers.IfNoneMatch.Should().ContainSingle()
+                    .Which.Tag.Should().Be("\"etag-nature\"");
+                return new HttpResponseMessage(HttpStatusCode.NotModified);
+            }
+        };
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // First call — populates cache and ETag
+        var images1 = await service.GetImagesAsync("nature");
+        images1.Should().HaveCount(1);
+        images1[0].FileName.Should().Be("sunset.jpg");
+
+        // Expire the image cache timestamp via reflection
+        var imageCacheField = typeof(GitHubImageService).GetField("_imageCache",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var imageCache = (Dictionary<string, (DateTime timestamp, List<WallpaperImage> images)>)imageCacheField.GetValue(service)!;
+        var cached = imageCache["nature"];
+        imageCache["nature"] = (DateTime.MinValue, cached.images);
+
+        // Second call — sends If-None-Match, gets 304, returns cached images
+        var images2 = await service.GetImagesAsync("nature");
+        images2.Should().HaveCount(1);
+        images2[0].FileName.Should().Be("sunset.jpg");
+        callCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetImagesAsync_304WithNoCachedData_ReturnsEmptyList()
+    {
+        _httpHandler.ResponseFactory = _ => new HttpResponseMessage(HttpStatusCode.NotModified);
+
+        var service = new GitHubImageService(_httpClientFactory, _settingsService, _logger);
+
+        // Set an ETag for the topic but no cached images
+        var etagsField = typeof(GitHubImageService).GetField("_imageETags",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var etags = (Dictionary<string, string>)etagsField.GetValue(service)!;
+        etags["nature"] = "\"stale-image-etag\"";
+
+        var images = await service.GetImagesAsync("nature");
+        images.Should().BeEmpty();
+    }
+
+        private sealed class TestHttpMessageHandler : HttpMessageHandler
     {
         public string ResponseContent { get; set; } = "[]";
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
         public bool ShouldThrow { get; set; }
         public int RequestCount { get; set; }
         public Dictionary<string, string> Headers { get; } = new();
+        public List<HttpRequestMessage> CapturedRequests { get; } = new();
+        public Func<HttpRequestMessage, HttpResponseMessage>? ResponseFactory { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             RequestCount++;
+            CapturedRequests.Add(request);
 
             if (ShouldThrow)
             {
                 throw new HttpRequestException("Network error");
+            }
+
+            if (ResponseFactory != null)
+            {
+                return Task.FromResult(ResponseFactory(request));
             }
 
             var response = new HttpResponseMessage(StatusCode)
