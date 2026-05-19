@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using PaperWalls.Serialization;
 
 namespace PaperWalls.Services;
 
@@ -33,7 +34,7 @@ internal sealed partial class ETagCacheService : IETagCacheService
 		try
 		{
 			var json = File.ReadAllText(CacheFilePath);
-			var loaded = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+			var loaded = JsonSerializer.Deserialize(json, AppJsonContext.Default.DictionaryStringString);
 			if (loaded != null)
 				_etags = loaded;
 		}
@@ -50,7 +51,7 @@ internal sealed partial class ETagCacheService : IETagCacheService
 		{
 			var dir = Path.GetDirectoryName(CacheFilePath)!;
 			Directory.CreateDirectory(dir);
-			var json = JsonSerializer.Serialize(_etags);
+			var json = JsonSerializer.Serialize(_etags, AppJsonContext.Default.DictionaryStringString);
 			File.WriteAllText(CacheFilePath, json);
 		}
 		catch (Exception ex)

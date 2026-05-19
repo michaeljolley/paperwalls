@@ -6,5 +6,6 @@ namespace PaperWalls.Serialization;
 
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(List<GitHubContentItem>))]
+[JsonSerializable(typeof(Dictionary<string, string>))]
 [JsonSourceGenerationOptions(WriteIndented = true)]
 internal sealed partial class AppJsonContext : JsonSerializerContext;
