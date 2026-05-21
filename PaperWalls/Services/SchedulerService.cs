@@ -68,19 +68,26 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 	{
 		LogSchedulerServiceStopping();
 
+		Task? taskToAwait;
+		CancellationTokenSource? ctsToDispose;
+
 		lock (_timerLock)
 		{
 			_cts?.Cancel();
 			_timer?.Dispose();
 			_timer = null;
 			NextChangeTime = null;
+			taskToAwait = _timerTask;
+			_timerTask = null;
+			ctsToDispose = _cts;
+			_cts = null;
 		}
 
-		if (_timerTask != null)
+		if (taskToAwait != null)
 		{
 			try
 			{
-				await _timerTask;
+				await taskToAwait;
 			}
 			catch (OperationCanceledException)
 			{
@@ -92,9 +99,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			}
 		}
 
-		_cts?.Dispose();
-		_cts = null;
-		_timerTask = null;
+		ctsToDispose?.Dispose();
 
 		LogSchedulerServiceStopped();
 	}
@@ -138,19 +143,26 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 
 			LogSettingsChangedRestartingTimer(newIntervalMinutes);
 
-			// Stop current timer
+			Task? taskToAwait;
+			CancellationTokenSource? ctsToDispose;
+
+			// Stop current timer and capture references under lock
 			lock (_timerLock)
 			{
 				_cts?.Cancel();
 				_timer?.Dispose();
+				taskToAwait = _timerTask;
+				_timerTask = null;
+				ctsToDispose = _cts;
+				_cts = null;
 			}
 
-			// Wait for timer task to finish
-			if (_timerTask != null)
+			// Wait for timer task to finish (outside lock to avoid blocking)
+			if (taskToAwait != null)
 			{
 				try
 				{
-					await _timerTask;
+					await taskToAwait;
 				}
 				catch (OperationCanceledException)
 				{
@@ -158,10 +170,11 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				}
 			}
 
+			ctsToDispose?.Dispose();
+
 			// Start new timer with new interval
 			lock (_timerLock)
 			{
-				_cts?.Dispose();
 				_cts = new CancellationTokenSource();
 				_timer = new PeriodicTimer(TimeSpan.FromMinutes(newIntervalMinutes));
 				NextChangeTime = DateTime.Now.AddMinutes(newIntervalMinutes);
