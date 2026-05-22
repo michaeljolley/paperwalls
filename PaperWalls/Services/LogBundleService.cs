@@ -45,13 +45,20 @@ internal sealed partial class LogBundleService : ILogBundleService
 			{
 				try
 				{
+					// Read file bytes before creating the zip entry so that a locked
+					// or unreadable file doesn't produce an empty entry in the archive.
+					byte[] content;
+					using (var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+					using (var ms = new MemoryStream())
+					{
+						fileStream.CopyTo(ms);
+						content = ms.ToArray();
+					}
+
 					var entryName = Path.GetFileName(logFile);
 					var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
-
 					using var entryStream = entry.Open();
-					// Open with FileShare.ReadWrite since Serilog may still be writing
-					using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-					fileStream.CopyTo(entryStream);
+					entryStream.Write(content);
 				}
 				catch (Exception ex)
 				{
