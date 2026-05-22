@@ -21,7 +21,7 @@ public class DiCompositionTests
         services.AddLogging();
 
         // HTTP clients (same as production)
-        services.AddHttpClient("GitHub");
+        services.AddHttpClient("GitHub", client => { client.Timeout = TimeSpan.FromSeconds(20); });
         services.AddHttpClient();
 
         // Pure C# services — same as production registrations

@@ -57,7 +57,7 @@ public partial class App : Application
 				.ConfigureServices((context, services) =>
 				{
 					// Register HTTP client factory
-					services.AddHttpClient("GitHub");
+					services.AddHttpClient("GitHub", client => { client.Timeout = TimeSpan.FromSeconds(20); });
 					services.AddHttpClient();
 
 					// Register services
