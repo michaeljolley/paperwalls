@@ -7,19 +7,22 @@ internal sealed partial class LogBundleService : ILogBundleService
 {
 	private readonly ILogger<LogBundleService> _logger;
 	private readonly string _logsDirectory;
+	private readonly string _outputDirectory;
 
-	public LogBundleService(ILogger<LogBundleService> logger)
+	public LogBundleService(ILogger<LogBundleService> logger, string? logsDirectory = null, string? outputDirectory = null)
 	{
 		_logger = logger;
-		var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-		_logsDirectory = Path.Combine(localAppData, "PaperWalls", "logs");
+		_logsDirectory = logsDirectory ?? Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			"PaperWalls", "logs");
+		_outputDirectory = outputDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 	}
 
 	public Task<string> CreateBugReportAsync()
 	{
 		return Task.Run(() =>
 		{
-			var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+			var desktopPath = _outputDirectory;
 			var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
 			var zipPath = Path.Combine(desktopPath, $"BugReport-{timestamp}.zip");
 
@@ -42,13 +45,20 @@ internal sealed partial class LogBundleService : ILogBundleService
 			{
 				try
 				{
+					// Read file bytes before creating the zip entry so that a locked
+					// or unreadable file doesn't produce an empty entry in the archive.
+					byte[] content;
+					using (var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+					using (var ms = new MemoryStream())
+					{
+						fileStream.CopyTo(ms);
+						content = ms.ToArray();
+					}
+
 					var entryName = Path.GetFileName(logFile);
 					var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
-
 					using var entryStream = entry.Open();
-					// Open with FileShare.ReadWrite since Serilog may still be writing
-					using var fileStream = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-					fileStream.CopyTo(entryStream);
+					entryStream.Write(content);
 				}
 				catch (Exception ex)
 				{
