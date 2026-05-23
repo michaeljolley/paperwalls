@@ -1,3 +1,5 @@
+using PaperWalls.Models;
+
 namespace PaperWalls.Services;
 
 public interface ISchedulerService
@@ -6,4 +8,5 @@ public interface ISchedulerService
 	Task StopAsync(CancellationToken cancellationToken);
 	DateTime? NextChangeTime { get; }
 	bool? LastChangeSucceeded { get; }
+	WallpaperChangeFailureReason LastChangeFailureReason { get; }
 }
