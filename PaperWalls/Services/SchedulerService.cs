@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PaperWalls.Models;
 
 namespace PaperWalls.Services;
 
@@ -17,6 +18,8 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 	public DateTime? NextChangeTime { get; private set; }
 
 	public bool? LastChangeSucceeded { get; private set; }
+
+	public WallpaperChangeFailureReason LastChangeFailureReason { get; private set; }
 
 	public SchedulerService(
 		IWallpaperService wallpaperService,
@@ -53,11 +56,13 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 			{
 				await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
 				LastChangeSucceeded = true;
+				LastChangeFailureReason = WallpaperChangeFailureReason.None;
 			}
 			catch (Exception ex)
 			{
 				LogFailedToChangeWallpaperOnStartup(ex);
 				LastChangeSucceeded = false;
+				LastChangeFailureReason = ClassifyFailure(ex);
 			}
 		}, cancellationToken);
 
@@ -115,6 +120,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 					LogTimerTick();
 					await _wallpaperService.ChangeWallpaperAsync(cancellationToken);
 					LastChangeSucceeded = true;
+					LastChangeFailureReason = WallpaperChangeFailureReason.None;
 
 					// Update next change time
 					var settings = _settingsService.LoadSettings();
@@ -124,6 +130,7 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 				{
 					LogErrorDuringScheduledWallpaperChange(ex);
 					LastChangeSucceeded = false;
+					LastChangeFailureReason = ClassifyFailure(ex);
 					// Continue running - don't crash the service
 				}
 			}
@@ -188,6 +195,30 @@ internal sealed partial class SchedulerService : ISchedulerService, IHostedServi
 		{
 			LogErrorRestartingTimerAfterSettingsChange(ex);
 		}
+	}
+
+	private static WallpaperChangeFailureReason ClassifyFailure(Exception ex)
+	{
+		// Unwrap AggregateException if needed
+		var inner = ex is AggregateException agg ? agg.InnerException ?? ex : ex;
+
+		if (inner is HttpRequestException httpEx)
+		{
+			if (httpEx.StatusCode == System.Net.HttpStatusCode.Forbidden ||
+				httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+			{
+				return WallpaperChangeFailureReason.RateLimited;
+			}
+			return WallpaperChangeFailureReason.NetworkError;
+		}
+
+		if (inner is TaskCanceledException or OperationCanceledException)
+			return WallpaperChangeFailureReason.NetworkError;
+
+		if (inner.GetType().Name.Contains("Win32") || inner.GetType().Name.Contains("COM"))
+			return WallpaperChangeFailureReason.SetWallpaperFailed;
+
+		return WallpaperChangeFailureReason.NetworkError;
 	}
 
 	// LoggerMessage source-generated methods for Native AOT compatibility

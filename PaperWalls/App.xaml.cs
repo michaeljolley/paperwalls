@@ -219,7 +219,12 @@ public partial class App : Application
 
 			if (scheduler.LastChangeSucceeded == false)
 			{
-				tooltip += " — ⚠ Last change failed";
+				tooltip += scheduler.LastChangeFailureReason switch
+				{
+					PaperWalls.Models.WallpaperChangeFailureReason.RateLimited => " — ⚠ Rate limited",
+					PaperWalls.Models.WallpaperChangeFailureReason.SetWallpaperFailed => " — ⚠ Failed to set wallpaper",
+					_ => " — ⚠ Network error",
+				};
 			}
 
 			_trayIcon.Tooltip = tooltip;
