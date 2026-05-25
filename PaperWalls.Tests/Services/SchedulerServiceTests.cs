@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Net;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -17,6 +19,7 @@ public class SchedulerServiceTests
         _wallpaperService = Substitute.For<IWallpaperService>();
         _settingsService = Substitute.For<ISettingsService>();
         _logger = Substitute.For<ILogger<SchedulerService>>();
+        _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
 
         // Default settings
         _settingsService.LoadSettings().Returns(new AppSettings
@@ -202,5 +205,52 @@ public class SchedulerServiceTests
 
         // Assert - should complete without errors
         service.NextChangeTime.Should().BeNull();
+    }
+
+    // --- ClassifyFailure coverage via StartAsync exception path ---
+
+    public static IEnumerable<object[]> ClassifyFailureData =>
+    [
+        [new HttpRequestException("forbidden", null, HttpStatusCode.Forbidden),    WallpaperChangeFailureReason.RateLimited],
+        [new HttpRequestException("rate limited", null, HttpStatusCode.TooManyRequests), WallpaperChangeFailureReason.RateLimited],
+        [new HttpRequestException("server error", null, HttpStatusCode.InternalServerError), WallpaperChangeFailureReason.NetworkError],
+        [new HttpRequestException("no status"),                                     WallpaperChangeFailureReason.NetworkError],
+        [new TaskCanceledException("timeout"),                                      WallpaperChangeFailureReason.NetworkError],
+        [new Win32Exception(5, "access denied"),                                    WallpaperChangeFailureReason.SetWallpaperFailed],
+        [new InvalidOperationException("generic"),                                  WallpaperChangeFailureReason.NetworkError],
+    ];
+
+    [Theory]
+    [MemberData(nameof(ClassifyFailureData))]
+    public async Task StartAsync_WhenChangeThrows_SetsExpectedFailureReason(
+        Exception exception,
+        WallpaperChangeFailureReason expectedReason)
+    {
+        _wallpaperService.ChangeWallpaperAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(exception));
+
+        var service = new SchedulerService(_wallpaperService, _settingsService, _logger);
+
+        await service.StartAsync(CancellationToken.None);
+        await Task.Delay(500);
+        await service.StopAsync(CancellationToken.None);
+
+        service.LastChangeSucceeded.Should().BeFalse();
+        service.LastChangeFailureReason.Should().Be(expectedReason);
+    }
+
+    [Fact]
+    public async Task StartAsync_WhenChangeSucceeds_SetsSucceededAndNoneReason()
+    {
+        // _wallpaperService.ChangeWallpaperAsync returns completed task by default
+
+        var service = new SchedulerService(_wallpaperService, _settingsService, _logger);
+
+        await service.StartAsync(CancellationToken.None);
+        await Task.Delay(500);
+        await service.StopAsync(CancellationToken.None);
+
+        service.LastChangeSucceeded.Should().BeTrue();
+        service.LastChangeFailureReason.Should().Be(WallpaperChangeFailureReason.None);
     }
 }
