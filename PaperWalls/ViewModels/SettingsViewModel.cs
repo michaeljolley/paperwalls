@@ -20,6 +20,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 	private readonly ILogger<SettingsViewModel> _logger;
 
 	private string _savedStyle = "Fill";
+	private CancellationTokenSource? _stylePreviewCts;
 
 	public SettingsViewModel(
 		ISettingsService settingsService,
@@ -184,10 +185,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 		if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper) &&
 			Enum.TryParse<WallpaperStyle>(newStyle, out var styleEnum))
 		{
+			_stylePreviewCts?.Cancel();
+			_stylePreviewCts = new CancellationTokenSource();
+			var token = _stylePreviewCts.Token;
+
 			Task.Run(() =>
 			{
 				try
 				{
+					if (token.IsCancellationRequested) return;
 					_desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum);
 				}
 				catch (Exception ex)
@@ -315,10 +321,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 			if (!string.IsNullOrEmpty(currentWallpaper) && File.Exists(currentWallpaper) &&
 				Enum.TryParse<WallpaperStyle>(_savedStyle, out var styleEnum))
 			{
+				_stylePreviewCts?.Cancel();
+				_stylePreviewCts = new CancellationTokenSource();
+				var token = _stylePreviewCts.Token;
+
 				Task.Run(() =>
 				{
 					try
 					{
+						if (token.IsCancellationRequested) return;
 						_desktopWallpaperService.SetWallpaper(currentWallpaper, styleEnum);
 					}
 					catch (Exception ex)
