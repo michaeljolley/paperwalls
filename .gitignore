@@ -27,3 +27,4 @@ BundleArtifacts/
 # Visual Studio cache/options
 .vscode/
 .idea/
+.local/

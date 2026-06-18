@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Serilog;
@@ -13,6 +14,7 @@ public partial class App : Application
 {
 	private static Mutex? _instanceMutex;
 	private IHost? _host;
+	private ILogger<App>? _logger;
 	private TrayIcon? _trayIcon;
 	private DispatcherTimer? _tooltipTimer;
 
@@ -85,6 +87,7 @@ public partial class App : Application
 
 			// Start the host
 			_host.Start();
+			_logger = _host.Services.GetRequiredService<ILogger<App>>();
 
 			// Create and show tray icon (app starts minimized to tray)
 			var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "logo.ico");
@@ -115,7 +118,7 @@ public partial class App : Application
 					}
 					catch (Exception ex)
 					{
-						Serilog.Log.Error(ex, "Failed to refresh wallpaper from tray menu");
+						_logger!.LogError(ex, "Failed to refresh wallpaper from tray menu");
 					}
 				};
 				flyout.Items.Add(refreshItem);
@@ -150,7 +153,7 @@ public partial class App : Application
 					}
 					catch (Exception ex)
 					{
-						Serilog.Log.Error(ex, "Failed to create bug report from tray menu");
+						_logger!.LogError(ex, "Failed to create bug report from tray menu");
 
 						try
 						{
@@ -168,7 +171,7 @@ public partial class App : Application
 						}
 						catch (Exception dialogEx)
 						{
-							Serilog.Log.Warning(dialogEx, "Failed to show bug report error dialog");
+							_logger!.LogWarning(dialogEx, "Failed to show bug report error dialog");
 						}
 					}
 				};
@@ -231,7 +234,7 @@ public partial class App : Application
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Debug(ex, "Failed to update tray tooltip");
+			_logger?.LogDebug(ex, "Failed to update tray tooltip");
 			_trayIcon.Tooltip = "PaperWalls";
 		}
 	}
@@ -248,7 +251,7 @@ public partial class App : Application
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Warning(ex, "Failed to stop tooltip timer during shutdown");
+			_logger?.LogWarning(ex, "Failed to stop tooltip timer during shutdown");
 		}
 
 		try
@@ -261,7 +264,7 @@ public partial class App : Application
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Warning(ex, "Failed to dispose tray icon during shutdown");
+			_logger?.LogWarning(ex, "Failed to dispose tray icon during shutdown");
 		}
 
 		try
@@ -275,7 +278,7 @@ public partial class App : Application
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Warning(ex, "Failed to stop host during shutdown");
+			_logger?.LogWarning(ex, "Failed to stop host during shutdown");
 		}
 
 		try
@@ -286,7 +289,7 @@ public partial class App : Application
 		}
 		catch (Exception ex)
 		{
-			Serilog.Log.Warning(ex, "Failed to release mutex during shutdown");
+			_logger?.LogWarning(ex, "Failed to release mutex during shutdown");
 		}
 
 		base.Exit();
@@ -294,13 +297,13 @@ public partial class App : Application
 
 	private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
 	{
-		Serilog.Log.Fatal(e.Exception, "Unhandled exception");
+		_logger?.LogCritical(e.Exception, "Unhandled exception");
 		e.Handled = true;
 	}
 
-	private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+	private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
 	{
-		Serilog.Log.Error(e.Exception, "Unobserved task exception");
+		_logger?.LogError(e.Exception, "Unobserved task exception");
 		e.SetObserved();
 	}
 }
